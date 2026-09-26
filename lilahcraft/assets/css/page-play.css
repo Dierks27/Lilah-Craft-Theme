@@ -1,0 +1,62 @@
+/* LilahCraft 2.0: Play page (templates/page-play.html).
+   Every rule is scoped under .lc-main--play (the editor loads all page files).
+   Headings inside cards are styled by position, not by class, so a card Jeff duplicates
+   or adds in the Site Editor looks right without extra classes.
+   Line heights match the design at desktop and tighten at 920px, where titles can wrap. */
+
+/* The Site Editor gives flow-layout children a 24px top margin that the front end doesn't;
+   spacing here comes from flex and grid gaps, so the editor matches the page. */
+.lc-main--play.is-layout-flow>*,
+.lc-main--play .is-layout-flow>*{margin-block:0}
+
+.lc-main--play .lc-pagehead .lc-lede{max-width:640px}
+
+/* ---------- Getting in: the two path cards ---------- */
+.lc-main--play .lc-play-path{--path-accent:var(--cyan);gap:14px;padding:30px;border-top:6px solid var(--path-accent)}
+.lc-main--play .lc-play-path--bedrock{--path-accent:var(--pink)}
+.lc-main--play .lc-play-path h2{font-size:28px;font-weight:800;line-height:1.55;letter-spacing:-.01em}
+.lc-main--play .lc-play-path .lc-play-who{font-size:16px;color:var(--soft)}
+.lc-main--play .lc-play-steps{display:flex;flex-direction:column;gap:8px;margin:0;padding-left:22px;font-size:17px;color:var(--ink)}
+.lc-main--play .lc-play-addrbox{display:flex;flex-direction:column;gap:2px;padding:14px 16px;background:var(--night);border-radius:6px}
+.lc-main--play .lc-play-addrbox p{color:var(--on-night-soft);font-size:13px}
+.lc-main--play .lc-play-addrbox .lc-addr{color:var(--cyan);font-size:18px}
+.lc-main--play .lc-play-path .lc-play-pathnote{font-size:15px;color:var(--soft)}
+
+/* ---------- The worlds: one card (group) per world, any number of them ---------- */
+.lc-main--play .lc-play-worlds>.wp-block-group{display:flex;flex-direction:column;gap:10px;padding:28px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
+.lc-main--play .lc-play-worlds h3{font-size:24px;font-weight:800;line-height:1.55;letter-spacing:0}
+.lc-main--play .lc-play-worlds p{font-size:17px;color:var(--text)}
+
+/* ---------- Resource pack and mods ---------- */
+.lc-main--play .lc-play-more{gap:40px}
+.lc-main--play .lc-play-col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.lc-main--play .lc-play-col>h2{line-height:1.55}
+.lc-main--play .lc-play-col .lc-actions{align-self:flex-start}
+.lc-main--play .lc-play-soon{gap:8px;padding:22px}
+.lc-main--play .lc-play-mods{display:flex;flex-direction:column;gap:10px}
+.lc-main--play .lc-play-mods>.wp-block-group{display:flex;flex-direction:column;gap:2px;padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
+.lc-main--play .lc-play-soon h3,
+.lc-main--play .lc-play-mods h3{font-family:var(--body);font-size:17px;font-weight:700;line-height:1.55;letter-spacing:0}
+.lc-main--play .lc-play-soon p,
+.lc-main--play .lc-play-mods p{font-size:16px;color:var(--text)}
+
+/* ---------- Page content (Pages > Play), e.g. the House rules pattern ----------
+   Empty page: the Post Content block renders nothing. The House rules pattern brings its
+   own wrapper; anything else Jeff adds gets the page width and gutter. */
+.lc-main--play .lc-rules>h2{line-height:1.55}
+.lc-main--play .lc-play-extra>:not(.lc-rules-wrap){width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
+.lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:72px}
+
+@media (max-width:920px){
+  .lc-main--play .lc-play-path h2,
+  .lc-main--play .lc-play-worlds h3,
+  .lc-main--play .lc-play-col>h2,
+  .lc-main--play .lc-rules>h2{line-height:1.2}
+}
+@media (max-width:520px){
+  .lc-main--play .lc-play-path{padding:22px}
+  .lc-main--play .lc-play-path h2{font-size:26px}
+  .lc-main--play .lc-play-worlds>.wp-block-group{padding:22px}
+  .lc-main--play .lc-play-addrbox .lc-addr{font-size:17px}
+  .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:48px}
+}

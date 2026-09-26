@@ -1,0 +1,110 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.6/theme.json",
+  "version": 3,
+  "settings": {
+    "appearanceTools": false,
+    "useRootPaddingAwareAlignments": false,
+    "layout": {
+      "contentSize": "760px",
+      "wideSize": "1280px"
+    },
+    "color": {
+      "defaultPalette": false,
+      "defaultGradients": false,
+      "defaultDuotone": false,
+      "palette": [
+        {
+          "slug": "night",
+          "name": "Night",
+          "color": "#1d2150"
+        },
+        {
+          "slug": "deep",
+          "name": "Deep night",
+          "color": "#12153a"
+        },
+        {
+          "slug": "pink",
+          "name": "Pink",
+          "color": "#ff7ac0"
+        },
+        {
+          "slug": "cyan",
+          "name": "Cyan",
+          "color": "#63e3ea"
+        },
+        {
+          "slug": "page",
+          "name": "Page",
+          "color": "#f4f2fb"
+        },
+        {
+          "slug": "lilac",
+          "name": "Lilac",
+          "color": "#eae6f8"
+        },
+        {
+          "slug": "ink",
+          "name": "Ink",
+          "color": "#23244a"
+        },
+        {
+          "slug": "soft",
+          "name": "Soft ink",
+          "color": "#55577a"
+        },
+        {
+          "slug": "white",
+          "name": "White",
+          "color": "#ffffff"
+        }
+      ]
+    },
+    "typography": {
+      "defaultFontSizes": false,
+      "fontFamilies": [
+        {
+          "slug": "body",
+          "name": "Atkinson Hyperlegible",
+          "fontFamily": "\"Atkinson Hyperlegible\", system-ui, sans-serif"
+        },
+        {
+          "slug": "display",
+          "name": "Bricolage Grotesque",
+          "fontFamily": "\"Bricolage Grotesque\", system-ui, sans-serif"
+        },
+        {
+          "slug": "mono",
+          "name": "JetBrains Mono",
+          "fontFamily": "\"JetBrains Mono\", ui-monospace, monospace"
+        }
+      ]
+    }
+  },
+  "styles": {
+    "color": {
+      "background": "#f4f2fb",
+      "text": "#23244a"
+    },
+    "typography": {
+      "fontFamily": "var(--wp--preset--font-family--body)"
+    }
+  },
+  "templateParts": [
+    {
+      "name": "header",
+      "title": "Header",
+      "area": "header"
+    },
+    {
+      "name": "footer",
+      "title": "Footer",
+      "area": "footer"
+    },
+    {
+      "name": "news-sidebar",
+      "title": "News sidebar",
+      "area": "uncategorized"
+    }
+  ]
+}

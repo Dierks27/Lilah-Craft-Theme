@@ -1,0 +1,314 @@
+<!-- wp:template-part {"slug":"header","tagName":"div"} /-->
+
+<!-- wp:group {"tagName":"main","className":"lc-main lc-main--minis"} -->
+<main class="wp-block-group lc-main lc-main--minis"><!-- wp:group {"tagName":"section","className":"lc-wrap lc-mn-head"} -->
+<section class="wp-block-group lc-wrap lc-mn-head"><!-- wp:group {"className":"lc-mn-intro"} -->
+<div class="wp-block-group lc-mn-intro"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<p class="lc-kicker">Collectibles</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1,"className":"lc-h1"} -->
+<h1 class="wp-block-heading lc-h1">Minis</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">Tiny collectible blocks. Every one is numbered, and each Mini has a cap. Once they're all printed, that's it. This is every Mini there is, straight from the Museum.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:html -->
+<div class="lc-mn-statbox">
+  <dl class="lc-mn-stats" aria-busy="true" data-mn-stats>
+    <div class="lc-mn-stat"><dt>Minis in all</dt><dd data-mn-stat="total"></dd></div>
+    <div class="lc-mn-stat"><dt>printed so far</dt><dd data-mn-stat="printed"></dd></div>
+    <div class="lc-mn-stat"><dt>sold out</dt><dd data-mn-stat="sold"></dd></div>
+  </dl>
+  <p class="lc-sample lc-mn-statnote" data-mn-statnote hidden></p>
+</div>
+<!-- /wp:html --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-wrap lc-mn-ladder"} -->
+<section class="wp-block-group lc-wrap lc-mn-ladder"><!-- wp:heading {"className":"lc-sr"} -->
+<h2 class="wp-block-heading lc-sr">Rarity</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-5 lc-gap-sm"} -->
+<div class="wp-block-group lc-grid lc-cols-5 lc-gap-sm"><!-- wp:group {"className":"lc-mn-rung lc-r--common"} -->
+<div class="wp-block-group lc-mn-rung lc-r--common"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<h3 class="wp-block-heading lc-mn-rung-name">Common</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The everyday set. Where most collections start.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-rung lc-r--uncommon"} -->
+<div class="wp-block-group lc-mn-rung lc-r--uncommon"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<h3 class="wp-block-heading lc-mn-rung-name">Uncommon</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Shows up often enough to trade.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-rung lc-r--rare"} -->
+<div class="wp-block-group lc-mn-rung lc-r--rare"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<h3 class="wp-block-heading lc-mn-rung-name">Rare</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>People notice in chat when you pull one.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-rung lc-r--epic"} -->
+<div class="wp-block-group lc-mn-rung lc-r--epic"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<h3 class="wp-block-heading lc-mn-rung-name">Epic</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Small runs. Placed ones slowly spin.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-rung lc-r--legendary"} -->
+<div class="wp-block-group lc-mn-rung lc-r--legendary"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<h3 class="wp-block-heading lc-mn-rung-name">Legendary</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Tiny runs, full glow, and a burst of light when you place one.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-wrap lc-sec lc-sec--flush lc-mn-catalog"} -->
+<section class="wp-block-group lc-wrap lc-sec lc-sec--flush lc-mn-catalog"><!-- wp:heading {"className":"lc-sr"} -->
+<h2 class="wp-block-heading lc-sr">Every Mini</h2>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<div class="lc-mn-finder" data-mn-finder>
+  <div class="lc-mn-filters">
+    <div class="lc-field lc-mn-find">
+      <label class="lc-label" for="miniFind">Find a Mini</label>
+      <input class="lc-input" id="miniFind" type="search" placeholder="Search by name" autocomplete="off" spellcheck="false" data-mn-find>
+    </div>
+    <div class="lc-field lc-mn-cat">
+      <label class="lc-label" for="miniCat">Category</label>
+      <select class="lc-select" id="miniCat" data-mn-cat>
+        <option value="all">All categories</option>
+        <option value="ANIMAL">Animal</option>
+        <option value="FOOD">Food</option>
+        <option value="LETTER">Letter</option>
+        <option value="SYMBOL">Symbol</option>
+        <option value="CHARACTER">Character</option>
+        <option value="VEHICLE">Vehicle</option>
+        <option value="HOLIDAY">Holiday</option>
+        <option value="MISC">Misc</option>
+      </select>
+    </div>
+    <label class="lc-check lc-mn-hide"><input type="checkbox" data-mn-hide> Hide sold out</label>
+  </div>
+  <div class="lc-chips" role="group" aria-label="Rarity">
+    <button class="lc-chip" type="button" aria-pressed="true" data-mn-rarity="all">All rarities</button>
+    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="common">Common</button>
+    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="uncommon">Uncommon</button>
+    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="rare">Rare</button>
+    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="epic">Epic</button>
+    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="legendary">Legendary</button>
+  </div>
+  <p class="lc-sample lc-mn-note" data-mn-note>Loading the Minis…</p>
+  <ul class="lc-grid lc-cols-4 lc-gap-md lc-mn-grid" role="list" aria-busy="true" data-mn-grid></ul>
+  <p class="lc-empty" data-mn-empty hidden></p>
+  <div class="lc-mn-more" data-mn-more hidden>
+    <p class="lc-small" data-mn-count></p>
+    <button class="lc-btn lc-btn--outline" type="button" data-mn-more-btn>Show more Minis</button>
+  </div>
+  <p class="lc-empty lc-mn-nojs">Turn on JavaScript to browse every Mini.</p>
+</div>
+<!-- /wp:html --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--night"} -->
+<section class="wp-block-group lc-sec lc-sec--night"><!-- wp:group {"className":"lc-wrap lc-stack lc-mn-how"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-mn-how"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">How to get one</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-4 lc-gap-md"} -->
+<div class="wp-block-group lc-grid lc-cols-4 lc-gap-md"><!-- wp:group {"className":"lc-mn-step"} -->
+<div class="wp-block-group lc-mn-step"><!-- wp:paragraph {"className":"lc-mn-step-n"} -->
+<p class="lc-mn-step-n">1</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"lc-mn-step-title"} -->
+<h3 class="wp-block-heading lc-mn-step-title">Open a Card Pack</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Buy one on a PC or in the Arcade, then right-click it. You get one Card.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-step"} -->
+<div class="wp-block-group lc-mn-step"><!-- wp:paragraph {"className":"lc-mn-step-n"} -->
+<p class="lc-mn-step-n">2</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"lc-mn-step-title"} -->
+<h3 class="wp-block-heading lc-mn-step-title">Read the Card</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>It says which Mini it makes and how rare it is.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-step"} -->
+<div class="wp-block-group lc-mn-step"><!-- wp:paragraph {"className":"lc-mn-step-n"} -->
+<p class="lc-mn-step-n">3</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"lc-mn-step-title"} -->
+<h3 class="wp-block-heading lc-mn-step-title">Print it</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Take the Card to a Printer with some filament. Craft filament or buy it.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-step"} -->
+<div class="wp-block-group lc-mn-step"><!-- wp:paragraph {"className":"lc-mn-step-n"} -->
+<p class="lc-mn-step-n">4</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"lc-mn-step-title"} -->
+<h3 class="wp-block-heading lc-mn-step-title">Your Mini!</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Numbered, graded, and sometimes Shiny. Show it off in a Display Case.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-wrap lc-sec lc-grid lc-cols-2 lc-mn-lore"} -->
+<section class="wp-block-group lc-wrap lc-sec lc-grid lc-cols-2 lc-mn-lore"><!-- wp:group {"className":"lc-card lc-mn-info"} -->
+<div class="wp-block-group lc-card lc-mn-info"><!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--sm">Wild Minis</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">Now and then a Mini appears in the wild near someone, and the whole server hears about it. Whoever reaches it first keeps it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true,"className":"lc-mn-wild"} -->
+<ol class="wp-block-list lc-mn-wild"><!-- wp:list-item -->
+<li>Hints follow as time goes by: first the biome, then which way to go.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Near the end, a light beam shows where it is.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Right-click it to keep it. After about five minutes it gets away.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">A <strong>Mini Radar</strong> tells you Cold, Warm, Hot… Burning. A <strong>Mini Lure</strong> makes the next wild Mini show up near you. A Mini that gets away never uses up a number.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-mn-info"} -->
+<div class="wp-block-group lc-card lc-mn-info"><!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--sm">Grades and Shiny</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">Every print rolls a grade, shown as stars. Some come out Shiny. Rarity always beats grade.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<ul class="lc-mn-grades" role="list">
+  <li><span class="lc-mn-grade">Standard</span><span class="lc-mn-stars" role="img" aria-label="one star">★</span></li>
+  <li><span class="lc-mn-grade">Graded</span><span class="lc-mn-stars" role="img" aria-label="two stars">★★</span></li>
+  <li><span class="lc-mn-grade">Mint</span><span class="lc-mn-stars" role="img" aria-label="three stars">★★★</span></li>
+</ul>
+<!-- /wp:html -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">Each Mini keeps its number and who first owned it, forever.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-wrap lc-sec lc-sec--flush lc-stack lc-mn-homes"} -->
+<section class="wp-block-group lc-wrap lc-sec lc-sec--flush lc-stack lc-mn-homes"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--md">Where Minis live</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-5 lc-mn-homegrid"} -->
+<div class="wp-block-group lc-grid lc-cols-5 lc-mn-homegrid"><!-- wp:group {"className":"lc-mn-home"} -->
+<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<h3 class="wp-block-heading lc-mn-home-name">The Museum</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-small"} -->
+<p class="lc-small">Every Mini there is, how many exist, and who has them.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-home"} -->
+<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<h3 class="wp-block-heading lc-mn-home-name">Display Case</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-small"} -->
+<p class="lc-small">Glows in the Mini’s rarity colour.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-home"} -->
+<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<h3 class="wp-block-heading lc-mn-home-name">Vending Machine</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-small"} -->
+<p class="lc-small">Sell your spares while you’re away.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-home"} -->
+<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<h3 class="wp-block-heading lc-mn-home-name">Auction House</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-small"} -->
+<p class="lc-small">Bid on Minis other players list.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-mn-home"} -->
+<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<h3 class="wp-block-heading lc-mn-home-name">Card Binder</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-small"} -->
+<p class="lc-small">Keep your Cards together.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"div"} /-->

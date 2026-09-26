@@ -1,0 +1,49 @@
+name: Release
+
+# Push a tag like v2.0.1 and this zips lilahcraft/ into lilahcraft-theme-2.0.1.zip
+# and attaches it to a GitHub release. The tag must match Version: in lilahcraft/style.css.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the theme
+        run: php tools/check-theme.php
+
+      - name: Tag matches the theme Version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER="$(sed -n 's/^Version:[[:space:]]*//p' lilahcraft/style.css | tr -d '\r[:space:]')"
+          if [ "$TAG" != "$VER" ]; then
+            echo "::error::The tag is v$TAG but lilahcraft/style.css says Version: $VER. Bump the Version, commit, and tag again."
+            exit 1
+          fi
+          echo "VERSION=$VER" >> "$GITHUB_ENV"
+
+      - name: Zip the theme
+        run: |
+          zip -r -X "lilahcraft-theme-$VERSION.zip" lilahcraft -x '*.DS_Store' '*/Thumbs.db'
+          unzip -l "lilahcraft-theme-$VERSION.zip" | tail -n 1
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ZIP="lilahcraft-theme-$VERSION.zip"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$ZIP" \
+              --title "LilahCraft theme $VERSION" \
+              --notes "Install: Appearance > Themes > Add New Theme > Upload Theme, choose $ZIP, then Replace active with uploaded. See the README for the settings." \
+              --generate-notes
+          fi

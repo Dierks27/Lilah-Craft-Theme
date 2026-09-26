@@ -1,0 +1,10 @@
+/* Block editor only (loaded with add_editor_style, never on the site).
+   The editor canvas adds WordPress's 24px "flow" margins between blocks (:root :where(.is-layout-flow) > *),
+   which the site doesn't have. The theme spaces everything with gap, so take those margins out here and the
+   editor matches the site. "body" lifts these just above WordPress's rule and below any page rule.
+   Posts' own content (.lc-entry) keeps its normal paragraph spacing. */
+body .lc-main > *,
+body .lc-main :where(.is-layout-flow:not(.lc-entry)) > *,
+body .is-root-container > :is(.wp-block-template-part, .lc-main) {
+  margin-block: 0;
+}

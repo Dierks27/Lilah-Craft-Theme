@@ -1,0 +1,80 @@
+/* LilahCraft 2.0: the Downloads page (templates/page-downloads.html) and its CraftBridge Client
+   card (lilahcraft/craftbridge, inc/blocks/craftbridge.php; picker in assets/js/page-downloads.js).
+   Every rule is scoped under .lc-main--downloads (the editor loads all page files).
+   Shared pieces come from site.css: .lc-pagehead, .lc-sec, .lc-wrap, .lc-grid, .lc-card, .lc-board,
+   .lc-btn, .lc-pill. */
+
+/* ---------- type, as drawn ---------- */
+.lc-main--downloads .lc-lede{max-width:680px}
+.lc-main--downloads .lc-h2--sm{line-height:1.55}
+.lc-main--downloads .lc-h3{line-height:1.55;letter-spacing:0}
+.lc-main--downloads .lc-dl-made{gap:18px}
+.lc-main--downloads .lc-dl-stack{gap:24px}
+
+/* ---------- CraftBridge Client: the loud two-column board ---------- */
+.lc-main--downloads .lc-cb{display:flex;flex-direction:column;gap:18px}
+.lc-main--downloads .lc-cb-board{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+
+/* left: what it does */
+.lc-main--downloads .lc-cb-about{display:flex;flex-direction:column;gap:16px;padding:36px}
+.lc-main--downloads .lc-cb-head{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px}
+.lc-main--downloads .lc-cb-title{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.55;letter-spacing:0;color:#fff}
+.lc-main--downloads .lc-cb-lede{font-size:18px;color:var(--on-night)}
+.lc-main--downloads .lc-cb-feats{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:17px;color:var(--on-night-bright)}
+.lc-main--downloads .lc-cb-feats kbd{display:inline;color:var(--cyan)} /* inline, so the comma after it never wraps alone */
+.lc-main--downloads .lc-cb-quiet{font-size:15px;color:var(--on-night-soft)}
+
+/* right: the picker */
+.lc-main--downloads .lc-cb-get{display:flex;flex-direction:column;gap:18px;padding:36px;background:var(--panel)}
+.lc-main--downloads .lc-cb-group{display:flex;flex-direction:column;gap:8px}
+.lc-main--downloads .lc-cb-label{font-weight:700;font-size:15px;color:#fff}
+.lc-main--downloads .lc-cb-opts{display:flex;gap:8px}
+.lc-main--downloads .lc-cb-opt{flex-grow:1;min-height:46px;padding:0 12px;border:2px solid var(--edge-dark);border-radius:6px;background:var(--deep);color:var(--on-night);font-family:var(--body);font-weight:700;font-size:16px;line-height:1.2;cursor:pointer}
+.lc-main--downloads .lc-cb-opt--mono{font-family:var(--mono);font-weight:600}
+.lc-main--downloads .lc-cb-opt:hover{border-color:var(--on-night-soft);color:#fff}
+.lc-main--downloads .lc-cb-opt[aria-pressed="true"]{background:var(--cyan);border-color:var(--cyan);color:var(--night)}
+/* Without JavaScript the buttons can't switch anything: the default pick and the full list show instead.
+   The Site Editor preview (--preview, rendered over REST) keeps them, to look like the page. */
+html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-group{display:none}
+
+.lc-main--downloads .lc-cb-dl{--b-h:52px;--b-size:18px;display:flex;width:100%}
+.lc-main--downloads .lc-cb-icon{flex:none}
+.lc-main--downloads .lc-cb-file{font-family:var(--mono);font-size:14px;color:var(--cyan);text-align:center;overflow-wrap:anywhere}
+.lc-main--downloads .lc-cb-file.is-note{font-family:var(--body);font-size:15px;color:var(--on-night)}
+
+.lc-main--downloads .lc-cb-needs,
+.lc-main--downloads .lc-cb-all{display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1px solid var(--rule-dark)}
+.lc-main--downloads .lc-cb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--on-night)}
+.lc-main--downloads .lc-cb-need{font-size:15px;color:var(--on-night)}
+.lc-main--downloads .lc-cb-all a{display:inline-flex;align-items:center;min-height:44px;font-weight:700;color:var(--cyan)}
+.lc-main--downloads .lc-cb-all a:hover{color:#fff}
+.lc-main--downloads .lc-cb-all-file,
+.lc-main--downloads .lc-cb-all-needs{display:block;overflow-wrap:anywhere}
+.lc-main--downloads .lc-cb-all-file{font-family:var(--mono);font-size:14px;color:var(--cyan)}
+
+/* ---------- resource packs ---------- */
+.lc-main--downloads .lc-dl-pack{gap:12px}
+.lc-main--downloads .lc-dl-title{gap:6px 10px}
+.lc-main--downloads .lc-dl-title .lc-pill{padding:2px 9px}
+.lc-main--downloads .lc-dl-tip{padding:14px 16px;background:var(--page);border-radius:6px;font-size:16px;color:var(--text)}
+
+/* ---------- recommended mods ---------- */
+.lc-main--downloads .lc-dl-intro{max-width:700px}
+.lc-main--downloads .lc-dl-mod .lc-text{flex-grow:1}
+.lc-main--downloads .lc-dl-mod .lc-actions{margin:0}
+
+/* ---------- installing, step by step ---------- */
+.lc-main--downloads .lc-dl-steps{max-width:760px;gap:14px}
+.lc-main--downloads .lc-dl-list{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:17px;color:var(--text)}
+.lc-main--downloads .lc-dl-list code{padding:0;background:none;border-radius:0;font-size:1em;color:var(--code)}
+
+/* ---------- narrower screens ---------- */
+@media (max-width:920px){
+  .lc-main--downloads .lc-cb-board{grid-template-columns:minmax(0,1fr)}
+  .lc-main--downloads .lc-cb-about,.lc-main--downloads .lc-cb-get{padding:28px}
+}
+@media (max-width:520px){
+  .lc-main--downloads .lc-cb-about,.lc-main--downloads .lc-cb-get{padding:22px}
+  .lc-main--downloads .lc-cb-title{font-size:30px;line-height:1.3}
+  .lc-main--downloads .lc-h2--sm,.lc-main--downloads .lc-h3{line-height:1.3}
+}

@@ -1,0 +1,53 @@
+<!-- wp:template-part {"slug":"header","tagName":"div"} /-->
+
+<!-- wp:group {"tagName":"main","className":"lc-main lc-main--news"} -->
+<main class="wp-block-group lc-main lc-main--news"><!-- wp:group {"className":"lc-wrap"} -->
+<div class="wp-block-group lc-wrap"><!-- wp:group {"className":"lc-pagehead"} -->
+<div class="wp-block-group lc-pagehead"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<p class="lc-kicker">Topic</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:query-title {"type":"archive","showPrefix":false,"className":"lc-h1"} /-->
+
+<!-- wp:term-description {"className":"lc-lede"} /--></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-wrap lc-news-layout"} -->
+<div class="wp-block-group lc-wrap lc-news-layout"><!-- wp:group {"className":"lc-news-feed"} -->
+<div class="wp-block-group lc-news-feed"><!-- wp:query {"queryId":23,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"className":"lc-news-rest"} -->
+<div class="wp-block-query lc-news-rest"><!-- wp:post-template {"className":"lc-news-list"} -->
+<!-- wp:group {"className":"lc-news-card"} -->
+<div class="wp-block-group lc-news-card"><!-- wp:group {"className":"lc-news-meta"} -->
+<div class="wp-block-group lc-news-meta"><!-- wp:post-date {"format":"M j, Y"} /-->
+
+<!-- wp:post-terms {"term":"category","prefix":"· ","className":"lc-news-topic"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-title {"level":2,"isLink":true,"className":"lc-news-card-title"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":40,"className":"lc-news-card-text"} /--></div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+
+<!-- wp:query-pagination {"className":"lc-news-pager"} -->
+<!-- wp:query-pagination-previous {"label":"Newer posts"} /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next {"label":"Older posts"} /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph {"className":"lc-empty"} -->
+<p class="lc-empty">Nothing in this topic yet. <a href="/news/">See all news</a></p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"news-sidebar","tagName":"aside","className":"lc-news-side"} /--></div>
+<!-- /wp:group --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"div"} /-->

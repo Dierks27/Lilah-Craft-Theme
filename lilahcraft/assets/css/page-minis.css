@@ -1,0 +1,105 @@
+/* LilahCraft 2.0: Minis page (templates/page-minis.html, assets/js/page-minis.js).
+   Rarity colours, pills and heads come from site.css (.lc-r--*, .lc-rarity, .lc-head). */
+
+/* ---------- page head: intro and the three stat cards ---------- */
+.lc-main--minis .lc-mn-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;padding-top:64px;padding-bottom:40px}
+.lc-main--minis .lc-mn-intro{display:flex;flex-direction:column;gap:12px;min-width:0}
+.lc-main--minis .lc-mn-intro .lc-lede{max-width:640px}
+.lc-main--minis .lc-mn-statbox{display:flex;flex-direction:column;gap:8px;flex:none}
+.lc-main--minis .lc-mn-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:460px}
+.lc-main--minis .lc-mn-stat{display:flex;flex-direction:column-reverse;justify-content:flex-end;padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.lc-main--minis .lc-mn-stat dt{font-size:15px;color:var(--soft)}
+.lc-main--minis .lc-mn-stat dd{margin:0;min-height:1.55em;font-family:var(--display);font-weight:800;font-size:28px;line-height:1.55;color:var(--ink)}
+.lc-main--minis .lc-mn-statnote{text-align:right}
+
+/* ---------- the rarity ladder ---------- */
+.lc-main--minis .lc-mn-ladder{padding-bottom:56px}
+.lc-main--minis .lc-mn-rung{display:flex;flex-direction:column;gap:10px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.lc-main--minis .lc-mn-rung-name{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:20px;line-height:1.55;letter-spacing:normal;color:var(--r-fg)}
+/* the gem: the design's two-path SVG, drawn in the rung's rarity colour */
+.lc-main--minis .lc-mn-rung-name::before{content:"";flex:none;width:26px;height:26px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9h18M9 3l3 6 3-6' fill='none' stroke='%23fff' stroke-opacity='.6' stroke-width='1.2'/%3E%3C/svg%3E") center/100% 100% no-repeat,var(--r-gem);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12l3 6-9 12L3 9z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12l3 6-9 12L3 9z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.lc-main--minis .lc-mn-rung p{font-size:16px;color:var(--text)}
+
+/* ---------- finder: filters, chips, the card grid ---------- */
+.lc-main--minis .lc-mn-finder{display:flex;flex-direction:column;gap:18px}
+.lc-main--minis .lc-mn-filters{display:flex;align-items:flex-end;gap:16px}
+.lc-main--minis .lc-mn-find{flex:1 1 auto}
+.lc-main--minis .lc-mn-cat{flex:none;width:230px}
+.lc-main--minis .lc-mn-hide{flex:none}
+.lc-main--minis .lc-mn-note{margin-top:-4px}
+.lc-main--minis .lc-mn-grid{margin:6px 0 0;padding:0;list-style:none}
+.lc-main--minis .lc-mn-card{--head:104px;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0;padding:26px 20px 22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.lc-main--minis .lc-mn-card .lc-head{box-shadow:0 7px 0 var(--r-shadow)}
+.lc-main--minis .lc-mn-name{max-width:100%;margin-top:6px;font-family:var(--display);font-weight:700;font-size:20px;line-height:1.55;text-align:center;overflow-wrap:anywhere}
+.lc-main--minis .lc-mn-pills{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px}
+.lc-main--minis .lc-mn-pills .lc-rarity,.lc-main--minis .lc-mn-pills .lc-pill{line-height:1.55}
+.lc-main--minis .lc-mn-prog{display:flex;flex-direction:column;gap:6px;width:100%;margin-top:auto}
+.lc-main--minis .lc-mn-bar{display:block;height:8px;background:var(--line-soft);border-radius:4px;overflow:hidden}
+.lc-main--minis .lc-mn-fill{display:block;height:8px;background:var(--r-gem)}
+.lc-main--minis .lc-mn-printed{font-size:14px;line-height:1.55;color:var(--soft);text-align:center}
+.lc-main--minis .lc-mn-finder>.lc-empty{margin-top:6px}
+.lc-main--minis .lc-mn-more{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px}
+.lc-main--minis .lc-mn-nojs{display:none}
+html:not(.lc-js) .lc-main--minis .lc-mn-nojs{display:block}
+html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc-mn-note,.lc-mn-grid){display:none}
+
+/* ---------- How to get one ---------- */
+.lc-main--minis .lc-mn-how{gap:32px}
+.lc-main--minis .lc-mn-step{display:flex;flex-direction:column;gap:10px;padding:24px;background:var(--deep);border:2px solid var(--rule-dark);border-radius:var(--radius)}
+.lc-main--minis .lc-mn-step-n{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:20px;background:var(--pink);color:var(--night);font-family:var(--display);font-weight:800;font-size:20px;line-height:1}
+.lc-main--minis .lc-mn-step-title{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.55;letter-spacing:normal;color:#fff}
+.lc-main--minis .lc-mn-step p:not(.lc-mn-step-n){font-size:16px;color:var(--on-night)}
+
+/* ---------- Wild Minis, Grades and Shiny ---------- */
+.lc-main--minis .lc-mn-info{gap:14px;padding:32px}
+.lc-main--minis .lc-mn-info h2{line-height:1.55}
+.lc-main--minis .lc-mn-wild{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:22px;font-size:17px;color:var(--text)}
+.lc-main--minis .lc-mn-grades{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.lc-main--minis .lc-mn-grades li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 16px;background:var(--page);border-radius:6px}
+.lc-main--minis .lc-mn-grade{font-weight:700;font-size:17px}
+.lc-main--minis .lc-mn-stars{font-size:20px;letter-spacing:2px;color:#d99a1e;white-space:nowrap}
+
+/* ---------- Where Minis live ---------- */
+.lc-main--minis .lc-mn-homes{gap:22px}
+.lc-main--minis .lc-mn-homes>h2{line-height:1.55}
+.lc-main--minis .lc-mn-homegrid{gap:16px}
+.lc-main--minis .lc-mn-home{display:flex;flex-direction:column;gap:6px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.lc-main--minis .lc-mn-home-name{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.55;letter-spacing:normal}
+
+/* site.css sets .lc-sec padding again inside its media queries, after .lc-sec--flush; keep these flush */
+.lc-main--minis .lc-sec.lc-sec--flush{padding-top:0}
+
+/* ---------- smaller screens ---------- */
+@media (max-width:1100px){
+  .lc-main--minis .lc-mn-stats{min-width:400px}
+}
+@media (max-width:920px){
+  .lc-main--minis .lc-mn-head{flex-direction:column;align-items:stretch;gap:28px;padding-top:48px;padding-bottom:32px}
+  .lc-main--minis .lc-mn-stats{min-width:0}
+  .lc-main--minis .lc-mn-statnote{text-align:left}
+  .lc-main--minis .lc-mn-ladder{padding-bottom:44px}
+  .lc-main--minis .lc-mn-filters{flex-wrap:wrap}
+  .lc-main--minis .lc-mn-find{flex-basis:100%}
+  .lc-main--minis .lc-mn-cat{flex:1 1 230px;width:auto}
+  .lc-main--minis .lc-mn-info h2,.lc-main--minis .lc-mn-homes>h2{line-height:1.2}
+}
+@media (max-width:520px){
+  .lc-main--minis .lc-mn-stats{grid-template-columns:minmax(0,1fr);gap:8px}
+  .lc-main--minis .lc-mn-stat{flex-direction:row;justify-content:space-between;align-items:center;gap:16px;padding:8px 16px}
+  .lc-main--minis .lc-mn-stat dt{font-size:16px}
+  .lc-main--minis .lc-mn-stat dd{font-size:24px;text-align:right}
+  .lc-main--minis .lc-mn-cat{flex-basis:100%}
+  .lc-main--minis .lc-mn-info{padding:24px 22px}
+  .lc-main--minis .lc-mn-step{padding:22px}
+  /* one column: the card turns sideways (head left, details right) so a long list stays scannable */
+  .lc-main--minis .lc-mn-grid{gap:14px}
+  .lc-main--minis .lc-mn-card{--head:80px;display:grid;grid-template-columns:80px minmax(0,1fr);grid-auto-rows:auto;align-content:center;align-items:center;column-gap:18px;row-gap:8px;padding:18px 18px 22px}
+  .lc-main--minis .lc-mn-card .lc-head{grid-row:1 / span 3;align-self:start}
+  .lc-main--minis .lc-mn-name{margin-top:0;font-size:19px;line-height:1.3;text-align:left}
+  .lc-main--minis .lc-mn-pills{justify-content:flex-start}
+  .lc-main--minis .lc-mn-prog{margin-top:0}
+  .lc-main--minis .lc-mn-printed{text-align:left}
+}

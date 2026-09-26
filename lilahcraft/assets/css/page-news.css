@@ -1,0 +1,99 @@
+/* LilahCraft 2.0: News. The posts page (templates/home.html), single posts (single.html) and
+   topic and other archives (archive.html). The Topics card is lilahcraft/topics (inc/blocks/topics.php).
+   Everything is scoped under .lc-main--news. */
+
+/* ---------- page head ---------- */
+.lc-main--news .lc-pagehead{padding-bottom:40px}
+.lc-main--news .lc-pagehead .lc-lede{max-width:640px}
+.lc-main--news .lc-pagehead .lc-lede p{margin:0}
+
+/* ---------- main column + 320 px sidebar ---------- */
+.lc-main--news .lc-news-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:40px;align-items:start;padding-bottom:80px}
+.lc-main--news .lc-news-feed{display:flex;flex-direction:column;gap:24px;min-width:0}
+.lc-main--news .lc-news-rest{display:flex;flex-direction:column;gap:24px}
+/* the list after the featured post has nothing to show (one post or none): no empty gap */
+.lc-main--news .lc-news-rest:not(:has(li,nav,.wp-block-query-no-results)){display:none}
+.lc-main--news .lc-news-list{display:flex;flex-direction:column;gap:24px;margin:0;padding:0;list-style:none}
+.lc-main--news .lc-news-list>li{margin:0}
+.lc-main--news .lc-empty a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px}
+
+/* ---------- post meta: "SEP 25, 2026 · UPDATES" ---------- */
+.lc-main--news .lc-news-meta{display:flex;flex-wrap:wrap;column-gap:1ch;font-family:var(--mono);font-size:14px;font-weight:600;color:var(--kicker);text-transform:uppercase}
+.lc-main--news .lc-news-meta>*{margin:0}
+/* only the first category (the site prints it as text; the editor preview lists them all) */
+.lc-main--news .lc-news-topic a{color:inherit;text-decoration:none}
+.lc-main--news .lc-news-topic a~a,.lc-main--news .lc-news-topic .wp-block-post-terms__separator{display:none}
+
+/* ---------- featured card: the newest post ---------- */
+.lc-main--news .lc-news-feature{position:relative;display:flex;flex-direction:column;gap:14px;padding:36px;background:var(--night);border-radius:var(--radius);color:var(--on-night-bright)}
+.lc-main--news .lc-news-feature .lc-news-meta{color:var(--pink)}
+.lc-main--news .lc-news-feature-title{font-family:var(--display);font-weight:800;font-size:40px;line-height:1.1;letter-spacing:-.02em;color:#fff}
+.lc-main--news .lc-news-feature-text{max-width:660px;font-size:18px;color:var(--on-night)}
+.lc-main--news .lc-news-feature-text p{margin:0}
+.lc-main--news .lc-news-more{display:block;width:fit-content;font-weight:700;font-size:17px;color:var(--cyan);text-decoration:none}
+.lc-main--news .lc-news-more:hover,.lc-main--news .lc-news-feature:hover .lc-news-more{color:var(--cyan);text-decoration:underline}
+/* the whole card is the one link */
+.lc-main--news .lc-news-more::after{content:"";position:absolute;inset:0;border-radius:var(--radius)}
+
+/* ---------- the other posts ---------- */
+.lc-main--news .lc-news-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:28px 32px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
+.lc-main--news .lc-news-card-title{font-family:var(--display);font-weight:700;font-size:27px;line-height:1.2;letter-spacing:0}
+.lc-main--news .lc-news-card-title a{color:inherit;text-decoration:none}
+.lc-main--news .lc-news-card:hover .lc-news-card-title a{color:var(--link-hover)}
+/* the whole card is the title's link */
+.lc-main--news .lc-news-card-title a::after{content:"";position:absolute;inset:0;border-radius:var(--radius)}
+.lc-main--news .lc-news-card-text{font-size:17px;color:var(--text)}
+.lc-main--news .lc-news-card-text p{margin:0}
+
+/* ---------- pagination ---------- */
+.lc-main--news .lc-news-pager{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
+.lc-main--news .lc-news-pager .wp-block-query-pagination-numbers{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lc-main--news .lc-news-pager a,.lc-main--news .lc-news-pager .page-numbers{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:0;padding:0 14px;border:2px solid var(--chip-line);border-radius:6px;background:#fff;color:var(--ink);font-weight:700;font-size:16px;line-height:1.2;text-decoration:none}
+.lc-main--news .lc-news-pager a:hover{border-color:var(--night);color:var(--ink)}
+.lc-main--news .lc-news-pager .current{background:var(--night);border-color:var(--night);color:#fff}
+.lc-main--news .lc-news-pager .dots{min-width:0;padding:0 4px;border-color:transparent;background:transparent;color:var(--soft)}
+.lc-main--news .lc-news-pager .wp-block-query-pagination-next{margin-left:auto}
+
+/* ---------- sidebar ---------- */
+.lc-main--news .lc-news-side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.lc-main--news .lc-topics-title,.lc-main--news .lc-news-side-title{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.55;letter-spacing:0}
+.lc-main--news .lc-topics{gap:12px}
+.lc-main--news .lc-topics-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.lc-main--news .lc-topic{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:0 4px;border-bottom:1px solid var(--line-soft);font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
+.lc-main--news .lc-topic:hover{color:var(--link-hover)}
+.lc-main--news .lc-topic-n{flex:none;font-weight:400;color:var(--soft)}
+.lc-main--news .lc-topic[aria-current]{padding-left:10px;box-shadow:inset 3px 0 0 var(--pink);color:var(--kicker)}
+
+.lc-main--news .lc-news-play{display:flex;flex-direction:column;gap:10px;padding:22px}
+.lc-main--news .lc-news-play .lc-addr{font-size:18px}
+.lc-main--news .lc-news-play-note{font-size:15px;color:var(--on-night)}
+.lc-main--news .lc-news-play-link a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700;font-size:16px;color:var(--pink)}
+.lc-main--news .lc-news-play-link a:hover{color:var(--cyan)}
+@media (min-width:921px){.lc-main--news .lc-news-play{box-shadow:6px 6px 0 var(--pink)}}
+
+/* ---------- single post ---------- */
+.lc-main--news .lc-news-posthead .lc-news-meta{letter-spacing:.06em}
+.lc-main--news .lc-news-article{padding:40px 44px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+.lc-main--news .lc-news-article .lc-entry{max-width:none}
+.lc-main--news .lc-entry>:first-child{margin-top:0}
+.lc-main--news .lc-entry h2{font-size:30px}
+.lc-main--news .lc-entry h3{font-size:23px}
+.lc-main--news .lc-news-back{margin:0}
+.lc-main--news .lc-news-back a{position:relative;display:inline-flex;align-items:center;min-height:44px;padding-left:26px;font-weight:700;font-size:17px}
+.lc-main--news .lc-news-back a::before{content:"\2190" / "";position:absolute;left:0;top:50%;transform:translateY(-52%);font-weight:400}
+
+/* ---------- smaller screens ---------- */
+@media (max-width:920px){
+  .lc-main--news .lc-news-layout{grid-template-columns:minmax(0,1fr);gap:32px;padding-bottom:56px}
+  .lc-main--news .lc-news-feature-title{font-size:34px}
+  .lc-main--news .lc-news-article{padding:32px}
+}
+@media (max-width:520px){
+  .lc-main--news .lc-news-layout{padding-bottom:48px}
+  .lc-main--news .lc-news-feature{padding:26px 22px}
+  .lc-main--news .lc-news-feature-title{font-size:29px}
+  .lc-main--news .lc-news-card{padding:22px}
+  .lc-main--news .lc-news-card-title{font-size:23px}
+  .lc-main--news .lc-news-article{padding:24px 20px}
+  .lc-main--news .lc-news-pager .wp-block-query-pagination-next{margin-left:0}
+}
