@@ -16,7 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Which page of the site this request is: home, play, downloads, market, minis, arcade,
- * guide, news, or '' for anything else. Posts and archives count as news.
+ * guide, news, or '' for anything else. Posts and archives count as news; search results
+ * (templates/search.html, which can list pages too) are ''.
  *
  * @return string
  */
@@ -29,7 +30,7 @@ function lilahcraft_page_key() {
 			return $slug;
 		}
 	}
-	if ( is_home() || is_singular( 'post' ) || is_archive() || is_search() ) {
+	if ( is_home() || is_singular( 'post' ) || is_archive() ) {
 		return 'news';
 	}
 	return '';
@@ -118,11 +119,23 @@ add_filter(
 add_action(
 	'after_setup_theme',
 	function () {
-		$files = array( lilahcraft_fonts_url(), 'assets/css/site.css' );
+		$files = array( 'assets/css/site.css' );
 		foreach ( glob( get_theme_file_path( 'assets/css/page-*.css' ) ) as $file ) {
 			$files[] = 'assets/css/' . basename( $file );
 		}
 		$files[] = 'assets/css/editor.css';
 		add_editor_style( $files );
+	}
+);
+
+// The fonts go in as a link, not an editor style: WordPress fetches remote editor styles on the server,
+// Google answers that with static fonts that lack the optical-size axis, and display type came out
+// wider in the editor than on the site. A link is fetched by the browser, as on the site.
+add_action(
+	'enqueue_block_assets',
+	function () {
+		if ( is_admin() ) {
+			wp_enqueue_style( 'lilahcraft-fonts', lilahcraft_fonts_url(), array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
 	}
 );

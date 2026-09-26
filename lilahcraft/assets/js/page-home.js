@@ -65,14 +65,20 @@
     return rel > 0 ? 'rising' : 'falling';
   }
 
-  /* The design draws 24 points in 96 px; thin a longer history to that many, keeping the first and last. */
+  /* The design draws 24 points in 96 px. A longer history is split into 24 buckets and each bucket
+     averaged (picking every 4th point zigzags on the half-hourly ripple), keeping the real first and last price. */
   var SPARK_POINTS = 24;
   function thin(series) {
-    if (series.length <= SPARK_POINTS) { return series; }
+    var n = series.length;
+    if (n <= SPARK_POINTS) { return series; }
     var out = [];
     for (var i = 0; i < SPARK_POINTS; i++) {
-      out.push(series[Math.round(i * (series.length - 1) / (SPARK_POINTS - 1))]);
+      var a = Math.floor(i * n / SPARK_POINTS), b = Math.floor((i + 1) * n / SPARK_POINTS), sum = 0;
+      for (var j = a; j < b; j++) { sum += series[j]; }
+      out.push(sum / (b - a));
     }
+    out[0] = series[0];
+    out[SPARK_POINTS - 1] = series[n - 1];
     return out;
   }
 
@@ -91,7 +97,9 @@
     var html = '<tr><th scope="row">' + D.esc(item.name) + '</th>' +
       '<td class="lc-home-bd-price">' + D.esc(D.money(item.price)) + '</td>';
     if (out) {
-      html += '<td class="lc-home-bd-chg lc-flat">' + NO_CHANGE + '</td>' +
+      /* The second "sold out" only shows on narrow phones, where the trend column is dropped (page-home.css). */
+      html += '<td class="lc-home-bd-chg lc-flat"><span class="lc-home-bd-dash">' + NO_CHANGE + '</span>' +
+        '<span class="lc-home-bd-out lc-home-bd-out--chg">sold out</span></td>' +
         '<td class="lc-home-bd-trend"><span class="lc-home-bd-out">sold out</span></td>';
     } else {
       html += '<td class="lc-home-bd-chg lc-' + ch.dir + '">' + (ch.html || NO_CHANGE) + '</td>' +

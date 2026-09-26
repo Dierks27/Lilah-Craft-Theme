@@ -13,18 +13,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * URL of a site page by slug, falling back to /slug/ before the page exists.
  *
+ * The site's published top-level pages are loaded in one query per request (pages only, so a
+ * Media Library file with the same slug is never taken for the page).
+ *
  * @param string $slug Page slug.
  * @return string
  */
 function lilahcraft_page_url( $slug ) {
+	static $urls = null;
 	if ( 'news' === $slug && (int) get_option( 'page_for_posts' ) ) {
 		return get_permalink( (int) get_option( 'page_for_posts' ) );
 	}
-	$page = get_page_by_path( $slug, OBJECT, 'page' );
-	if ( $page && 'publish' === $page->post_status ) {
-		return get_permalink( $page );
+	if ( null === $urls ) {
+		$urls  = array();
+		$pages = get_posts(
+			array(
+				'post_type'              => array( 'page' ),
+				'post_status'            => 'publish',
+				'post_name__in'          => array_keys( lilahcraft_pages() ),
+				'post_parent'            => 0,
+				'posts_per_page'         => 20,
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+		foreach ( $pages as $page ) {
+			$urls[ $page->post_name ] = get_permalink( $page );
+		}
 	}
-	return home_url( '/' . $slug . '/' );
+	return isset( $urls[ $slug ] ) ? $urls[ $slug ] : home_url( '/' . $slug . '/' );
 }
 
 /**

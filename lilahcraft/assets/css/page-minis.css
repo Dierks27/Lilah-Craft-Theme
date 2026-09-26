@@ -32,6 +32,11 @@
 .lc-main--minis .lc-mn-note{margin-top:-4px}
 .lc-main--minis .lc-mn-grid{margin:6px 0 0;padding:0;list-style:none}
 .lc-main--minis .lc-mn-card{--head:104px;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0;padding:26px 20px 22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
+/* a refresh rebuilds the card of a Mini that changed; when that card has focus, Chromium's scroll
+   anchoring jumps the page, so page-minis.js sets .lc-mn-rebuild on the grid for that one refresh and
+   the cards stay out of anchoring only then (the grid itself anchors instead); otherwise they anchor
+   as usual, so cards added or removed above the reader don't shift the view */
+.lc-main--minis .lc-mn-rebuild .lc-mn-card{overflow-anchor:none}
 .lc-main--minis .lc-mn-card .lc-head{box-shadow:0 7px 0 var(--r-shadow)}
 .lc-main--minis .lc-mn-name{max-width:100%;margin-top:6px;font-family:var(--display);font-weight:700;font-size:20px;line-height:1.55;text-align:center;overflow-wrap:anywhere}
 .lc-main--minis .lc-mn-pills{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px}
@@ -78,7 +83,12 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
 }
 @media (max-width:920px){
   .lc-main--minis .lc-mn-head{flex-direction:column;align-items:stretch;gap:28px;padding-top:48px;padding-bottom:32px}
-  .lc-main--minis .lc-mn-stats{min-width:0}
+  /* one column: each stat becomes a row, label first, so the label starts with a capital */
+  .lc-main--minis .lc-mn-stats{min-width:0;grid-template-columns:minmax(0,1fr);gap:8px}
+  .lc-main--minis .lc-mn-stat{flex-direction:row;justify-content:space-between;align-items:center;gap:16px;padding:8px 16px}
+  .lc-main--minis .lc-mn-stat dt{font-size:16px}
+  .lc-main--minis .lc-mn-stat dt::first-letter{text-transform:uppercase}
+  .lc-main--minis .lc-mn-stat dd{font-size:24px;text-align:right}
   .lc-main--minis .lc-mn-statnote{text-align:left}
   .lc-main--minis .lc-mn-ladder{padding-bottom:44px}
   .lc-main--minis .lc-mn-filters{flex-wrap:wrap}
@@ -87,10 +97,6 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
   .lc-main--minis .lc-mn-info h2,.lc-main--minis .lc-mn-homes>h2{line-height:1.2}
 }
 @media (max-width:520px){
-  .lc-main--minis .lc-mn-stats{grid-template-columns:minmax(0,1fr);gap:8px}
-  .lc-main--minis .lc-mn-stat{flex-direction:row;justify-content:space-between;align-items:center;gap:16px;padding:8px 16px}
-  .lc-main--minis .lc-mn-stat dt{font-size:16px}
-  .lc-main--minis .lc-mn-stat dd{font-size:24px;text-align:right}
   .lc-main--minis .lc-mn-cat{flex-basis:100%}
   .lc-main--minis .lc-mn-info{padding:24px 22px}
   .lc-main--minis .lc-mn-step{padding:22px}

@@ -205,6 +205,20 @@
     return p === 0 && f > 0 ? null : p;
   }
 
+  /* 48 hours of half-hour snapshots is 96 points in a 104 px sparkline, which draws as a zigzag.
+     A centred moving average (up to 7 points, less for shorter series; none under the design's 32)
+     gives the soft trend line the design draws. The detail chart keeps the raw series. */
+  function smooth(s) {
+    var r = Math.min(3, Math.floor(s.length / 32)), out = [];
+    if (!r) { return s; }
+    for (var i = 0; i < s.length; i++) {
+      var a = Math.max(0, i - r), b = Math.min(s.length - 1, i + r), sum = 0;
+      for (var j = a; j <= b; j++) { sum += s[j]; }
+      out.push(sum / (b - a + 1));
+    }
+    return out;
+  }
+
   function fillRow(r, it) {
     setText(r.name, it.name);
     if (r._sw !== it.swatch) { r._sw = it.swatch; r.sw.style.background = it.swatch; }
@@ -233,10 +247,11 @@
     }
     setHTML(r.stock, stockHTML);
 
-    var vals = it.out ? [1, 1] : it.series;
-    setHTML(r.spark, vals.length < 2 ? '' :
+    /* sold out: flat along the bottom, as designed (and as the detail chart draws it) */
+    var pts = it.out ? '0.0,27.0 104.0,27.0' : it.series.length >= 2 ? D.sparkPoints(smooth(it.series), 104, 30, 3) : '';
+    setHTML(r.spark, !pts ? '' :
       '<svg width="104" height="30" viewBox="0 0 104 30" aria-hidden="true" focusable="false"><polyline points="' +
-      D.sparkPoints(vals, 104, 30, 3) + '" fill="none" stroke="' + CHANGE_COLOUR[dir] +
+      pts + '" fill="none" stroke="' + CHANGE_COLOUR[dir] +
       '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>');
   }
 

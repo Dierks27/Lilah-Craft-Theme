@@ -8,3 +8,13 @@ body .lc-main :where(.is-layout-flow:not(.lc-entry)) > *,
 body .is-root-container > :is(.wp-block-template-part, .lc-main) {
   margin-block: 0;
 }
+
+/* site.css sets h1 { margin: 0 }, so give the post and page title some room above the first block. */
+body .editor-visual-editor__post-title-wrapper {
+  margin-bottom: 32px;
+}
+
+/* site.css hides a House rules card with no rule typed. Keep it visible in the editor, even with the list removed. */
+body .lc-rules-wrap:not(:has(li:not(:empty))) {
+  display: block;
+}

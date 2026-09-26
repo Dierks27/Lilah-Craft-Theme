@@ -2,7 +2,8 @@
    Every rule is scoped under .lc-main--play (the editor loads all page files).
    Headings inside cards are styled by position, not by class, so a card Jeff duplicates
    or adds in the Site Editor looks right without extra classes.
-   Line heights match the design at desktop and tighten at 920px, where titles can wrap. */
+   Line heights match the design at desktop and tighten where titles can wrap
+   (1120px for the resource pack and mods headings, 920px for the rest). */
 
 /* The Site Editor gives flow-layout children a 24px top margin that the front end doesn't;
    spacing here comes from flex and grid gaps, so the editor matches the page. */
@@ -47,10 +48,13 @@
 .lc-main--play .lc-play-extra>:not(.lc-rules-wrap){width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
 .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:72px}
 
+/* The two-column headings wrap below about 1095px of content width, 1112px with a classic scrollbar, before the grid stacks at 920. */
+@media (max-width:1120px){
+  .lc-main--play .lc-play-col>h2{line-height:1.2}
+}
 @media (max-width:920px){
   .lc-main--play .lc-play-path h2,
   .lc-main--play .lc-play-worlds h3,
-  .lc-main--play .lc-play-col>h2,
   .lc-main--play .lc-rules>h2{line-height:1.2}
 }
 @media (max-width:520px){

@@ -1,7 +1,7 @@
 <?php
 /**
- * News: the lilahcraft/topics block, plus two small helpers for the News templates
- * (templates/home.html, single.html, archive.html).
+ * News: the lilahcraft/topics block, plus small helpers for the News templates
+ * (templates/home.html, single.html, category.html, archive.html).
  *
  * lilahcraft/topics  The sidebar "Topics" card: every category that has published posts, each a
  *                    row link with its real post count. The current topic is marked with
@@ -14,7 +14,10 @@
  *                    its pages without the skipped posts, so "Older posts" never leads to an
  *                    empty page.
  *
- * WordPress's untouched default category (slug "uncategorized") is left out of both.
+ * Sidebar name     The News sidebar template part is an aside; it gets the design's label, "More".
+ *
+ * WordPress's untouched default category (slug "uncategorized", still named "Uncategorized") is
+ * left out of the Topics card and the post meta. Once it is renamed it shows like any other topic.
  *
  * @package LilahCraft
  */
@@ -24,13 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Whether a term is WordPress's untouched default category.
+ * Whether a term is WordPress's untouched default category. Renaming it keeps its slug, so the
+ * name decides: a renamed default category ("General", say) is a real topic.
  *
  * @param WP_Term $term Term.
  * @return bool
  */
 function lilahcraft_is_uncategorized( $term ) {
-	return 'uncategorized' === $term->slug;
+	return 'uncategorized' === $term->slug && in_array( $term->name, array( 'Uncategorized', __( 'Uncategorized' ) ), true ); // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- core's own string.
 }
 
 /**
@@ -153,6 +157,27 @@ add_filter(
 	},
 	10,
 	3
+);
+
+/*
+ * Sidebar name: the News sidebar part renders as <aside>; name the landmark as the design does.
+ * The Template Part block has no label setting, so it is added here.
+ */
+add_filter(
+	'render_block_core/template-part',
+	function ( $content, $block ) {
+		if ( empty( $block['attrs']['slug'] ) || 'news-sidebar' !== $block['attrs']['slug'] || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return $content;
+		}
+		$tags = new WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag() && 'ASIDE' === $tags->get_tag() ) {
+			$tags->set_attribute( 'aria-label', __( 'More', 'lilahcraft' ) );
+			$content = $tags->get_updated_html();
+		}
+		return $content;
+	},
+	10,
+	2
 );
 
 /*

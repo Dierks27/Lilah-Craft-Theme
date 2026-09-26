@@ -4,15 +4,25 @@ The WordPress block theme for [lilahcraft.com](https://lilahcraft.com): Home, Pl
 
 No build step. Plain PHP, block templates, CSS and small vanilla JavaScript files.
 
-## Install or update
+## Install (once)
 
 1. Download `lilahcraft-theme-<version>.zip` from the [Releases](../../releases) page.
-2. In WordPress: **Appearance → Themes → Add New Theme → Upload Theme**, choose the zip, then **Replace active with uploaded** (or **Activate** the first time).
-3. That's it. The first time the theme runs (on activation, or on the first admin page after an in-place update) it:
+2. In WordPress: **Appearance → Themes → Add New Theme → Upload Theme**, choose the zip, then **Replace installed with uploaded** (or **Activate** the first time).
+3. That's it. The first time the new version runs (on activation, or on the first page load after uploading it over the old one) it:
    - creates any of these pages that don't exist yet: Home, Play, Downloads, Market, Minis, Arcade, Guide, News (existing pages are never changed);
    - sets **Settings → Reading** to a static front page = Home and posts page = News. Existing posts are left alone.
 
 Permalinks must be anything except "Plain" (Settings → Permalinks), because links between pages use `/play/`, `/market/` and so on.
+
+## Updates (automatic from then on)
+
+From 2.0.0 on, the theme updates itself from this repo's GitHub releases. No more downloading and uploading:
+
+- WordPress asks GitHub for the newest release (at most once an hour) during its normal update checks. A release whose `lilahcraft-theme-<version>.zip` is newer than the installed version shows up under **Dashboard → Updates** like any other theme update.
+- Auto-updates are switched on for the theme the first time it runs, so WordPress installs new releases by itself on its usual twice-daily update run. To turn that off (or back on): **Appearance → Themes → LilahCraft → Disable auto-updates**.
+- In a hurry: **Dashboard → Updates → Check again**, then **Update Themes**.
+
+This works because `style.css` has `Update URI: https://github.com/Dierks27/Lilah-Craft-Theme` (so WordPress doesn't look for it on wordpress.org) and `inc/updater.php` answers WordPress's update check. The repo is public, so no token is needed. Anyone who can publish a release on this repo can ship code to the site, so treat release access like site access.
 
 ## Settings → LilahCraft
 
@@ -53,14 +63,15 @@ Page layouts live in the theme's templates. To change copy, open **Appearance �
 2. Commit and push.
 3. Tag and push the tag: `git tag v2.0.1 && git push origin v2.0.1`.
 
-GitHub Actions checks the theme, confirms the tag matches the Version, zips `lilahcraft/` into `lilahcraft-theme-<version>.zip` and attaches it to a release. The zip unpacks to `lilahcraft/`, so uploading it replaces the live theme in place.
+GitHub Actions checks the theme, confirms the tag matches the Version, zips `lilahcraft/` into `lilahcraft-theme-<version>.zip` and attaches it to a release. The zip unpacks to `lilahcraft/`, so it replaces the live theme in place. The site picks the release up by itself (see Updates above), so **pushing a tag deploys to lilahcraft.com** within about half a day.
 
 ## Layout
 
 ```
 lilahcraft/
   style.css, theme.json, functions.php
-  inc/        settings, feeds + REST routes, server ping, page setup, assets, PHP-rendered blocks
+  inc/        settings, feeds + REST routes, server ping, page setup, assets, updates from GitHub,
+              PHP-rendered blocks
   parts/      header, footer
   templates/  front-page (Home), page-play, page-downloads, page-market, page-minis, page-arcade,
               page-guide, home (News), single, archive, page, index, 404

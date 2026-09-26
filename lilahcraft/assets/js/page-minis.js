@@ -266,8 +266,24 @@
 
   /* ---------- load, and refresh every two minutes while live ---------- */
 
+  // Which Mini a card is, across refreshes: its id, or its name when the feed has no id.
+  function ident(m) {
+    return m.src.id == null || m.src.id === '' ? 'name:' + m.name : 'id:' + m.src.id;
+  }
+
   D.watch('minis', function (res) {
     var list = res && res.data && res.data.minis;
+    // A card that changed is rebuilt below. If it has focus (after "Show more Minis"), note which
+    // Mini it is and where it sat, so focus can move to its new card instead of dropping to the page.
+    var active = document.activeElement, lost = null;
+    all.forEach(function (m) {
+      var li = cards[m.key];
+      if (!lost && li && li.parentNode === ui.grid && li.contains(active)) {
+        lost = { id: ident(m), at: [].indexOf.call(ui.grid.children, li) };
+      }
+    });
+    // While a focused card is rebuilt, the cards stay out of scroll anchoring (see page-minis.css).
+    if (lost) { ui.grid.classList.add('lc-mn-rebuild'); }
     all = prepare(list);
     // Forget cards for Minis that are gone or changed.
     var keep = {};
@@ -284,5 +300,19 @@
     setLabels(res);
     updateCategories();
     render();
+    if (lost && (!document.activeElement || document.activeElement === document.body)) {
+      var back = null;
+      all.forEach(function (m) {
+        var li = cards[m.key];
+        if (!back && li && li.parentNode === ui.grid && ident(m) === lost.id) { back = li; }
+      });
+      // The Mini left the list (or the filters): use the card now in its place.
+      back = back || ui.grid.children[Math.min(lost.at, ui.grid.children.length - 1)];
+      if (back) {
+        back.setAttribute('tabindex', '-1');
+        back.focus({ preventScroll: true });
+      }
+    }
+    ui.grid.classList.remove('lc-mn-rebuild');
   }, 120);
 })();

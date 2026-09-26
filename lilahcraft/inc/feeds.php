@@ -99,12 +99,12 @@ function lilahcraft_get_feed( $feed ) {
 			),
 			false
 		);
-		lilahcraft_note_feed( $feed, true, '' );
+		lilahcraft_note_feed( $feed, true, '', $url );
 		set_transient( 'lilahcraft_feed_' . $feed, $fresh, $ttl );
 		return $fresh;
 	}
 
-	lilahcraft_note_feed( $feed, false, $fresh->get_error_message() );
+	lilahcraft_note_feed( $feed, false, $fresh->get_error_message(), $url );
 	if ( $last ) {
 		$out          = $last;
 		$out['stale'] = true;
@@ -125,14 +125,16 @@ function lilahcraft_get_feed( $feed ) {
  * @param string $feed  market or minis.
  * @param bool   $ok    Whether it worked.
  * @param string $error Error text.
+ * @param string $url   The URL fetched: the settings page only shows the note for that URL.
  */
-function lilahcraft_note_feed( $feed, $ok, $error ) {
+function lilahcraft_note_feed( $feed, $ok, $error, $url = '' ) {
 	update_option(
 		'lilahcraft_feedstat_' . $feed,
 		array(
 			'time'  => time(),
 			'ok'    => (bool) $ok,
 			'error' => substr( sanitize_text_field( $error ), 0, 200 ),
+			'url'   => (string) $url,
 		),
 		false
 	);
@@ -197,6 +199,19 @@ function lilahcraft_num( $n ) {
 }
 
 /**
+ * A whole number, or $default when the value isn't a number or is too big for an int
+ * (casting 1.5e20 to int warns on newer PHP).
+ *
+ * @param mixed $n       Value.
+ * @param mixed $default Fallback.
+ * @return int|mixed
+ */
+function lilahcraft_int( $n, $default = 0 ) {
+	$n = lilahcraft_num( $n );
+	return ( null !== $n && abs( $n ) < PHP_INT_MAX ) ? (int) round( $n ) : $default;
+}
+
+/**
  * Keep only the Market fields the site uses.
  *
  * @param array $j Decoded feed.
@@ -208,11 +223,12 @@ function lilahcraft_clean_market( $j ) {
 	}
 	$items = array();
 	foreach ( $j['items'] as $it ) {
-		if ( ! is_array( $it ) || ! isset( $it['id'] ) ) {
+		if ( ! is_array( $it ) || ! isset( $it['id'] ) || ! is_scalar( $it['id'] ) ) {
 			continue;
 		}
+		$id    = substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $it['id'] ) ), 0, 80 );
 		$price = lilahcraft_num( isset( $it['price'] ) ? $it['price'] : null );
-		if ( null === $price ) {
+		if ( '' === $id || null === $price ) {
 			continue;
 		}
 		$history = array();
@@ -222,30 +238,32 @@ function lilahcraft_clean_market( $j ) {
 					continue;
 				}
 				$history[] = array(
-					't' => isset( $h['t'] ) ? (int) $h['t'] : 0,
+					't' => lilahcraft_int( isset( $h['t'] ) ? $h['t'] : 0 ),
 					'p' => (float) $h['p'],
-					's' => isset( $h['s'] ) ? (int) $h['s'] : 0,
+					's' => lilahcraft_int( isset( $h['s'] ) ? $h['s'] : 0 ),
 				);
 			}
 		}
 		$name    = lilahcraft_text( isset( $it['name'] ) ? $it['name'] : '' );
+		$stock   = isset( $it['stock'] ) ? lilahcraft_int( $it['stock'], null ) : null;
+		$max     = isset( $it['maxStock'] ) ? lilahcraft_int( $it['maxStock'], null ) : null;
 		$items[] = array(
-			'id'        => substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $it['id'] ) ), 0, 80 ),
+			'id'        => $id,
 			'name'      => '' !== $name ? $name : ucwords( str_replace( '_', ' ', strtolower( (string) $it['id'] ) ) ),
-			'material'  => substr( preg_replace( '/[^A-Z0-9_]/', '', strtoupper( (string) ( isset( $it['material'] ) ? $it['material'] : $it['id'] ) ) ), 0, 80 ),
+			'material'  => substr( preg_replace( '/[^A-Z0-9_]/', '', strtoupper( (string) ( isset( $it['material'] ) && is_scalar( $it['material'] ) ? $it['material'] : $it['id'] ) ) ), 0, 80 ),
 			'price'     => $price,
 			'buy'       => lilahcraft_num( isset( $it['buy'] ) ? $it['buy'] : null ),
 			'sell'      => lilahcraft_num( isset( $it['sell'] ) ? $it['sell'] : null ),
-			'stock'     => isset( $it['stock'] ) && is_numeric( $it['stock'] ) ? max( 0, (int) $it['stock'] ) : null,
-			'maxStock'  => isset( $it['maxStock'] ) && is_numeric( $it['maxStock'] ) ? max( 0, (int) $it['maxStock'] ) : null,
+			'stock'     => null === $stock ? null : max( 0, $stock ),
+			'maxStock'  => null === $max ? null : max( 0, $max ),
 			'change24h' => lilahcraft_num( isset( $it['change24h'] ) ? $it['change24h'] : null ),
 			'history'   => $history,
 		);
 	}
-	$refresh = isset( $j['refreshSeconds'] ) ? (int) $j['refreshSeconds'] : 30;
+	$refresh = isset( $j['refreshSeconds'] ) ? lilahcraft_int( $j['refreshSeconds'], 30 ) : 30;
 	return array(
 		'title'          => lilahcraft_text( isset( $j['title'] ) ? $j['title'] : '' ),
-		'generatedAt'    => isset( $j['generatedAt'] ) ? (int) $j['generatedAt'] : 0,
+		'generatedAt'    => isset( $j['generatedAt'] ) ? lilahcraft_int( $j['generatedAt'] ) : 0,
 		'refreshSeconds' => max( 5, min( 3600, $refresh ? $refresh : 30 ) ),
 		'items'          => $items,
 	);
@@ -277,16 +295,20 @@ function lilahcraft_clean_minis( $j ) {
 	}
 	$minis = array();
 	foreach ( $j['minis'] as $m ) {
-		if ( ! is_array( $m ) || ! isset( $m['id'] ) ) {
+		if ( ! is_array( $m ) || ! isset( $m['id'] ) || ! is_scalar( $m['id'] ) ) {
 			continue;
 		}
-		$cap     = isset( $m['cap'] ) && is_numeric( $m['cap'] ) ? (int) $m['cap'] : -1;
-		$printed = isset( $m['printed'] ) && is_numeric( $m['printed'] ) ? max( 0, (int) $m['printed'] ) : 0;
+		$id = substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $m['id'] ) ), 0, 80 );
+		if ( '' === $id ) {
+			continue;
+		}
+		$cap     = isset( $m['cap'] ) ? lilahcraft_int( $m['cap'], -1 ) : -1;
+		$printed = isset( $m['printed'] ) ? max( 0, lilahcraft_int( $m['printed'] ) ) : 0;
 		$row     = array(
-			'id'       => substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $m['id'] ) ), 0, 80 ),
+			'id'       => $id,
 			'name'     => lilahcraft_text( isset( $m['name'] ) ? $m['name'] : $m['id'] ),
-			'rarity'   => substr( preg_replace( '/[^A-Z_]/', '', strtoupper( (string) ( isset( $m['rarity'] ) ? $m['rarity'] : 'COMMON' ) ) ), 0, 20 ),
-			'category' => substr( preg_replace( '/[^A-Z_]/', '', strtoupper( (string) ( isset( $m['category'] ) ? $m['category'] : 'MISC' ) ) ), 0, 30 ),
+			'rarity'   => substr( preg_replace( '/[^A-Z_]/', '', strtoupper( (string) ( isset( $m['rarity'] ) && is_scalar( $m['rarity'] ) ? $m['rarity'] : 'COMMON' ) ) ), 0, 20 ),
+			'category' => substr( preg_replace( '/[^A-Z_]/', '', strtoupper( (string) ( isset( $m['category'] ) && is_scalar( $m['category'] ) ? $m['category'] : 'MISC' ) ) ), 0, 30 ),
 			'series'   => lilahcraft_text( isset( $m['series'] ) ? $m['series'] : '' ),
 			'cap'      => $cap < 0 ? -1 : $cap,
 			'printed'  => $printed,
@@ -299,7 +321,7 @@ function lilahcraft_clean_minis( $j ) {
 		$minis[] = $row;
 	}
 	return array(
-		'generatedAt' => isset( $j['generatedAt'] ) ? (int) $j['generatedAt'] : 0,
+		'generatedAt' => isset( $j['generatedAt'] ) ? lilahcraft_int( $j['generatedAt'] ) : 0,
 		'minis'       => $minis,
 	);
 }

@@ -33,6 +33,11 @@
 .lc-main--downloads .lc-cb-opt--mono{font-family:var(--mono);font-weight:600}
 .lc-main--downloads .lc-cb-opt:hover{border-color:var(--on-night-soft);color:#fff}
 .lc-main--downloads .lc-cb-opt[aria-pressed="true"]{background:var(--cyan);border-color:var(--cyan);color:var(--night)}
+/* Forced colours (Windows contrast themes) replace the cyan, so the pick uses the system's selected colours.
+   forced-color-adjust:none, or the text backplate hides the label; the focus ring keeps the system colour. */
+@media (forced-colors:active){
+  .lc-main--downloads .lc-cb-opt[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;border-color:Highlight;color:HighlightText;outline-color:Highlight}
+}
 /* Without JavaScript the buttons can't switch anything: the default pick and the full list show instead.
    The Site Editor preview (--preview, rendered over REST) keeps them, to look like the page. */
 html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-group{display:none}
@@ -64,7 +69,7 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 .lc-main--downloads .lc-dl-mod .lc-actions{margin:0}
 
 /* ---------- installing, step by step ---------- */
-.lc-main--downloads .lc-dl-steps{max-width:760px;gap:14px}
+.lc-main--downloads .lc-dl-steps{max-width:818px;gap:14px} /* the design's 760 is the content width: + 2x28 padding + 2x1 border */
 .lc-main--downloads .lc-dl-list{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:17px;color:var(--text)}
 .lc-main--downloads .lc-dl-list code{padding:0;background:none;border-radius:0;font-size:1em;color:var(--code)}
 

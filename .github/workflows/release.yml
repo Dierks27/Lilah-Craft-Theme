@@ -44,6 +44,6 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" "$ZIP" \
               --title "LilahCraft theme $VERSION" \
-              --notes "Install: Appearance > Themes > Add New Theme > Upload Theme, choose $ZIP, then Replace active with uploaded. See the README for the settings." \
+              --notes "Install: Appearance > Themes > Add New Theme > Upload Theme, choose $ZIP, then Replace installed with uploaded. See the README for the settings." \
               --generate-notes
           fi

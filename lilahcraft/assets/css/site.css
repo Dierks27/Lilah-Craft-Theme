@@ -42,8 +42,12 @@ code,kbd,samp{font-family:var(--mono);font-size:.86em}
 code{background:#e8e4f6;padding:1px 6px;border-radius:3px}
 .wp-site-blocks{padding:0}
 .wp-site-blocks>*,.wp-site-blocks>*+*{margin-block:0}
+/* Short pages (404, empty search): the footer still reaches the bottom of the window. Not in the Site Editor. */
+.wp-site-blocks:not(.is-root-container){display:flex;flex-direction:column;min-height:calc(100vh - var(--wp-admin--admin-bar--height, 0px))}
+.wp-site-blocks:not(.is-root-container)>.lc-main{flex:1 0 auto}
 .wp-block-template-part{margin:0}
 .lc-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.lc-nowrap{white-space:nowrap}
 
 /* ---------- layout ---------- */
 .lc-main{display:block}
@@ -147,8 +151,8 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 .lc-chip:hover{border-color:var(--night)}
 .lc-chip[aria-pressed="true"]{background:var(--night);border-color:var(--night);color:#fff}
 .lc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-weight:700;font-size:13px;line-height:1.4;white-space:nowrap}
-.lc-pill--soon{background:#fff1d1;color:#7d4f06}
-.lc-pill--night{background:var(--night);color:#fff}
+.lc-pill.lc-pill--soon{background:#fff1d1;color:#7d4f06}
+.lc-pill.lc-pill--night{background:var(--night);color:#fff}
 .lc-pill--code{background:var(--row-dark);color:var(--cyan);font-family:var(--mono);font-weight:600;font-size:14px}
 
 /* ---------- forms ---------- */
@@ -163,7 +167,6 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 /* ---------- facts list (dl) ---------- */
 .lc-facts{padding:8px 22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
 .lc-facts>div{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid var(--line-soft)}
-.lc-facts>div:last-child{border-bottom:0}
 .lc-facts dt{color:var(--soft)}
 .lc-facts dd{margin:0;font-weight:700;text-align:right}
 
@@ -185,7 +188,10 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 .lc-board .lc-up{color:var(--up-dark)} .lc-board .lc-down{color:var(--down-dark)} .lc-board .lc-flat{color:var(--flat-dark)}
 
 /* ---------- header ---------- */
-/* The header part wrapper is only as tall as the header, so let the header stick to the page instead */
+/* The header part wrapper is only as tall as the header, so let the header stick to the page instead.
+   The first rule needs no :has() (Firefox 115 ESR); every template starts with the header part.
+   Not in the Site Editor, whose root container is also .wp-site-blocks. */
+.wp-site-blocks:not(.is-root-container)>.wp-block-template-part:first-child{display:contents}
 .wp-block-template-part:has(>.lc-top){display:contents}
 .lc-top{position:sticky;top:var(--wp-admin--admin-bar--height,0px);z-index:50;background:var(--night);border-bottom:1px solid var(--edge-dark);color:var(--on-night)}
 .lc-top-in{position:relative;max-width:1280px;margin:0 auto;height:var(--header-h);padding:0 var(--gutter);display:flex;align-items:center;gap:28px}
@@ -233,9 +239,11 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 .lc-foot-col{display:flex;flex-direction:column;min-width:150px}
 .lc-foot-col h2{margin:0 0 4px;font-family:var(--body);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#fff}
 .lc-foot-col ul{list-style:none;margin:0;padding:0}
-.lc-foot-col a{display:inline-flex;align-items:center;min-height:44px;color:var(--on-night);text-decoration:none;font-size:16px}
+.lc-foot-col a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;color:var(--on-night);text-decoration:none;font-size:16px}
 .lc-foot-col a:hover{color:var(--cyan);text-decoration:underline}
 .lc-legal{padding-top:16px;border-top:1px solid var(--edge-dark);font-size:13px;color:#a4a8dc}
+/* Side by side, the brand text wraps before the three link columns do */
+@media (min-width:921px){.lc-foot-nav{flex-shrink:0}}
 @media (max-width:1100px){.lc-foot-cols,.lc-foot-nav{gap:40px}}
 @media (max-width:920px){.lc-foot-cols{flex-direction:column;gap:28px}}
 @media (max-width:520px){.lc-foot-nav{flex-direction:column;gap:20px}}
@@ -246,7 +254,10 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 .lc-rules h2{color:#fff}
 .lc-rules ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 40px;margin:0;padding-left:22px;font-size:17px;color:var(--on-night)}
 .lc-rules li:empty{display:none}
-@media (max-width:920px){.lc-rules ol{grid-template-columns:minmax(0,1fr)}.lc-rules{padding:28px 22px}}
+/* No rule typed yet: hide the whole card (in the editor the empty items aren't :empty, so it stays editable) */
+.lc-rules-wrap:not(:has(li:not(:empty))){display:none}
+@media (max-width:920px){.lc-rules-wrap{padding-bottom:56px}.lc-rules ol{grid-template-columns:minmax(0,1fr)}.lc-rules{padding:28px 22px}}
+@media (max-width:520px){.lc-rules-wrap{padding-bottom:48px}}
 
 /* ---------- plain pages and posts (page.html, single.html, index.html) ---------- */
 .lc-entry{max-width:760px}
@@ -258,6 +269,12 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 .lc-entry img{border-radius:var(--radius)}
 .lc-entry blockquote{padding-left:18px;border-left:4px solid var(--pink);color:var(--text)}
 .lc-entry .wp-block-image{margin-inline:0}
+
+/* Forced colors replace backgrounds, which is all that marks the pressed chip and the current page link.
+   Their focus ring keeps the system colour the other controls get. */
+@media (forced-colors:active){
+  .lc-chip[aria-pressed="true"],.lc-nav a[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight;outline-color:Highlight}
+}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}

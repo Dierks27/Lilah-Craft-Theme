@@ -1,6 +1,7 @@
-/* LilahCraft 2.0: News. The posts page (templates/home.html), single posts (single.html) and
-   topic and other archives (archive.html). The Topics card is lilahcraft/topics (inc/blocks/topics.php).
-   Everything is scoped under .lc-main--news. */
+/* LilahCraft 2.0: News. The posts page (templates/home.html), single posts (single.html), topic
+   archives (category.html) and other archives (archive.html). The Topics card is lilahcraft/topics
+   (inc/blocks/topics.php). Everything is scoped under .lc-main--news; the sidebar rules also match
+   .editor-styles-wrapper, so the News sidebar part looks right when edited on its own. */
 
 /* ---------- page head ---------- */
 .lc-main--news .lc-pagehead{padding-bottom:40px}
@@ -56,20 +57,26 @@
 
 /* ---------- sidebar ---------- */
 .lc-main--news .lc-news-side{display:flex;flex-direction:column;gap:20px;min-width:0}
-.lc-main--news .lc-topics-title,.lc-main--news .lc-news-side-title{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.55;letter-spacing:0}
-.lc-main--news .lc-topics{gap:12px}
-.lc-main--news .lc-topics-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
-.lc-main--news .lc-topic{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:0 4px;border-bottom:1px solid var(--line-soft);font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
-.lc-main--news .lc-topic:hover{color:var(--link-hover)}
-.lc-main--news .lc-topic-n{flex:none;font-weight:400;color:var(--soft)}
-.lc-main--news .lc-topic[aria-current]{padding-left:10px;box-shadow:inset 3px 0 0 var(--pink);color:var(--kicker)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-title,:is(.lc-main--news,.editor-styles-wrapper) .lc-news-side-title{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.55;letter-spacing:0}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics{gap:12px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:0 4px;border-bottom:1px solid var(--line-soft);font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic:hover{color:var(--link-hover)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic-n{flex:none;font-weight:400;color:var(--soft)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{padding-left:10px;box-shadow:inset 3px 0 0 var(--pink);color:var(--kicker)}
 
-.lc-main--news .lc-news-play{display:flex;flex-direction:column;gap:10px;padding:22px}
-.lc-main--news .lc-news-play .lc-addr{font-size:18px}
-.lc-main--news .lc-news-play-note{font-size:15px;color:var(--on-night)}
-.lc-main--news .lc-news-play-link a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700;font-size:16px;color:var(--pink)}
-.lc-main--news .lc-news-play-link a:hover{color:var(--cyan)}
-@media (min-width:921px){.lc-main--news .lc-news-play{box-shadow:6px 6px 0 var(--pink)}}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play{display:flex;flex-direction:column;gap:10px;padding:22px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play .lc-addr{font-size:18px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-note{font-size:15px;color:var(--on-night)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700;font-size:16px;color:var(--pink)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a:hover{color:var(--cyan)}
+@media (min-width:921px){:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play{box-shadow:6px 6px 0 var(--pink)}}
+/* Forced colours (Windows contrast themes) drop the pink bar and the colour, so the current topic uses the
+   system's selected colours. The number sets its own colour, so it inherits; the focus ring keeps a system colour. */
+@media (forced-colors:active){
+  :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;outline-color:Highlight}
+  :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current] .lc-topic-n{color:inherit}
+}
 
 /* ---------- single post ---------- */
 .lc-main--news .lc-news-posthead .lc-news-meta{letter-spacing:.06em}

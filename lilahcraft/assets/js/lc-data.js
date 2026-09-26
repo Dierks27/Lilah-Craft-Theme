@@ -14,6 +14,8 @@
     });
   }
   function isNum(n) { return typeof n === 'number' && isFinite(n); }
+  /* Own keys only, so feed text like "constructor" never matches an Object.prototype name. */
+  function hasOwn(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
   function round(n, d) { var f = Math.pow(10, d); return Math.round(n * f) / f; }
 
   /* $0.08, $2.40, $1,250.00; very cheap things keep a third decimal. */
@@ -30,44 +32,94 @@
 
   /* ---------- loading ---------- */
 
+  /* No answer after 12 s counts as unreachable (so a hung request can't stop the refreshes);
+     a slow connection gets another 30 s to download a big answer once it has started. */
+  var ANSWER_MS = 12000, BODY_MS = 30000;
+  /* The last real copy of each feed this page has seen, kept for when a refresh fails. */
+  var lastGood = {};
+
   /* Resolves to { mode: 'live'|'stale'|'sample', unreachable: bool, data: feed }.
      sample = no feed URL set, or the feed can't be reached and there's no good copy yet. */
   function load(name) {
     if (!window.fetch) { return Promise.resolve(sampleResult(name, false)); }
-    return fetch(REST + name, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
-      .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.json(); })
-      .then(function (j) { return normalize(name, j); })
-      .catch(function () { return sampleResult(name, true); });
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = 0, fail = null;
+    var timeout = new Promise(function (resolve, reject) { fail = reject; });
+    function giveUpAfter(ms) {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        if (ctrl) { ctrl.abort(); }
+        fail(new Error('timeout'));
+      }, ms);
+    }
+    giveUpAfter(ANSWER_MS);
+    var req = fetch(REST + name, { headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        giveUpAfter(BODY_MS);
+        return r.json();
+      });
+    return Promise.race([req, timeout])
+      .then(function (j) {
+        clearTimeout(timer);
+        var res = normalize(name, j);
+        if (res.mode !== 'sample') { lastGood[name] = res; }
+        return res;
+      })
+      .catch(function () { clearTimeout(timer); return unreachableResult(name); });
   }
   function sampleResult(name, unreachable) {
     return { mode: 'sample', unreachable: !!unreachable, data: name === 'market' ? marketSample() : minisSample() };
   }
+  /* Can't reach the feed: the last good copy as stale if there is one, otherwise labelled sample data. */
+  function unreachableResult(name) {
+    var good = lastGood[name];
+    return good ? { mode: 'stale', unreachable: true, data: good.data } : sampleResult(name, true);
+  }
   function normalize(name, j) {
-    if (!j || j.sample) { return sampleResult(name, !!(j && j.unreachable)); }
-    var list = name === 'market' ? j.items : j.minis;
-    if (!Array.isArray(list)) { return sampleResult(name, true); }
+    if (j && j.sample && !j.unreachable) { return sampleResult(name, false); }
+    var list = j && !j.sample ? (name === 'market' ? j.items : j.minis) : null;
+    if (!Array.isArray(list)) { return unreachableResult(name); }
     return { mode: j.stale ? 'stale' : 'live', unreachable: false, data: j };
   }
 
   /* Load now and again every refreshSeconds (market) or `everySeconds`.
-     Sample data isn't reloaded unless the feed was unreachable. Returns a stop function. */
+     Sample data isn't reloaded unless the feed was unreachable. While the tab is hidden a due
+     refresh waits, and runs as soon as the tab is shown again. Returns a stop function. */
   function watch(name, cb, everySeconds) {
-    var timer = null, stopped = false;
+    var timer = null, stopped = false, pending = false;
+    function schedule(res) {
+      var secs = 0;
+      if (res.mode !== 'sample') {
+        secs = Math.max(15, Number(everySeconds || res.data.refreshSeconds || CFG.cacheSeconds || 60));
+      } else if (res.unreachable) {
+        secs = 60;
+      }
+      if (secs) { timer = setTimeout(due, secs * 1000); }
+    }
     function tick() {
       load(name).then(function (res) {
         if (stopped) { return; }
-        cb(res);
-        var secs = 0;
-        if (res.mode !== 'sample') {
-          secs = Math.max(15, Number(everySeconds || res.data.refreshSeconds || CFG.cacheSeconds || 60));
-        } else if (res.unreachable) {
-          secs = 60;
-        }
-        if (secs) { timer = setTimeout(tick, secs * 1000); }
+        try { cb(res); } catch (e) { if (window.console) { console.error(e); } }
+        schedule(res);
       });
     }
+    function due() {
+      if (document.hidden) { pending = true; } else { tick(); }
+    }
+    function onVisible() {
+      if (!document.hidden && pending && !stopped) {
+        pending = false;
+        tick();
+      }
+    }
+    document.addEventListener('visibilitychange', onVisible);
     tick();
-    return function () { stopped = true; clearTimeout(timer); };
+    return function () {
+      stopped = true;
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }
 
   /* ---------- drawing ---------- */
@@ -254,7 +306,7 @@
   /* The feed's "RARE" → "rare". Unknown rarities read as common. */
   function rarityKey(r) {
     var k = String(r || '').toLowerCase();
-    return RARITIES[k] ? k : 'common';
+    return hasOwn(RARITIES, k) ? k : 'common';
   }
   var CATEGORY_ORDER = ['ANIMAL', 'FOOD', 'LETTER', 'SYMBOL', 'CHARACTER', 'VEHICLE', 'HOLIDAY', 'MISC'];
   function miniCategoryLabel(c) {
@@ -279,7 +331,9 @@
     dirt: [['abacdaba', 'cabaebac', 'abdacaba', 'baeabdca', 'acabacae', 'dabacaba', 'abacabda', 'caebacab'], { a: '#866043', b: '#9b6f4b', c: '#6c4a30', d: '#b9855c', e: '#593d29' }],
     bricks: [['abbmbaab', 'bacmabca', 'mmmmmmmm', 'bmabbamb', 'abmacbma', 'mmmmmmmm', 'abbmbaab', 'bacmabca'], { a: '#9c5230', b: '#b8663d', c: '#7a3b1d', m: '#d8b99b' }],
     grate: [['abcabcab', 'bddbddbc', 'cddcddca', 'abcabcab', 'bddbddbc', 'cddcddca', 'abcabcab', 'bcabcabc'], { a: '#a77e67', b: '#c49a7e', c: '#6fb39a', d: '#3a2a24' }],
-    cobble: [['cabbcdaa', 'abebcaed', 'dbbacdba', 'cacddbea', 'abbeacdc', 'dcaabbad', 'aebcdaeb', 'bdacbadc'], { a: '#7f7f7f', b: '#9a9a9a', c: '#5e5e5e', d: '#6e6e6e', e: '#b0b0b0' }]
+    cobble: [['cabbcdaa', 'abebcaed', 'dbbacdba', 'cacddbea', 'abbeacdc', 'dcaabbad', 'aebcdaeb', 'bdacbadc'], { a: '#7f7f7f', b: '#9a9a9a', c: '#5e5e5e', d: '#6e6e6e', e: '#b0b0b0' }],
+    lapis: [['abacbdab', 'cadabacb', 'abcaebac', 'bdabacda', 'acbadbac', 'baecabdb', 'adbacaeb', 'cabdbacd'], { a: '#1f4aa8', b: '#2a5cc8', c: '#173a86', d: '#4f82e2', e: '#8db4f5' }],
+    beacon: [['aabbbbbc', 'addeeddc', 'bdeffedc', 'befggfec', 'befggfec', 'bdeffedc', 'bhhhhhhc', 'bccccccc'], { a: '#f4fdfe', b: '#d2f1f4', c: '#9fd2da', d: '#2c3a66', e: '#2fb8c4', f: '#63e3ea', g: '#e6feff', h: '#221c3a' }]
   };
   var MYSTERY = ['aaaaaaaa', 'aabqqbaa', 'abqaaqba', 'aaaaqqaa', 'aaaqqaaa', 'aaaqqaaa', 'aaaaaaaa', 'aaaqqaaa'];
   var artCache = {};
@@ -312,7 +366,7 @@
     var el = document.createElement('span');
     el.className = 'lc-head';
     el.setAttribute('aria-hidden', 'true');
-    var fallback = mini && mini._art && ART[mini._art] ? pixelURL(ART[mini._art][0], ART[mini._art][1]) : mysteryURL(mini && mini.rarity);
+    var fallback = mini && mini._art && hasOwn(ART, mini._art) ? pixelURL(ART[mini._art][0], ART[mini._art][1]) : mysteryURL(mini && mini.rarity);
     var skin = mini && typeof mini.skin === 'string' && SKIN_RE.test(mini.skin) ? mini.skin : '';
     if (!skin) {
       el.style.backgroundImage = 'url("' + fallback + '")';
@@ -332,7 +386,8 @@
     return el;
   }
 
-  /* Sample Minis: the design's eight, in the real feed's shape. */
+  /* Sample Minis: the design's eight, in the real feed's shape. The design leaves the Rare and
+     Legendary names open, so those two get example blocks (ids kept for page-home.js). */
   var MINIS_SRC = [
     ['blue_amethyst', 'Blue Amethyst', 'COMMON', 'amethyst', 31, 50],
     ['compressed_dirt', 'Compressed Dirt', 'COMMON', 'cdirt', 17, 50],
@@ -340,8 +395,8 @@
     ['dried_clay_bricks', 'Dried Clay Bricks', 'COMMON', 'bricks', 47, 100],
     ['exposed_copper_grate', 'Exposed Copper Grate', 'COMMON', 'grate', 25, 100],
     ['cobblestone', 'Cobblestone', 'UNCOMMON', 'cobble', 29, 50],
-    ['rare_mini', 'Rare Mini', 'RARE', '', 10, 25],
-    ['legendary_mini', 'Legendary Mini', 'LEGENDARY', '', 5, 5]
+    ['rare_mini', 'Lapis Block', 'RARE', 'lapis', 10, 25],
+    ['legendary_mini', 'Beacon', 'LEGENDARY', 'beacon', 5, 5]
   ];
   var minisCache = null;
   function minisSample() {

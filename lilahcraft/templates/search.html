@@ -1,0 +1,41 @@
+<!-- wp:template-part {"slug":"header","tagName":"div"} /-->
+
+<!-- wp:group {"tagName":"main","className":"lc-main lc-main--search"} -->
+<main class="wp-block-group lc-main lc-main--search"><!-- wp:group {"className":"lc-wrap"} -->
+<div class="wp-block-group lc-wrap"><!-- wp:group {"className":"lc-pagehead"} -->
+<div class="wp-block-group lc-pagehead"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<p class="lc-kicker">Search</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:query-title {"type":"search","className":"lc-h1"} /--></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-wrap lc-sec lc-sec--flush"} -->
+<div class="wp-block-group lc-wrap lc-sec lc-sec--flush"><!-- wp:query {"queryId":1,"query":{"inherit":true,"perPage":10,"postType":"post"},"className":"lc-stack lc-stack--lg"} -->
+<div class="wp-block-query lc-stack lc-stack--lg"><!-- wp:post-template {"className":"lc-stack lc-stack--lg"} -->
+<!-- wp:group {"className":"lc-card"} -->
+<div class="wp-block-group lc-card"><!-- wp:post-date {"format":"M j, Y","className":"lc-kicker"} /-->
+
+<!-- wp:post-title {"level":2,"isLink":true,"className":"lc-h3"} /-->
+
+<!-- wp:post-excerpt {"className":"lc-text"} /--></div>
+<!-- /wp:group -->
+<!-- /wp:post-template -->
+
+<!-- wp:query-pagination -->
+<!-- wp:query-pagination-previous /-->
+
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">Nothing matches that search. Try another word, or pick a page from the menu above.</p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></div>
+<!-- /wp:group --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"div"} /-->
