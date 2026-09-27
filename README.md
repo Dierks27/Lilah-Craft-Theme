@@ -30,13 +30,13 @@ This works because `style.css` has `Update URI: https://github.com/Dierks27/Lila
 |---|---|
 | Market feed URL | HomeCraftMgmt's `/api/market` address. Blank = the Market page and the Home board show sample data, labelled "Sample data". |
 | Minis feed URL | HomeCraftMgmt's `/api/minis` address. Blank = labelled sample data. |
-| Feed token | Optional shared secret. When HomeCraftMgmt is set up with a token, paste the same one here; WordPress sends it with every feed request as `Authorization: Bearer …`. Visitors never see it. Use https feed addresses when the feed crosses the internet. |
+| Feed token | Optional shared secret. When HomeCraftMgmt is set up with a token, paste the same one here; WordPress sends it with every feed request as `Authorization: Bearer …`. Visitors never see it. Use https feed addresses when the feed crosses the internet. While a token is set, WordPress doesn't follow a feed's redirects (they would carry the token to another address): use the feed's final address. |
 | Cache seconds | How long WordPress keeps each feed before asking again (default 60). |
 | Server address / port | Pinged for the header's player count (default `mc.lilahcraft.com`, `25565`). When the ping fails, the count is hidden. |
 | Minecraft version | The version the server is on, shown on Downloads. Blank hides that line. |
 | CraftBridge Client version | Shown on Downloads and used in the download links (default `0.4.0`). |
 | CraftBridge download URL pattern | `{version}`, `{mc}` and `{loader}` are filled in for each pick. If a file is missing, the button links to the release page instead. |
-| Hero style | Charcoal (default) or Light: the top band of every page and the header. |
+| Hero style | Charcoal (default) or Light: the top band of every page and the header, on the site and in the Site Editor. |
 
 Under each feed URL the settings page says when the last fetch worked or why it failed.
 
@@ -44,13 +44,13 @@ Under each feed URL the settings page says when the last fetch worked or why it 
 
 Browsers never talk to the game server. WordPress fetches, caches and serves same-origin routes:
 
-- `GET /wp-json/lilahcraft/v1/market`: the Market feed (with `history7d` and `history30d` passed on when HomeCraftMgmt sends them; the Market page then turns on its 7D and 30D ranges). Cached for the configured seconds. The last good copy is kept, and if a fetch fails it is served with `"stale": true`. No URL set: `{ "sample": true }`.
+- `GET /wp-json/lilahcraft/v1/market`: the Market feed. `history7d` and `history30d` (when HomeCraftMgmt sends them) are only in `?long=1`, which the Market page asks for to turn on its 7D and 30D ranges; Home and the plain route stay small. Cached for the configured seconds. The last good copy is kept, and if a fetch fails it is served with `"stale": true`. No URL set: `{ "sample": true }`.
 - `GET /wp-json/lilahcraft/v1/minis`: the same for the Minis feed. Only counts are passed on, never owners.
 - `GET /wp-json/lilahcraft/v1/status`: a Java server list ping from PHP (3 second timeout, cached 60 seconds): `{ online, players, max, version }`.
 
 Only the fields the site uses are passed through; anything else in a feed is dropped.
 
-- `GET /wp-json/lilahcraft/v1/activity`: "When are people on?" on the Play page. WordPress keeps the highest player count of each hour from its own pings (plus a 15-minute background check) for 14 days, and serves the average day once it has at least three days of data. Counts only, never names.
+- `GET /wp-json/lilahcraft/v1/activity`: "When are people on?" on the Play page. WordPress keeps the highest player count of each hour from its own pings (plus a 15-minute background check) for 14 days, and serves the average day once those samples span at least three days (a log that stopped, say because the ping broke, ages out instead of passing for recent). Counts only, never names.
 
 ### Fonts and share cards
 
@@ -64,6 +64,10 @@ Page layouts live in the theme's templates. To change copy, open **Appearance �
 - **House rules (Play):** once the rules are written, open **Pages → Play**, insert the **House rules** pattern (Patterns → LilahCraft) and type one rule per line. Until then the section isn't on the page.
 - **News:** write posts as usual. The newest post is the big card on News. Categories are the Topics in the sidebar.
 - **CraftBridge requirements** on Downloads (loader, Fabric API, NeoForge and JEI versions) are for CraftBridge Client 0.4.0 and live in `lilahcraft/inc/blocks/craftbridge.php`. Update them there when a new CraftBridge version changes them.
+
+### Updating from 2.0
+
+A template or part edited in Appearance → Editor under 2.0 keeps its 2.0 layout after the update to 2.1: no hero band, no texture, and the old dark bands turn plain. The Dashboard lists any such template in a notice. Reset each one (open it, ⋮ → Reset) and redo the text changes in the new layout.
 
 ## Release a new version
 
@@ -88,5 +92,6 @@ lilahcraft/
   assets/js   site.js (shared), lc-data.js (feeds, sample data, symbols), page-<name>.js
   assets/img  block textures (tex-*, strip-*), the Play QR code, share cards (og/)
   assets/fonts  the four font families (woff2) and their licence
-tools/check-theme.php   the checks the release runs (PHP lint, JSON, no bracket placeholders, no old colours)
+tools/check-theme.php   the checks the release runs (PHP lint, JSON, no bracket placeholders, none of the 2.0 look:
+                        its colours, tokens and classes, rounded corners, outlined text, the star field)
 ```

@@ -293,7 +293,10 @@ function lilahcraft_render_field( $args ) {
 				$feed_url = (string) lilahcraft_setting( $feed_key );
 				$host     = (string) wp_parse_url( $feed_url, PHP_URL_HOST );
 				$is_http  = 0 === stripos( $feed_url, 'http://' );
-				$is_local = '' === $host || false === strpos( $host, '.' ) || preg_match( '/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/', $host );
+				// A LAN name has no dot. An IPv6 address ([2001:db8::1]) has none either: only loopback,
+				// private (fc00::/7) and link-local (fe80::/10) ones count as local.
+				$is_local = '' === $host || ( false === strpos( $host, '.' ) && '[' !== $host[0] )
+					|| preg_match( '/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[(::1\]|f[cd]|fe[89ab]))/i', $host );
 				if ( $is_http && ! $is_local ) {
 					printf( '<p class="description"><strong>%s</strong></p>', esc_html__( 'A feed address starts with http://, so the token travels unencrypted. Use https:// if the feed crosses the internet.', 'lilahcraft' ) );
 					break;

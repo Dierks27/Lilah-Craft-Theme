@@ -42,6 +42,11 @@
 .lc-main--arcade .lc-arcade-warn-icon{display:block;flex:none;width:24px;height:24px}
 .lc-main--arcade .lc-arcade-warn p{font-size:17px;font-weight:600;color:var(--ink)}
 
+/* Above 920 px the wool texture starts 36 px down and is nine blocks tall (site.css): the hero is at least
+   that tall, so its bottom row shows whole instead of as a thin sliver at the hero's foot */
+@media (min-width:921px){
+  .lc-main--arcade .lc-arcade-hero-in{min-height:calc(36px + var(--cell) * 9)}
+}
 @media (max-width:920px){
   .lc-main--arcade .lc-arcade-hero-in{grid-template-columns:minmax(0,1fr);gap:36px}
   .lc-main--arcade .lc-arcade-wallet{max-width:480px}

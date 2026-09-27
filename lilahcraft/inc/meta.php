@@ -55,13 +55,21 @@ add_action(
 		$url   = home_url( ! empty( $GLOBALS['wp']->request ) ? user_trailingslashit( $GLOBALS['wp']->request ) : '/' );
 
 		if ( is_singular() ) {
+			// A draft being previewed has no canonical address yet.
 			$url = wp_get_canonical_url();
+			$url = $url ? $url : get_permalink();
 		}
 		if ( is_singular( 'post' ) ) {
 			$type    = 'article';
-			$excerpt = trim( wp_strip_all_tags( get_the_excerpt() ) );
+			// A password-protected post keeps its words to itself: the card uses the News description.
+			$excerpt = post_password_required() ? '' : wp_strip_all_tags( get_the_excerpt(), true );
+			// Over 200 characters: end on the last whole word (the 201st character shows whether the 200th ends one).
+			if ( mb_strlen( $excerpt ) > 200 ) {
+				$excerpt = preg_match( '/^(.*\S)\s/su', mb_substr( $excerpt, 0, 201 ), $m ) ? $m[1] : wp_html_excerpt( $excerpt, 200 );
+				$excerpt = rtrim( $excerpt, ' ,;:' ) . '…';
+			}
 			if ( '' !== $excerpt ) {
-				$desc = wp_html_excerpt( $excerpt, 200, '…' );
+				$desc = $excerpt;
 			}
 			if ( has_post_thumbnail() ) {
 				$thumb = wp_get_attachment_image_url( get_post_thumbnail_id(), 'large' );
@@ -83,12 +91,20 @@ add_action(
 			array( 'property', 'og:image:height', '630' ),
 			array( 'name', 'twitter:card', 'summary_large_image' ),
 		);
+		$skip = array();
 		if ( is_singular( 'post' ) && has_post_thumbnail() ) {
+			$skip = array( 'og:image:width', 'og:image:height' );
+		}
+		// Search results and "not found" have no address of their own to share (and no ?s= in $wp->request).
+		if ( is_search() || is_404() ) {
+			$skip = array( 'og:type', 'og:url' );
+		}
+		if ( $skip ) {
 			$tags = array_values(
 				array_filter(
 					$tags,
-					function ( $t ) {
-						return ! in_array( $t[1], array( 'og:image:width', 'og:image:height' ), true );
+					function ( $t ) use ( $skip ) {
+						return ! in_array( $t[1], $skip, true );
 					}
 				)
 			);

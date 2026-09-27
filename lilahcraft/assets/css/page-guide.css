@@ -8,8 +8,10 @@
 /* ---------- two columns: side menu + sections ---------- */
 .lc-main--guide .lc-guide{display:grid;grid-template-columns:250px minmax(0,1fr);gap:48px;align-items:start;padding-block:64px 88px}
 
-/* ---------- side menu ---------- */
-.lc-main--guide .lc-toc{position:sticky;top:var(--sticky-top);max-height:calc(100vh - var(--sticky-top) - 24px);overflow-y:auto;overscroll-behavior:contain;padding:0 10px 10px;background:#fff;border:3px solid var(--charcoal)}
+/* ---------- side menu ----------
+   On a short window the menu scrolls inside itself (page-guide.js keeps the marked link in view). Its
+   scrolls chain on to the page as usual, so the wheel and keys over it still move the page. */
+.lc-main--guide .lc-toc{position:sticky;top:var(--sticky-top);max-height:calc(100vh - var(--sticky-top) - 24px);overflow-y:auto;padding:0 10px 10px;background:#fff;border:3px solid var(--charcoal)}
 .lc-main--guide .lc-toc .lc-strip{height:40px;margin:0 -10px;border-bottom:3px solid var(--charcoal)}
 .lc-main--guide .lc-toc-title{padding:14px 12px 8px 14px;font-family:var(--mono);font-weight:600;font-size:13px;line-height:1.4;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .lc-main--guide .lc-toc-list{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}

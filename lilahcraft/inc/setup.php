@@ -16,6 +16,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Whether this theme is the site's active theme, not just being previewed (Appearance > Themes >
+ * Live Preview, or the Customizer). A preview loads functions.php and filters get_stylesheet(),
+ * but must not change the site: no pages, no Reading, no background job.
+ *
+ * @return bool
+ */
+function lilahcraft_is_active_theme() {
+	global $wp_customize;
+	if ( $wp_customize instanceof WP_Customize_Manager && ! $wp_customize->is_theme_active() ) {
+		return false;
+	}
+	return get_option( 'stylesheet' ) === get_stylesheet();
+}
+
+/**
  * The site's pages, slug => title, in menu order.
  *
  * @return array
@@ -168,11 +183,102 @@ add_action(
 );
 
 // Uploading a new version over the active theme does not "switch" themes, so run once on the first
-// request of any kind (front end, admin, REST or cron) after it.
+// request of any kind (front end, admin, REST or cron) after it. Never while only previewed.
 add_action(
 	'wp_loaded',
 	function () {
+		if ( ! lilahcraft_is_active_theme() ) {
+			return;
+		}
+		// When this site first ran the 2.1 look (autoloaded, so the check is free after that).
+		if ( ! get_option( 'lilahcraft_look_since' ) ) {
+			update_option( 'lilahcraft_look_since', time(), true );
+		}
 		lilahcraft_setup_once();
+	}
+);
+
+/**
+ * Templates and parts saved in Appearance > Editor before this site first ran the 2.1 look. They
+ * still hold the 2.0 markup (no hero band, no texture) and override the theme's new files until
+ * they're reset. Ones the current user hid are left out.
+ *
+ * @return array post ID => title
+ */
+function lilahcraft_old_templates() {
+	$since = (int) get_option( 'lilahcraft_look_since' );
+	$old   = array();
+	if ( ! $since ) {
+		return $old;
+	}
+	$posts = get_posts(
+		array(
+			'post_type'      => array( 'wp_template', 'wp_template_part' ),
+			'post_status'    => 'publish',
+			'posts_per_page' => 50,
+			'no_found_rows'  => true,
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				array(
+					'taxonomy' => 'wp_theme',
+					'field'    => 'slug',
+					'terms'    => get_stylesheet(),
+				),
+			),
+			'date_query'     => array(
+				array(
+					'column' => 'post_modified_gmt',
+					'before' => gmdate( 'Y-m-d H:i:s', $since ),
+				),
+			),
+		)
+	);
+	$hidden = array_map( 'intval', (array) get_user_meta( get_current_user_id(), 'lilahcraft_hidden_templates', true ) );
+	foreach ( $posts as $p ) {
+		// Only edits of the theme's own templates: one Jeff made from scratch has no newer copy to miss.
+		$file = ( 'wp_template' === $p->post_type ? 'templates/' : 'parts/' ) . $p->post_name . '.html';
+		if ( ! in_array( $p->ID, $hidden, true ) && file_exists( get_theme_file_path( $file ) ) ) {
+			$old[ $p->ID ] = '' !== $p->post_title ? $p->post_title : $p->post_name;
+		}
+	}
+	return $old;
+}
+
+// "Hide this notice" on the old-templates notice below: for this user, and only for the ones listed now.
+add_action(
+	'admin_init',
+	function () {
+		if ( ! isset( $_GET['lilahcraft_hide_old_templates'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		check_admin_referer( 'lilahcraft_hide_old_templates' );
+		$user   = get_current_user_id();
+		$hidden = (array) get_user_meta( $user, 'lilahcraft_hidden_templates', true );
+		update_user_meta( $user, 'lilahcraft_hidden_templates', array_values( array_unique( array_merge( array_map( 'intval', $hidden ), array_keys( lilahcraft_old_templates() ) ) ) ) );
+		wp_safe_redirect( remove_query_arg( array( 'lilahcraft_hide_old_templates', '_wpnonce' ) ) );
+		exit;
+	}
+);
+
+// An update from 2.0 leaves any template edited under 2.0 in the old layout, with no warning anywhere else.
+add_action(
+	'admin_notices',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! lilahcraft_is_active_theme() ) {
+			return;
+		}
+		$old = lilahcraft_old_templates();
+		if ( ! $old ) {
+			return;
+		}
+		printf(
+			'<div class="notice notice-warning"><p>%1$s</p><p><a href="%2$s">%3$s</a> &middot; <a href="%4$s">%5$s</a></p></div>',
+			/* translators: %s: template names, like Page: Arcade, Header. */
+			esc_html( sprintf( __( 'These templates were changed in Appearance → Editor before LilahCraft 2.1, so they still show the 2.0 layout without the new look: %s. Open each one, choose ⋮ → Reset, then redo any text changes.', 'lilahcraft' ), implode( ', ', array_map( 'wp_specialchars_decode', $old ) ) ) ),
+			esc_url( admin_url( 'site-editor.php?postType=wp_template' ) ),
+			esc_html__( 'Open the templates', 'lilahcraft' ),
+			esc_url( wp_nonce_url( add_query_arg( 'lilahcraft_hide_old_templates', '1' ), 'lilahcraft_hide_old_templates' ) ),
+			esc_html__( 'Hide this notice', 'lilahcraft' )
+		);
 	}
 );
 

@@ -30,8 +30,9 @@
 .lc-main--news .lc-news-feature{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:32px 36px 36px;background:var(--charcoal);border:3px solid var(--charcoal);color:var(--muted-dark)}
 .lc-main--news .lc-news-feature>*{max-width:100%}
 /* The pink wool strip (site.css .lc-strip, drawn here so every featured post gets it, in the editor too).
-   It bleeds to the card's edges and its cells stay square: the 12×2 pattern repeats across. */
-.lc-main--news .lc-news-feature::before{content:"";align-self:stretch;height:60px;margin:-32px -36px 10px;border-bottom:3px solid var(--charcoal);background:url(../img/strip-wool.svg) repeat-x 0 0/auto 100%;image-rendering:pixelated}
+   It bleeds to the card's edges. Whole copies of the 12×2 pattern fill it (round), so it never ends in a
+   cut-off sliver of a cell and the cells stay close to square, as on the other strip cards. */
+.lc-main--news .lc-news-feature::before{content:"";align-self:stretch;height:60px;margin:-32px -36px 10px;border-bottom:3px solid var(--charcoal);background:url(../img/strip-wool.svg) 0 0/auto 100% round no-repeat;image-rendering:pixelated}
 .lc-main--news .lc-news-feature .lc-news-meta{color:var(--pink)}
 .lc-main--news .lc-news-feature-title{font-family:var(--display);font-weight:800;font-size:38px;line-height:1.12;letter-spacing:-.02em;color:#fff}
 .lc-main--news .lc-news-feature-text{max-width:660px;font-size:18px;color:var(--muted-dark)}
@@ -91,14 +92,18 @@
 :is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link{margin-top:6px}
 :is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a{display:inline-flex;align-items:center;min-height:44px;font-weight:800;font-size:16px;color:#fff;text-decoration:underline;text-decoration-thickness:2px}
 :is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a:hover{color:#fff;text-decoration-color:var(--orange)}
-/* without scripts the copy button can't copy: leave just the address */
-html:not(.lc-js) .lc-main--news .lc-news-play-copy{display:none}
+/* without scripts the copy button can't copy: leave just the address (the Site Editor canvas has no
+   lc-js either, but there the button should show, as it does on the site) */
+html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--news .lc-news-play-copy{display:none}
 
-/* Forced colours (Windows contrast themes) drop backgrounds, which is all that marks the current topic,
-   so it uses the system's selected colours. The number sets its own colour, so it inherits. */
+/* Forced colours (Windows contrast themes) drop backgrounds, which is all that marks the current topic
+   and the current page, so they use the system's selected colours. The number sets its own colour, so it
+   inherits. The pager's "…" loses its (transparent) border, which forced colours would draw. */
 @media (forced-colors:active){
   :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;outline-color:Highlight}
   :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current] .lc-topic-n{color:inherit}
+  .lc-main--news .lc-news-pager .current{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}
+  .lc-main--news .lc-news-pager .dots{border:0}
 }
 
 /* ---------- single post ---------- */
@@ -121,8 +126,9 @@ html:not(.lc-js) .lc-main--news .lc-news-play-copy{display:none}
 .lc-main--news .lc-entry :is(th,td){padding:10px 12px;border:1px solid var(--light);text-align:left;vertical-align:top}
 .lc-main--news .lc-entry th{background:var(--page);color:var(--ink)}
 .lc-main--news .lc-entry .wp-block-table{overflow-x:auto}
-.lc-main--news .lc-entry .wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:0;background:var(--purple);color:#fff;font-family:var(--body);font-weight:800;font-size:17px;line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--purple-deep)}
-.lc-main--news .lc-entry .wp-block-button__link:hover{color:#fff;filter:brightness(1.07)}
+/* core Buttons and a File block's download button: square purple buttons, not core's round gray pill */
+.lc-main--news .lc-entry :is(.wp-block-button__link,.wp-block-file__button){display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:0;background:var(--purple);color:#fff;font-family:var(--body);font-weight:800;font-size:17px;line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--purple-deep);opacity:1}
+.lc-main--news .lc-entry :is(.wp-block-button__link,.wp-block-file__button):hover{color:#fff;filter:brightness(1.07)}
 .lc-main--news .lc-news-back{margin:0}
 .lc-main--news .lc-news-back a{position:relative;display:inline-flex;align-items:center;min-height:44px;padding-left:28px;font-weight:800;font-size:17px}
 .lc-main--news .lc-news-back a::before{content:"\2190" / "";position:absolute;left:0;top:50%;transform:translateY(-52%);font-weight:400}

@@ -2,14 +2,15 @@
 /**
  * Same-origin REST routes for the live data.
  *
- *   GET /wp-json/lilahcraft/v1/market   the Market feed (HomeCraftMgmt /api/market)
+ *   GET /wp-json/lilahcraft/v1/market   the Market feed (HomeCraftMgmt /api/market), without the long
+ *                                       history; ?long=1 adds history7d and history30d when the feed has them
  *   GET /wp-json/lilahcraft/v1/minis    the Minis feed  (HomeCraftMgmt /api/minis)
  *   GET /wp-json/lilahcraft/v1/status   { online, players, max, version }
  *
  * WordPress fetches each feed, keeps it in a transient for the configured seconds and keeps the
- * last good copy in an option. A failed fetch serves that copy with "stale": true. With no URL set,
- * or nothing good yet, the answer is { "sample": true } and the page shows labelled sample data.
- * Only whitelisted fields are passed on.
+ * last good copy in an option (both whole, long history included). A failed fetch serves that copy
+ * with "stale": true. With no URL set, or nothing good yet, the answer is { "sample": true } and the
+ * page shows labelled sample data. Only whitelisted fields are passed on.
  *
  * @package LilahCraft
  */
@@ -30,6 +31,10 @@ add_action(
 					'permission_callback' => '__return_true',
 					'callback'            => function ( WP_REST_Request $request ) use ( $route ) {
 						$data = 'status' === $route ? lilahcraft_server_status() : lilahcraft_get_feed( $route );
+						// Only the Market page asks for 7D/30D (?long=1): Home's refreshes stay small.
+						if ( 'market' === $route && '1' !== (string) $request->get_param( 'long' ) ) {
+							$data = lilahcraft_market_lean( $data );
+						}
 						return lilahcraft_rest_response( $data, $request );
 					},
 				)
@@ -37,6 +42,23 @@ add_action(
 		}
 	}
 );
+
+/**
+ * The Market feed without the long history (history7d, history30d): up to 288 more points per item
+ * that only the Market page's 7D and 30D ranges use.
+ *
+ * @param array $data Market feed, as stored.
+ * @return array
+ */
+function lilahcraft_market_lean( $data ) {
+	if ( empty( $data['items'] ) || ! is_array( $data['items'] ) ) {
+		return $data;
+	}
+	foreach ( array_keys( $data['items'] ) as $i ) {
+		unset( $data['items'][ $i ]['history7d'], $data['items'][ $i ]['history30d'] );
+	}
+	return $data;
+}
 
 /**
  * JSON response with an ETag, so an unchanged feed costs the browser a 304.
@@ -148,11 +170,14 @@ function lilahcraft_note_feed( $feed, $ok, $error, $url = '' ) {
  * @return array|WP_Error
  */
 function lilahcraft_fetch_feed( $feed, $url ) {
-	$res = wp_remote_get(
+	// WordPress sends the same headers on to wherever a redirect points (another host, plain http),
+	// so with a feed token set, redirects are not followed.
+	$token = '' !== (string) lilahcraft_setting( 'feed_token' );
+	$res   = wp_remote_get(
 		$url,
 		array(
 			'timeout'     => 5,
-			'redirection' => 2,
+			'redirection' => $token ? 0 : 2,
 			'headers'     => lilahcraft_feed_headers(),
 			'user-agent'  => 'LilahCraft site/' . wp_get_theme( get_template() )->get( 'Version' ),
 		)
@@ -161,6 +186,10 @@ function lilahcraft_fetch_feed( $feed, $url ) {
 		return $res;
 	}
 	$code = (int) wp_remote_retrieve_response_code( $res );
+	if ( $token && $code >= 300 && $code < 400 ) {
+		/* translators: %d: HTTP status code. */
+		return new WP_Error( 'lilahcraft_feed', sprintf( __( 'The feed answered HTTP %d (a redirect). With a feed token set, redirects are not followed: use the final address.', 'lilahcraft' ), $code ) );
+	}
 	if ( 200 !== $code ) {
 		/* translators: %d: HTTP status code. */
 		return new WP_Error( 'lilahcraft_feed', sprintf( __( 'The feed answered HTTP %d.', 'lilahcraft' ), $code ) );
@@ -255,8 +284,8 @@ function lilahcraft_clean_points( $list, $max ) {
  * Keep only the Market fields the site uses.
  *
  * history is the last 48 hours (96 half-hour points). history7d (hourly, up to 168 points) and
- * history30d (every 6 hours, up to 120 points) are passed on only when the feed has them; the
- * Market page turns its 7D and 30D ranges on when they're there.
+ * history30d (every 6 hours, up to 120 points) are kept only when the feed has them and served
+ * only with ?long=1; the Market page asks for them and turns its 7D and 30D ranges on when they're there.
  *
  * @param array $j Decoded feed.
  * @return array|WP_Error

@@ -18,3 +18,18 @@ body .editor-visual-editor__post-title-wrapper {
 body .lc-rules-wrap:not(:has(li:not(:empty))) {
   display: block;
 }
+
+/* The canvas never runs site.js, so at 1150px and below site.css would show the no-script header (the whole menu
+   unfolded). Show the header as visitors see it instead: the Menu button, the menu folded away. */
+@media (max-width: 1150px) {
+  body.editor-styles-wrapper .lc-menu-btn {
+    display: inline-flex;
+  }
+  body.editor-styles-wrapper .lc-menu {
+    display: none;
+  }
+  body.editor-styles-wrapper .lc-top-in {
+    height: var(--header-h);
+    flex-wrap: nowrap;
+  }
+}

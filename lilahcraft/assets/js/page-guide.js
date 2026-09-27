@@ -1,7 +1,8 @@
 /* LilahCraft: Guide page.
    Marks the "Guide sections" link for the section being read with aria-current="true"
    (styled in page-guide.css). The section at the top of the viewport, just under the sticky
-   header, is the current one; at the very bottom of the page the last section wins.
+   header, is the current one; at the very bottom of the page the last section wins. When a short
+   window makes the menu scroll, the marked link is kept in its view.
    The command search is the shared [data-lc-filter] in site.js. */
 (function () {
   'use strict';
@@ -18,12 +19,31 @@
   });
   if (!items.length) { return; }
 
+  // On a short window the sticky menu scrolls inside itself: bring the marked link into its view,
+  // centred so its neighbours show too (above the first section, the menu's top). Only the menu
+  // scrolls, never the page (so no scrollIntoView). Not while keyboard focus is in the menu: PageDown
+  // and the arrows scroll the menu first there, and moving it back would take the next key from the page.
+  function reveal(link) {
+    if (nav.scrollHeight <= nav.clientHeight) { return; }
+    var keys = false;
+    try { keys = !!nav.querySelector(':focus-visible'); } catch (e) { keys = false; }
+    if (keys) { return; }
+    if (!link) { nav.scrollTop = 0; return; }
+    var top = nav.getBoundingClientRect().top + nav.clientTop;
+    var bottom = top + nav.clientHeight;
+    var r = link.getBoundingClientRect();
+    if (r.top < top || r.bottom > bottom) {
+      nav.scrollTop += (r.top + r.bottom) / 2 - (top + bottom) / 2;
+    }
+  }
+
   var current = null;
   function setCurrent(item) {
     if (item === current) { return; }
     if (current) { current.link.removeAttribute('aria-current'); }
     current = item;
     if (item) { item.link.setAttribute('aria-current', 'true'); }
+    reveal(item ? item.link : null);
   }
 
   // Where an anchored section lands: html's scroll-padding-top (header + admin bar + 16 px).

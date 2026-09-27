@@ -35,12 +35,16 @@
   /* No answer after 12 s counts as unreachable (so a hung request can't stop the refreshes);
      a slow connection gets another 30 s to download a big answer once it has started. */
   var ANSWER_MS = 12000, BODY_MS = 30000;
-  /* The last real copy of each feed this page has seen, kept for when a refresh fails. */
+  /* The last real copy of each feed (and variant) this page has seen, kept for when a refresh fails. */
   var lastGood = {};
 
   /* Resolves to { mode: 'live'|'stale'|'sample', unreachable: bool, data: feed }.
-     sample = no feed URL set, or the feed can't be reached and there's no good copy yet. */
-  function load(name) {
+     sample = no feed URL set, or the feed can't be reached and there's no good copy yet.
+     opts.long asks for the long 7D/30D history too (?long=1, Market only); it keeps its own last good copy. */
+  function load(name, opts) {
+    var long = !!(opts && opts.long);
+    var key = long ? name + ':long' : name;
+    var url = REST + name + (long ? (REST.indexOf('?') > -1 ? '&' : '?') + 'long=1' : '');
     if (!window.fetch) { return Promise.resolve(sampleResult(name, false)); }
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = 0, fail = null;
@@ -53,7 +57,7 @@
       }, ms);
     }
     giveUpAfter(ANSWER_MS);
-    var req = fetch(REST + name, { headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined })
+    var req = fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) {
         if (!r.ok) { throw new Error('HTTP ' + r.status); }
         giveUpAfter(BODY_MS);
@@ -62,31 +66,31 @@
     return Promise.race([req, timeout])
       .then(function (j) {
         clearTimeout(timer);
-        var res = normalize(name, j);
-        if (res.mode !== 'sample') { lastGood[name] = res; }
+        var res = normalize(name, j, key);
+        if (res.mode !== 'sample') { lastGood[key] = res; }
         return res;
       })
-      .catch(function () { clearTimeout(timer); return unreachableResult(name); });
+      .catch(function () { clearTimeout(timer); return unreachableResult(name, key); });
   }
   function sampleResult(name, unreachable) {
     return { mode: 'sample', unreachable: !!unreachable, data: name === 'market' ? marketSample() : minisSample() };
   }
   /* Can't reach the feed: the last good copy as stale if there is one, otherwise labelled sample data. */
-  function unreachableResult(name) {
-    var good = lastGood[name];
+  function unreachableResult(name, key) {
+    var good = lastGood[key || name];
     return good ? { mode: 'stale', unreachable: true, data: good.data } : sampleResult(name, true);
   }
-  function normalize(name, j) {
+  function normalize(name, j, key) {
     if (j && j.sample && !j.unreachable) { return sampleResult(name, false); }
     var list = j && !j.sample ? (name === 'market' ? j.items : j.minis) : null;
-    if (!Array.isArray(list)) { return unreachableResult(name); }
+    if (!Array.isArray(list)) { return unreachableResult(name, key); }
     return { mode: j.stale ? 'stale' : 'live', unreachable: false, data: j };
   }
 
-  /* Load now and again every refreshSeconds (market) or `everySeconds`.
+  /* Load now and again every refreshSeconds (market) or `everySeconds`; `opts` as for load().
      Sample data isn't reloaded unless the feed was unreachable. While the tab is hidden a due
      refresh waits, and runs as soon as the tab is shown again. Returns a stop function. */
-  function watch(name, cb, everySeconds) {
+  function watch(name, cb, everySeconds, opts) {
     var timer = null, stopped = false, pending = false;
     function schedule(res) {
       var secs = 0;
@@ -98,7 +102,7 @@
       if (secs) { timer = setTimeout(due, secs * 1000); }
     }
     function tick() {
-      load(name).then(function (res) {
+      load(name, opts).then(function (res) {
         if (stopped) { return; }
         try { cb(res); } catch (e) { if (window.console) { console.error(e); } }
         schedule(res);
@@ -261,7 +265,10 @@
     GRAVEL: 'GRVL', CLAY_BALL: 'CLAY', DEEPSLATE: 'DPSL', COBBLED_DEEPSLATE: 'CDPS', GRANITE: 'GRNT', DIORITE: 'DIOR', ANDESITE: 'ANDS'
   };
   function codeFrom(id) {
-    var words = String(id || 'item').toUpperCase().replace(/[^A-Z0-9_]/g, '').split('_').filter(Boolean);
+    // "minecraft:sponge" → from "sponge", so a namespace doesn't give every item the same code.
+    var s = String(id || 'item');
+    s = s.slice(s.lastIndexOf(':') + 1);
+    var words = s.toUpperCase().replace(/[^A-Z0-9_]/g, '').split('_').filter(Boolean);
     if (!words.length) { return 'ITEM'; }
     if (words.length === 1) {
       var w = words[0];
@@ -270,9 +277,10 @@
     return (words[0].slice(0, 2) + words[words.length - 1].slice(0, 2)).slice(0, 4);
   }
   /* { id: symbol } for a list of items. Stable across refreshes and feed order (worked out in id order):
-     table symbols first, then codes from the ids, numbered when two would clash. */
+     table symbols first, then codes from the ids, numbered when two would clash.
+     Prototype-free maps, so ids like "__proto__" or "constructor" are ordinary keys. */
   function symbols(items) {
-    var out = {}, used = {};
+    var out = Object.create(null), used = Object.create(null);
     var list = (items || []).slice().sort(function (a, b) {
       return String(a.id) < String(b.id) ? -1 : (String(a.id) > String(b.id) ? 1 : 0);
     });
@@ -283,7 +291,8 @@
     list.forEach(function (it) {
       if (out[it.id]) { return; }
       var base = codeFrom(it.id), sym = base, n = 2;
-      while (used[sym]) { sym = base.slice(0, 3) + n; n++; if (n > 9) { base = base.slice(0, 2) + base.charAt(3); n = 2; } }
+      // IRO2 … IRO9, IR10 …: n keeps growing, so this always finds a free one.
+      while (used[sym]) { var tail = String(n++); sym = base.slice(0, Math.max(1, 4 - tail.length)) + tail; }
       out[it.id] = sym;
       used[sym] = true;
     });
@@ -415,9 +424,9 @@
     artCache[key] = c.toDataURL('image/png');
     return artCache[key];
   }
-  /* The design's generated block for a Mini with no skin: a "?" in its rarity colour. */
+  /* The generated block for a Mini with no skin: charcoal with a charcoal-2 ring, a "?" in its rarity colour. */
   function mysteryURL(rarity) {
-    return pixelURL(MYSTERY, { a: '#2b3172', b: '#3d4494', q: RARITIES[rarityKey(rarity)].q });
+    return pixelURL(MYSTERY, { a: '#26242b', b: '#3a3740', q: RARITIES[rarityKey(rarity)].q });
   }
   var SKIN_RE = /^https:\/\/textures\.minecraft\.net\/texture\/[0-9a-f]{16,128}$/i;
 

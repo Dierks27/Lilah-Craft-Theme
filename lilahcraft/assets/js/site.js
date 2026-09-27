@@ -1,5 +1,5 @@
 /* LilahCraft: shared behaviour on every page.
-   - [data-lc-copy="text"] buttons copy text (data-lc-copied="Copied!" is the done label; data-lc-copy-what="link" names it if copying fails)
+   - [data-lc-copy="text"] buttons copy text (data-lc-copied="Copied!" is the done label; data-lc-copy-what="link" names it when it's announced)
    - header Menu button below 1150 px
    - header player count from /wp-json/lilahcraft/v1/status, hidden when the ping fails
    - [data-lc-filter="tableId"] search boxes filter [data-lc-row] rows, grouped by [data-lc-group]
@@ -47,7 +47,8 @@
     copyText(text).then(function () {
       btn.textContent = btn.getAttribute('data-lc-copied') || 'Copied!';
       btn.setAttribute('data-done', '1');
-      LC.announce('Copied ' + text);
+      // Name what was copied when the button says (a long link read out is noise); the address reads fine.
+      LC.announce(btn.hasAttribute('data-lc-copy-what') ? 'Copied the ' + btn.getAttribute('data-lc-copy-what') + '.' : 'Copied ' + text);
       btn._lcTimer = setTimeout(function () {
         btn.textContent = label;
         btn.setAttribute('data-done', '0');

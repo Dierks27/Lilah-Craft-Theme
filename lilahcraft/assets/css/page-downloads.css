@@ -62,7 +62,7 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 .lc-main--downloads .lc-dl-steps{max-width:818px;gap:14px}
 .lc-main--downloads .lc-dl-list{margin:0;padding-left:26px;display:flex;flex-direction:column;gap:8px;font-size:17px;color:var(--text)}
 .lc-main--downloads .lc-dl-list li{padding-left:4px}
-.lc-main--downloads .lc-dl-list li::marker{font-family:var(--mono);font-weight:700;color:var(--orange-deep)}
+.lc-main--downloads .lc-dl-list li::marker{font-family:var(--mono);font-weight:700;color:var(--ink)}
 .lc-main--downloads .lc-dl-list code{padding:0;background:none;font-size:.94em;font-weight:700;color:var(--ink)}
 
 /* ---------- narrower screens ---------- */

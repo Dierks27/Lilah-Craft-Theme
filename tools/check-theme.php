@@ -8,7 +8,9 @@
  * - nothing mentions the private server (the word is assembled below so this file passes too)
  * - no square brackets in the visible text of any template, part or pattern
  *   (placeholders like [n] must never ship; values hide instead)
- * - none of the old 2.0 colours (#1d2150, #ff7ac0, #63e3ea) anywhere
+ * - none of the old 2.0 look in any css, html, js, php, json or svg file: its colours (#1d2150, #ff7ac0,
+ *   #63e3ea, and the navy #2b3172, #3d4494), its token and class names, rounded corners, outlined
+ *   (text-stroke) text and the radial-gradient star field
  *
  * Exits 1 on any failure.
  */
@@ -21,6 +23,16 @@ if ( ! $can_lint ) {
 	echo "Note: no PHP binary to lint with here, so the lint step is skipped.\n";
 }
 
+// 2.1 replaced the navy/pink/cyan look: none of it may come back. Pattern => what it is.
+$old_look = array(
+	'/#(1d2150|ff7ac0|63e3ea|2b3172|3d4494)\b/i' => 'an old 2.0 colour',
+	'/(?<![\w-])--(night2?|deep|panel|rule-dark|row-dark|edge-dark|cyan(-shade)?|pink-shade|lilac|head-ink|line-soft|chip-line|dash|on-night(-soft|-bright)?|link(-hover)?|kicker|code|soft|raised|radius)(?![\w-])/' => 'an old 2.0 token',
+	'/\b(lc-sec--lilac|lc-sec--night|lc-card--night|lc-btn--cyan|lc-btn--night|lc-pill--night|lc-pagehead)\b/' => 'an old 2.0 class',
+	'/border-radius\s*:(?!\s*(0(px|em|rem|%)?\s*)+(!important\s*)?([;}"\'\n]|$)|\s*(inherit|initial|unset))\s*[^;}"\'\n]*/i' => 'rounded corners (square corners only)',
+	'/text-stroke/i' => 'outlined text',
+	'/radial-gradient/i' => 'a radial gradient (the old star field)',
+);
+
 $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $files as $file ) {
 	$path = str_replace( '\\', '/', $file->getPathname() );
@@ -31,9 +43,12 @@ foreach ( $files as $file ) {
 		$failures[] = "$rel mentions the private server.";
 	}
 
-	// 2.1 replaced the navy/pink/cyan look: none of its colours may come back.
-	if ( preg_match( '/\.(css|html|js|php)$/', $path ) && preg_match( '/#(1d2150|ff7ac0|63e3ea)\b/i', $body, $old ) ) {
-		$failures[] = "$rel still uses an old 2.0 colour ($old[0]).";
+	if ( preg_match( '/\.(css|html|js|php|json|svg)$/', $path ) ) {
+		foreach ( $old_look as $pattern => $what ) {
+			if ( preg_match( $pattern, $body, $old ) ) {
+				$failures[] = "$rel still has $what ($old[0]).";
+			}
+		}
 	}
 
 	if ( $can_lint && substr( $path, -4 ) === '.php' ) {

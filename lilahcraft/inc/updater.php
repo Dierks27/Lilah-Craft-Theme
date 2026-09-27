@@ -118,11 +118,11 @@ add_filter(
 );
 
 // Switch auto-updates on for this theme once, the way the "Enable auto-updates" link would.
-// If Jeff turns them off later, this never turns them back on.
+// If Jeff turns them off later, this never turns them back on. Not while the theme is only previewed.
 add_action(
 	'admin_init',
 	function () {
-		if ( get_option( 'lilahcraft_autoupdate_default' ) || ! current_user_can( 'update_themes' ) ) {
+		if ( get_option( 'lilahcraft_autoupdate_default' ) || ! current_user_can( 'update_themes' ) || ! lilahcraft_is_active_theme() ) {
 			return;
 		}
 		$auto = (array) get_site_option( 'auto_update_themes', array() );

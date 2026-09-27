@@ -39,6 +39,11 @@
           "color": "#ff5fa8"
         },
         {
+          "slug": "pink-deep",
+          "name": "Deep pink (text on light)",
+          "color": "#b02d69"
+        },
+        {
           "slug": "orange",
           "name": "Orange",
           "color": "#ff8a2b"

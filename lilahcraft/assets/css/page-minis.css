@@ -9,7 +9,8 @@
 .lc-main--minis .lc-mn-stat:nth-child(2){--mn-bar:var(--pink)}
 .lc-main--minis .lc-mn-stat:nth-child(3){--mn-bar:var(--purple)}
 .lc-main--minis .lc-mn-stat dt{font-size:15px;font-weight:600;line-height:1.4;color:var(--hero-muted)}
-.lc-main--minis .lc-mn-stat dd{margin:0;min-height:1.2em;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.2;letter-spacing:-.02em;color:var(--hero-text)}
+/* a count never breaks mid-number ("12,3" / "45"); narrower tiles get a smaller size below */
+.lc-main--minis .lc-mn-stat dd{margin:0;min-height:1.2em;font-family:var(--display);font-weight:800;font-size:30px;line-height:1.2;letter-spacing:-.02em;color:var(--hero-text);white-space:nowrap;overflow-wrap:normal}
 /* the "Sample data" / "Last known list" line: the hero's muted colour, so it reads on Light heroes too */
 .lc-main--minis .lc-hero .lc-mn-statnote{color:var(--hero-muted)}
 
@@ -85,9 +86,23 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
 .lc-main--minis .lc-mn-home .lc-small{color:var(--muted)}
 
 /* ---------- smaller screens ---------- */
+/* up to 1200 px the ladder is still five across: smaller names and gems keep "Uncommon" and
+   "Legendary" inside their cards (from 1100 px down it has three columns) */
+@media (min-width:1101px) and (max-width:1200px){
+  .lc-main--minis .lc-mn-rung-name{gap:8px;font-size:15px}
+  .lc-main--minis .lc-mn-rung-name::before{width:20px;height:20px}
+}
+/* 1100 px and below the hero caps the stat tiles narrower (the texture keeps its 400 px): slimmer
+   padding, and the number grows with the tiles, from 20 px at 921 to 30 px at 1100, so even a
+   six-digit count stays inside its tile (920 px and below set their own) */
+@media (max-width:1100px){
+  .lc-main--minis .lc-mn-stat{padding:16px 12px 12px}
+  .lc-main--minis .lc-mn-stat dd{font-size:min(30px, calc((100vw - 563px) / 17.9))}
+}
 @media (max-width:920px){
   .lc-main--minis .lc-mn-stat{padding:16px 16px 12px}
-  .lc-main--minis .lc-mn-stat dd{font-size:26px}
+  /* 26 px, a little less under 600 px where the three tiles get narrow */
+  .lc-main--minis .lc-mn-stat dd{font-size:min(26px, calc((100vw - 152px) / 16.8))}
   .lc-main--minis .lc-mn-ladder{padding-top:48px;padding-bottom:40px}
   .lc-main--minis .lc-mn-filters{flex-wrap:wrap}
   .lc-main--minis .lc-mn-find{flex-basis:100%}

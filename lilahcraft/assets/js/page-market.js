@@ -1,8 +1,9 @@
 /* LilahCraft 2.1: the Market page, a trader's view of the feed.
    Ticker tape, the LCX index and breadth, the market list (search, sector tabs, watchlist), the
-   selected item (price, 12H/24H/48H chart, stock on the shelf, stats, where to trade), top movers,
-   sectors today, the heatmap and "What's my stuff worth?". All from LCData.watch('market'): live,
-   stale (the last good copy) or labelled sample data. The selection sits in the URL (?item=id).
+   selected item (price, 12H/24H/48H chart, plus 7D/30D when the feed has the longer history, stock on
+   the shelf, stats, where to trade), top movers, sectors today, the heatmap and "What's my stuff worth?".
+   All from LCData.watch('market') with the long history: live, stale (the last good copy) or labelled
+   sample data. The selection sits in the URL (?item=id).
    Each refresh updates the page in place, so the selection, sector, range, search, calculator and
    keyboard focus all stay put. */
 (function () {
@@ -16,6 +17,8 @@
   var DEFAULT_ID = 'iron_ingot';
   var SECTORS = ['ores', 'stone', 'wood', 'farm', 'mob', 'nether', 'other'];
   var RANGE_POINTS = { '12H': 24, '24H': 48, '48H': 96 };
+  /* 7D and 30D chart the feed's longer history (hourly and 6-hourly points), when the item has it. */
+  var LONG_RANGE = { '7D': 'history7d', '30D': 'history30d' }, RANGE_STEP_H = { '7D': 1, '30D': 6 };
   var WATCH_KEY = 'lilahcraft-market-watch';
   var CALC_KEY = 'lilahcraft-market-calc';
   var STACK = 64, MAX_QTY = 999999, MAX_LINES = 40, MAX_COUNT = 1e9;
@@ -42,11 +45,18 @@
     if (s.split('.')[1].length < 2) { s = Math.abs(n).toFixed(2); }
     return (n < 0 ? '−$' : '$') + s;
   }
+  /* A price per item at the feed's own precision, 2 to 4 decimals at any size ($2.394, $93.575, $0.61):
+     buy and sell prices, and what the calculator multiplies, so each × amount matches the line. */
+  function exact(n) {
+    if (!isNum(n)) { return ''; }
+    return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  }
   /* A price with a fixed number of decimals (chart gridlines) */
   function fixed(n, d) {
     return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   }
-  function signed(n) { return (n < 0 ? '−' : '+') + D.money(Math.abs(n)); }
+  /* "+$0.03"; under a cent keeps four decimals ("−$0.0002") instead of reading "$0.000" */
+  function signed(n) { var a = Math.abs(n); return (n < 0 ? '−' : '+') + (a < 0.01 ? fine(a) : D.money(a)); }
 
   /* "+2.4%" with screen-reader words, as in the design's list pills. */
   function pctHTML(it) {
@@ -112,7 +122,7 @@
   var list = q('[data-mk-list]'), listEmpty = q('[data-mk-list-empty]'), listFoot = q('[data-mk-list-foot]');
   var center = q('[data-mk-center]'), quote = q('.mk-quote');
   var watchBtn = q('[data-mk-watch]'), linkBtn = q('[data-mk-link]');
-  var rangeBox = q('.mk-range'), openLabel = q('[data-mk-open-label]');
+  var rangeBox = q('.mk-range'), openLabel = q('[data-mk-open-label]'), tfNote = q('#mkTfNote');
   var chartBox = q('[data-mk-chart]'), svg = q('[data-mk-svg]'), gLabels = q('[data-mk-glabels]');
   var axis = q('[data-mk-axis]'), noHist = q('[data-mk-nohist]');
   var sb = q('[data-mk-sb]'), sbNow = q('[data-mk-sb-now]'), sbSvg = q('[data-mk-sb-svg]');
@@ -141,15 +151,23 @@
     q: find.value || '', tab: 'all', sel: null, wanted: urlItem(), picked: false, tf: '48H',
     watch: dict(), lines: []
   };
+  /* Stored values are checked as they're read: ids are short strings, the watchlist stays small,
+     and two stored lines for one item become one line. */
   (function () {
-    var w = readStore(WATCH_KEY);
-    if (Array.isArray(w)) { w.forEach(function (id) { if (typeof id === 'string' && id) { state.watch[id] = true; } }); }
-    var c = readStore(CALC_KEY);
+    function okId(id) { return typeof id === 'string' && id && id.length <= 80; }
+    var w = readStore(WATCH_KEY), nw = 0;
+    if (Array.isArray(w)) {
+      w.forEach(function (id) { if (okId(id) && !state.watch[id] && nw < 500) { state.watch[id] = true; nw++; } });
+    }
+    var c = readStore(CALC_KEY), at = dict();
     if (Array.isArray(c)) {
       c.forEach(function (l) {
-        if (l && typeof l.id === 'string' && l.id && isNum(l.n) && l.n >= 1 && state.lines.length < MAX_LINES) {
-          state.lines.push({ id: l.id, n: Math.min(MAX_COUNT, Math.floor(l.n)), name: typeof l.name === 'string' ? l.name.slice(0, 80) : '' });
-        }
+        if (!l || !okId(l.id) || !isNum(l.n) || l.n < 1) { return; }
+        var n = Math.min(MAX_COUNT, Math.floor(l.n));
+        if (at[l.id]) { at[l.id].n = Math.min(MAX_COUNT, at[l.id].n + n); return; }
+        if (state.lines.length >= MAX_LINES) { return; }
+        at[l.id] = { id: l.id, n: n, name: typeof l.name === 'string' ? l.name.slice(0, 80) : '' };
+        state.lines.push(at[l.id]);
       });
     }
   })();
@@ -158,6 +176,7 @@
 
   /* ---------- data ---------- */
 
+  function points(a) { return (Array.isArray(a) ? a : []).filter(function (h) { return h && isNum(h.p); }); }
   function ingest(data) {
     var raw = data && Array.isArray(data.items) ? data.items : [];
     var items = [], byId = dict();
@@ -165,7 +184,8 @@
       if (!r || r.id == null) { return; }
       var id = String(r.id);
       if (byId[id]) { return; }
-      var hist = (Array.isArray(r.history) ? r.history : []).filter(function (h) { return h && isNum(h.p); });
+      var hist = points(r.history), longHist = {};
+      Object.keys(LONG_RANGE).forEach(function (tf) { longHist[tf] = points(r[LONG_RANGE[tf]]); });
       var it = {
         id: id,
         name: String(r.name || id),
@@ -177,6 +197,7 @@
         maxStock: isNum(r.maxStock) && r.maxStock > 0 ? r.maxStock : null,
         change24h: isNum(r.change24h) ? r.change24h : null,
         history: hist,
+        long: longHist,
         series: hist.map(function (h) { return h.p; }),
         out: M.soldOut(r),
         sector: M.categoryOf(r.material || id),
@@ -203,6 +224,8 @@
     if (!state.picked && state.wanted && state.byId[state.wanted]) { state.sel = state.wanted; return; }
     if (state.sel && state.byId[state.sel]) { return; }
     state.sel = state.byId[DEFAULT_ID] ? DEFAULT_ID : state.items.length ? state.items[0].id : null;
+    /* The picked item left the feed, or a shared ?item= isn't in it: the address bar follows, so a reload or a shared URL shows this one too */
+    if ((state.picked || state.wanted) && state.sel) { putURL(state.sel); }
   }
 
   function visibleItems() {
@@ -213,14 +236,21 @@
     });
   }
 
-  /* The history slice for the chosen range */
-  function rangeHist(it) { return it.history.slice(-RANGE_POINTS[state.tf]); }
+  /* 12H/24H/48H always work; 7D and 30D only when the item has at least two points of that history. */
+  function hasRange(it, tf) { return !LONG_RANGE[tf] || it.long[tf].length >= 2; }
+  /* The history for the chosen range */
+  function rangeHist(it) { return LONG_RANGE[state.tf] ? it.long[state.tf] : it.history.slice(-RANGE_POINTS[state.tf]); }
   function spanHours(hist) {
     var a = hist.length ? hist[0].t : 0, b = hist.length ? hist[hist.length - 1].t : 0;
     if (isNum(a) && isNum(b) && a > 0 && b > a) { return Math.max(1, Math.round((b - a) / 3600000)); }
-    return Math.max(1, Math.round((hist.length - 1) / 2));
+    return Math.max(1, Math.round((hist.length - 1) * (RANGE_STEP_H[state.tf] || 0.5)));
   }
   function hoursText(h) { return h === 1 ? 'hour' : h + ' hours'; }
+  /* On 7D and 30D, two days or more reads in days, to the half day: "7 days", "3.5 days". */
+  function inDays(h) { return !!LONG_RANGE[state.tf] && h >= 48; }
+  function daysText(h) { var d = Math.round(h / 12) / 2; return d + (d === 1 ? ' day' : ' days'); }
+  function spanText(h) { return inDays(h) ? daysText(h) : hoursText(h); }
+  function agoText(h) { return (inDays(h) ? daysText(h) : h + 'h') + ' ago'; }
 
   /* ---------- status ---------- */
 
@@ -258,10 +288,23 @@
     /* Speed from the run's width, set once per item count so a refresh never makes the tape jump. */
     if (tapeCount !== state.items.length) {
       tapeCount = state.items.length;
-      var w = run1.offsetWidth, view = run1.parentNode.parentNode.clientWidth;
-      tape.classList.toggle('is-still', !w || w <= view);
-      track.style.setProperty('--mk-tape-s', Math.max(20, Math.round(w / 45)) + 's');
+      track.style.setProperty('--mk-tape-s', Math.max(20, Math.round(run1.offsetWidth / 45)) + 's');
     }
+    fitTape();
+  }
+  /* A run that fits in the view stands still; checked on every render and whenever the tape or the run resizes. */
+  function fitTape() {
+    var w = run1.offsetWidth, view = run1.parentNode.parentNode.clientWidth;
+    tape.classList.toggle('is-still', !w || w <= view);
+  }
+  if (tape && run1 && run2 && track) {
+    var tapeTimer = null;
+    var refit = function () { clearTimeout(tapeTimer); tapeTimer = setTimeout(fitTape, 80); };
+    if (window.ResizeObserver) {
+      var tapeObs = new ResizeObserver(refit);
+      tapeObs.observe(tape);
+      tapeObs.observe(run1);
+    } else { window.addEventListener('resize', refit); }
   }
   if (tapeBtn) {
     tapeBtn.addEventListener('click', function () {
@@ -326,7 +369,7 @@
     setText(outN, nOut ? nOut + plural(nOut, ' item', ' items') : 'None');
   }
 
-  /* The LCX explainer: a disclosure. Escape or a click elsewhere closes it. */
+  /* The LCX explainer: a disclosure. Escape, a click elsewhere or focus moving elsewhere closes it. */
   function setPop(open, focusBtn) {
     if (!info || !pop) { return; }
     info.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -335,6 +378,10 @@
   }
   if (info && pop) {
     info.addEventListener('click', function () { setPop(info.getAttribute('aria-expanded') !== 'true', false); });
+    /* Focus moving on closes it too, so it never covers the control that has focus (the search box). */
+    document.addEventListener('focusin', function (e) {
+      if (!pop.hidden && !pop.contains(e.target) && !info.contains(e.target)) { setPop(false, false); }
+    });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !pop.hidden) { setPop(false, pop.contains(document.activeElement) || document.activeElement === info); }
     });
@@ -401,11 +448,17 @@
     r.pill.hidden = !html;
     setHTML(r.pill, html);
   }
-  function put(node, ref) {
-    if (list.moveBefore && node.parentNode === list) {
-      try { list.moveBefore(node, ref); return; } catch (e) { /* fall back below */ }
+  /* Reorder without losing focus where the browser can (moveBefore); callers put focus back otherwise. */
+  function put(parent, node, ref) {
+    if (parent.moveBefore && node.parentNode === parent) {
+      try { parent.moveBefore(node, ref); return; } catch (e) { /* fall back below */ }
     }
-    list.insertBefore(node, ref);
+    parent.insertBefore(node, ref);
+  }
+  function refocus(active) {
+    if (active && active !== document.activeElement && document.contains(active)) {
+      try { active.focus({ preventScroll: true }); } catch (e) { active.focus(); }
+    }
   }
 
   function renderList() {
@@ -426,7 +479,7 @@
     state.items.forEach(function (it) {
       var li = rows[it.id].li;
       if (li === cursor) { cursor = cursor.nextSibling; return; }
-      put(li, cursor);
+      put(list, li, cursor);
     });
     vis.forEach(function (it) { shown[it.id] = true; });
     Object.keys(rows).forEach(function (id) {
@@ -442,9 +495,7 @@
     if (!n) { setText(listEmpty, emptyText(total)); }
     setText(listFoot, footText(n, total));
     renderPick(vis);
-    if (active && active !== document.activeElement && document.contains(active)) {
-      try { active.focus({ preventScroll: true }); } catch (e) { active.focus(); }
-    }
+    refocus(active);
     return vis;
   }
 
@@ -528,6 +579,8 @@
       setHTML(ch, 'Sold out');
     } else if (it.ch.html) {
       var delta = isNum(it.price) && isNum(it.change24h) && it.change24h > -100 ? it.price - it.price / (1 + it.change24h / 100) : null;
+      /* Leave the $ amount out when it would round to nothing */
+      if (delta !== null && Math.abs(delta) < 0.00005) { delta = null; }
       ch.className = 'mk-q-ch lc-' + it.ch.dir;
       setHTML(ch, it.ch.html + (delta !== null && it.ch.dir !== 'flat' ? ' (' + esc(signed(delta)) + ')' : '') + ' <span class="mk-q-today">today</span>');
     } else {
@@ -536,12 +589,36 @@
     }
     watchBtn.setAttribute('aria-pressed', state.watch[it.id] ? 'true' : 'false');
     if (linkBtn) { linkBtn.setAttribute('data-lc-copy', itemURL(it.id)); }
-    tfBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-tf') === state.tf ? 'true' : 'false'); });
+    /* The chosen range stays across refreshes; an item without that longer history shows 48H. */
+    if (!hasRange(it, state.tf)) { state.tf = '48H'; }
+    syncRange(it);
     if (openLabel) { setText(openLabel, 'Open (' + state.tf + ')'); }
     renderChart(it);
     renderStock(it);
     renderStats(it);
     renderTrade(it);
+  }
+
+  /* Range tabs: 7D and 30D are toggles only while the selected item has that history. Otherwise they
+     stay disabled (aria-disabled, described by the note), and the note names only what's missing. */
+  function syncRange(it) {
+    var missing = [];
+    tfBtns.forEach(function (b) {
+      var tf = b.getAttribute('data-tf');
+      if (hasRange(it, tf)) {
+        b.removeAttribute('aria-disabled');
+        b.removeAttribute('aria-describedby');
+        b.setAttribute('aria-pressed', tf === state.tf ? 'true' : 'false');
+      } else {
+        missing.push(tf);
+        b.removeAttribute('aria-pressed');
+        b.setAttribute('aria-disabled', 'true');
+        if (tfNote) { b.setAttribute('aria-describedby', tfNote.id); }
+      }
+    });
+    if (!tfNote) { return; }
+    tfNote.hidden = !missing.length;
+    if (missing.length) { setText(tfNote, missing.join(' and ') + (missing.length > 1 ? ' need' : ' needs') + ' longer history from HomeCraftMgmt'); }
   }
 
   var chartW = 0;
@@ -582,9 +659,9 @@
     }).join(''));
 
     var hrs = spanHours(hist);
-    setText(ax.start, hrs + 'h ago');
-    setText(ax.mid, hrs >= 2 ? Math.round(hrs / 2) + 'h ago' : '');
-    var label = 'Price of ' + it.name + ' over the last ' + hoursText(hrs) + ': ';
+    setText(ax.start, agoText(hrs));
+    setText(ax.mid, hrs >= 2 ? agoText(Math.round(hrs / 2)) : '');
+    var label = 'Price of ' + it.name + ' over the last ' + spanText(hrs) + ': ';
     label += lo === hi ? fine(lo) + ' the whole time.' :
       'from ' + fine(first) + ' to ' + fine(last) + '; low ' + fine(lo) + ', high ' + fine(hi) + '.';
     svg.setAttribute('aria-label', label);
@@ -617,7 +694,7 @@
     var now = isNum(it.stock) ? it.stock : s[s.length - 1];
     var lo = Math.min.apply(null, s);
     setText(sbNow, 'Now ' + D.count(now) + (it.maxStock ? ' of ' + D.count(it.maxStock) : ''));
-    sbSvg.setAttribute('aria-label', 'Stock on the shelf over the last ' + hoursText(spanHours(hist)) + ': ' + D.count(now) + ' now' +
+    sbSvg.setAttribute('aria-label', 'Stock on the shelf over the last ' + spanText(spanHours(hist)) + ': ' + D.count(now) + ' now' +
       (it.maxStock ? ' of a full shelf of ' + D.count(it.maxStock) : '') + (lo === top ? '.' : ', between ' + D.count(lo) + ' and ' + D.count(top) + '.'));
   }
 
@@ -637,8 +714,8 @@
     setStat('low', has ? esc(fine(Math.min.apply(null, vals))) : null);
     var spreadOk = isNum(it.buy) && isNum(it.sell) && isNum(it.price) && it.price > 0;
     setStat('spread', spreadOk ? ((it.buy - it.sell) / it.price * 100).toFixed(1) + '%' : null);
-    setStat('buy', it.out ? '<span aria-hidden="true">—</span><span class="lc-sr">none, sold out</span>' : isNum(it.buy) ? esc(fine(it.buy)) : null, it.out);
-    setStat('sell', isNum(it.sell) ? esc(fine(it.sell)) : null);
+    setStat('buy', it.out ? '<span aria-hidden="true">—</span><span class="lc-sr">none, sold out</span>' : isNum(it.buy) ? esc(exact(it.buy)) : null, it.out);
+    setStat('sell', isNum(it.sell) ? esc(exact(it.sell)) : null);
     setStat('stock', it.out ? 'None' : isNum(it.stock) ? esc(D.count(it.stock)) : null, it.out);
     var shelf = null;
     if (it.out) { shelf = 'Empty'; }
@@ -653,7 +730,7 @@
     setText(qv.buyName, it.name);
     setText(qv.sellName, it.name);
     setText(qv.buyNote, it.out ? 'Nobody can buy it until someone sells one in.' : 'At any PC: Crate store. Pick a shipping speed; it waits in your Locker.');
-    setText(qv.sellNote, isNum(it.sell) ? 'At any PC: Sell to Crate. Paid instantly at ' + fine(it.sell) + ' each right now.' : 'At any PC: Sell to Crate. Paid instantly.');
+    setText(qv.sellNote, isNum(it.sell) ? 'At any PC: Sell to Crate. Paid instantly at ' + exact(it.sell) + ' each right now.' : 'At any PC: Sell to Crate. Paid instantly.');
     buyBox.hidden = false;
     sellBox.hidden = false;
   }
@@ -738,7 +815,7 @@
       t.btn.className = 'mk-tile mk-h-' + heatClass(it);
       setHTML(t.btn, '<span class="mk-tile-top"><span class="mk-tile-sym">' + esc(it.sym) + '</span><span class="mk-tile-name">' + esc(it.name) +
         '</span></span><span class="mk-tile-row"><span class="mk-tile-p">' + esc(D.money(it.price)) + '</span><span>' + pctHTML(it) + '</span></span>');
-      if (heatUl.children[i] !== t.li) { heatUl.insertBefore(t.li, heatUl.children[i] || null); }
+      if (heatUl.children[i] !== t.li) { put(heatUl, t.li, heatUl.children[i] || null); }
     });
     Object.keys(tiles).forEach(function (id) {
       if (keep[id]) { return; }
@@ -749,6 +826,9 @@
     if (lost) {
       var first = heatUl.querySelector('button');
       (first || find).focus();
+    } else {
+      /* A tile that moved (the feed changed its order) keeps focus */
+      refocus(active);
     }
   }
 
@@ -757,7 +837,8 @@
   var calcForm = q('[data-mk-calc-form]'), calcItem = q('[data-mk-calc-item]'), calcQty = q('[data-mk-calc-qty]');
   var calcUnit = q('[data-mk-calc-unit]'), calcErr = q('[data-mk-calc-err]'), calcTable = q('[data-mk-calc-table]');
   var calcRows = q('[data-mk-calc-rows]'), calcTotal = q('[data-mk-calc-total]'), calcEmpty = q('[data-mk-calc-empty]');
-  var calcKey = '', calcTouched = false, lineRows = dict();
+  var calcAdd = q('.mk-cf-add');
+  var calcKey = null, calcTouched = false, lineRows = dict();
 
   function sellable() {
     return state.items.filter(function (it) { return isNum(it.sell) && it.sell >= 0; })
@@ -767,14 +848,17 @@
   function stacksText(n) {
     if (n < STACK) { return ''; }
     var st = Math.floor(n / STACK), rest = n % STACK;
-    return st + plural(st, ' stack', ' stacks') + (rest ? ' + ' + rest : '');
+    return D.count(st) + plural(st, ' stack', ' stacks') + (rest ? ' + ' + D.count(rest) : '');
   }
-  function lineWorth(l) {
+  /* What n items fetch, in whole cents: n times the sell price as shown (4 decimals), rounded once.
+     The total adds these, so it always matches the Worth column. */
+  function cents(n, sell) { return Math.round(n * Math.round(sell * 10000) / 100); }
+  function lineCents(l) {
     var it = state.byId[l.id];
-    return it && isNum(it.sell) ? l.n * it.sell : null;
+    return it && isNum(it.sell) ? cents(l.n, it.sell) : null;
   }
   function calcTotalValue() {
-    return state.lines.reduce(function (a, l) { var w = lineWorth(l); return w === null ? a : a + w; }, 0);
+    return state.lines.reduce(function (a, l) { var c = lineCents(l); return c === null ? a : a + c; }, 0) / 100;
   }
 
   function renderCalcOptions() {
@@ -783,16 +867,23 @@
     var keepVal = calcItem.value;
     if (key !== calcKey) {
       calcKey = key;
-      calcItem.innerHTML = opts.map(function (it) { return '<option value="' + esc(it.id) + '"></option>'; }).join('');
+      calcItem.innerHTML = opts.length ? opts.map(function (it) { return '<option value="' + esc(it.id) + '"></option>'; }).join('') :
+        '<option value="">No item has a sell price right now</option>';
     }
     for (var i = 0; i < calcItem.options.length; i++) {
       var it = state.byId[calcItem.options[i].value];
-      if (it) { setText(calcItem.options[i], it.name + ' (' + it.sym + ') · ' + fine(it.sell) + ' each'); }
+      if (it) { setText(calcItem.options[i], it.name + ' (' + it.sym + ') · ' + exact(it.sell) + ' each'); }
     }
+    /* Only ever choose one of the options, so the select never shows blank */
+    var listed = function (id) { return opts.some(function (o) { return o.id === id; }); };
     var want = calcTouched ? keepVal : state.sel;
-    if (!want || !state.byId[want] || !isNum(state.byId[want].sell)) { want = keepVal && state.byId[keepVal] ? keepVal : opts.length ? opts[0].id : ''; }
+    if (!listed(want)) { want = listed(keepVal) ? keepVal : opts.length ? opts[0].id : ''; }
     calcItem.value = want;
     calcItem.disabled = !opts.length;
+    if (calcAdd) {
+      if (!opts.length && document.activeElement === calcAdd) { calcQty.focus(); }
+      calcAdd.disabled = !opts.length;
+    }
   }
 
   function makeLineRow(id) {
@@ -814,12 +905,12 @@
       var it = state.byId[l.id];
       if (it) { l.name = it.name; }
       var name = it ? it.name : (l.name || l.id);
-      var w = lineWorth(l), st = stacksText(l.n);
+      var w = lineCents(l), st = stacksText(l.n);
       setHTML(r.item, '<span class="mk-ci-name">' + esc(name) + '</span>' + (it ? '<span class="mk-ci-sub">' + esc(it.sym) + '</span>' :
         '<span class="mk-ci-gone">Not on the market right now</span>'));
       setHTML(r.amt, esc(amountText(l.n)) + (st ? '<span class="mk-ci-sub">' + esc(st) + '</span>' : ''));
-      setHTML(r.each, w === null ? '<span aria-hidden="true">—</span><span class="lc-sr">no price</span>' : esc(fine(it.sell)) + '<span class="mk-k"> each</span>');
-      setHTML(r.worth, w === null ? '<span aria-hidden="true">—</span><span class="lc-sr">not counted</span>' : esc(D.money(w)));
+      setHTML(r.each, w === null ? '<span aria-hidden="true">—</span><span class="lc-sr">no price</span>' : esc(exact(it.sell)) + '<span class="mk-k"> each</span>');
+      setHTML(r.worth, w === null ? '<span aria-hidden="true">—</span><span class="lc-sr">not counted</span>' : esc(D.money(w / 100)));
       setText(r.rmName, ' ' + name);
       if (calcRows.children[i] !== r.tr) { calcRows.insertBefore(r.tr, calcRows.children[i] || null); }
     });
@@ -835,11 +926,12 @@
     if (active && active !== document.activeElement && document.contains(active)) { active.focus(); }
   }
 
-  /* msg for the amount field (marked invalid), or for the list as a whole (notAmount) */
+  /* msg for the amount field (marked invalid), or for the list as a whole (notAmount). Always announced:
+     the field may already have focus, so moving focus there says nothing. */
   function calcError(msg, notAmount) {
     setText(calcErr, msg);
     if (msg && !notAmount) { calcQty.setAttribute('aria-invalid', 'true'); } else { calcQty.removeAttribute('aria-invalid'); }
-    if (msg && notAmount) { announce(msg); }
+    announce(msg);
   }
   function totalWords() {
     return state.lines.length ? 'Total ' + D.money(calcTotalValue()) + '.' : 'The list is empty.';
@@ -851,7 +943,7 @@
     calcForm.addEventListener('submit', function (e) {
       e.preventDefault();
       var it = state.byId[calcItem.value];
-      if (!it || !isNum(it.sell)) { return; }
+      if (!it || !isNum(it.sell)) { calcError('Pick an item that has a sell price right now.', true); return; }
       var raw = String(calcQty.value || '').replace(/[,\s]/g, '');
       var qty = /^\d+$/.test(raw) ? parseInt(raw, 10) : NaN;
       if (!(qty >= 1 && qty <= MAX_QTY)) {
@@ -872,10 +964,17 @@
         line = { id: it.id, n: 0, name: it.name };
         state.lines.push(line);
       }
-      line.n = Math.min(MAX_COUNT, line.n + add);
+      /* A line holds at most MAX_COUNT items: say what was really added */
+      var added = Math.min(MAX_COUNT, line.n + add) - line.n;
+      if (!added) {
+        calcError('That line is already at its limit of ' + amountText(MAX_COUNT) + '.', true);
+        return;
+      }
+      line.n += added;
       saveLines();
       renderCalc();
-      announce('Added ' + amountText(add) + ' of ' + it.name + ', worth ' + D.money(add * it.sell) + '. ' + totalWords());
+      announce('Added ' + amountText(added) + ' of ' + it.name + ', worth ' + D.money(cents(added, it.sell) / 100) + '. ' +
+        (added < add ? 'That line is now at its limit. ' : '') + totalWords());
     });
     calcRows.addEventListener('click', function (e) {
       var b = e.target.closest ? e.target.closest('.mk-rm') : null;
@@ -1020,6 +1119,7 @@
   }
   if (window.ResizeObserver) { new ResizeObserver(onResize).observe(chartBox); } else { window.addEventListener('resize', onResize); }
 
+  /* { long: true } asks for the 7D/30D history too (only this page does; Home stays on the lean feed) */
   D.watch('market', function (res) {
     var first = !state.res;
     state.res = res;
@@ -1027,5 +1127,5 @@
     renderAll();
     /* A shared link (?item=) scrolls the list to its item */
     if (first && state.sel && state.sel === urlItem()) { revealRow(state.sel, true); }
-  });
+  }, null, { long: true });
 })();

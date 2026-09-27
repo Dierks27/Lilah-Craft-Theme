@@ -3,9 +3,13 @@
    The market board, its headlines and the four Minis are filled by assets/js/page-home.js. */
 
 /* ---------- hero: charcoal band, amethyst texture (site.css), MINE · SELL, copy and the market board ---------- */
-/* 84 px below (72 drawn): the board is taller than drawn, by its headlines, and MINE · SELL still shows beneath it. */
-.lc-main--home .lc-home-hero-in{padding-block:64px 84px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center}
+/* 90 px below (72 drawn): the board is taller than drawn, by its headlines, and MINE · SELL still shows whole beneath it
+   and its shadow. */
+.lc-main--home .lc-home-hero-in{padding-block:64px 90px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center}
 .lc-main--home .lc-home-hero-in>*{max-width:none}
+/* MINE · SELL is about 8.1 × its size wide: below about 1130 px it shrinks with the window so the whole word shows,
+   and its foot stays cropped by the hero's edge in proportion, as drawn (-22 px at 128). */
+.lc-main--home .lc-home-hero .lc-bgword{font-size:min(128px, calc((100vw - 80px) / 8.2));bottom:-.172em}
 /* Wider than the 1280 px page: MINE · SELL lines up with the content, as drawn, instead of the window edge. */
 @media (min-width:1281px){.lc-main--home .lc-home-hero .lc-bgword{left:calc((100% - 1280px) / 2 + 40px)}}
 /* Site Editor only: there the HTML block holding MINE · SELL gets a wrapper; let the word sit at the hero's foot as on the site. */
@@ -18,11 +22,13 @@
 .lc-main--home .lc-home-addr{display:flex;flex-wrap:wrap;align-items:stretch}
 .lc-main--home .lc-home-addr-box{display:flex;align-items:center;min-height:54px;padding:0 18px;border:2px solid var(--purple);background:var(--addr-bg);color:var(--hero-text);font-family:var(--mono);font-weight:600;font-size:20px;line-height:1.2;white-space:nowrap}
 .lc-main--home .lc-home-addr .lc-btn{--b-h:54px;--b-size:16px;padding:0 20px}
-html:not(.lc-js) .lc-main--home [data-lc-copy]{display:none}
+/* The copy buttons need the script; without it the address is still there to select. (Shown in the Site Editor.) */
+html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--home [data-lc-copy]{display:none}
 
 /* The board: white with a hard orange shadow (site.css .lc-board). It sits in the hero, so it puts back
-   the light-surface price colours, links, text and focus ring the hero switched to their dark variants. */
-.lc-main--home .lc-home-board{--up:#1f9d55;--down:#e5484d;--flat:#5f5c66;min-width:0;position:relative}
+   the light-surface price colours, links, text and focus ring the hero switched to their dark variants.
+   Its up and down are a shade deeper than the look's #1f9d55 / #e5484d, so the small change text reads at 4.5:1 on white. */
+.lc-main--home .lc-home-board{--up:#1a8048;--down:#c7353a;--flat:#5f5c66;min-width:0;position:relative}
 .lc-main--home .lc-home-board :focus-visible{outline-color:var(--purple)}
 .lc-main--home .lc-home-board p{color:var(--muted)}
 .lc-main--home .lc-home-bd-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 12px;padding:14px 18px;border-bottom:3px solid var(--charcoal)}
@@ -132,8 +138,9 @@ html:not(.lc-js) .lc-main--home .lc-home-minis-show{display:none}
 .lc-main--home .lc-home-join-more{font-weight:800;font-size:17px}
 .lc-main--home .lc-home-news-all a,
 .lc-main--home .lc-home-join-more a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px}
+/* The arrow is decorative: empty alt text keeps it out of the link's name (the first value is for older browsers). */
 .lc-main--home .lc-home-news-all a::after,
-.lc-main--home .lc-home-join-more a::after{content:"\00a0→"}
+.lc-main--home .lc-home-join-more a::after{content:"\00a0→";content:"\00a0→" / ""}
 .lc-main--home .lc-home-news-list{margin:0;padding:0;list-style:none}
 .lc-main--home .lc-home-news-list>li{display:flex;min-width:0;margin:0}
 .lc-main--home .lc-home-news-card{position:relative;flex:1}
@@ -187,7 +194,11 @@ html:not(.lc-js) .lc-main--home .lc-home-minis-show{display:none}
   .lc-main--home .lc-home-bd-head,.lc-main--home .lc-home-bd-foot,.lc-main--home .lc-home-bd-news{padding-inline:14px}
 }
 @media (max-width:920px){
-  .lc-main--home .lc-home-hero-in{grid-template-columns:minmax(0,1fr);gap:44px;padding-block:44px 92px}
+  /* Room below the board for the ground layer (site.css) and MINE · SELL standing on it, clear of the board's shadow.
+     The letters stand .11em above the foot of their line box. Pixel rounding moves the foot by up to about 1.5px,
+     so the extra 2px keeps it tucked 1–2px under the ground instead of floating above it. */
+  .lc-main--home .lc-home-hero-in{grid-template-columns:minmax(0,1fr);gap:44px;padding-block:44px calc(var(--cell) * 2 + 84px)}
+  .lc-main--home .lc-home-hero .lc-bgword{font-size:min(72px, calc((100vw - 40px) / 8.2));bottom:calc(var(--cell) * 2 - .11em - 2px)}
   .lc-main--home .lc-home-title{font-size:38px}
   .lc-main--home .lc-home-explore{padding:44px 0 12px}
   .lc-main--home .lc-home-doors{padding:52px 0 56px}
@@ -202,7 +213,8 @@ html:not(.lc-js) .lc-main--home .lc-home-minis-show{display:none}
   .lc-main--home .lc-home-join-qr{display:none}
 }
 @media (max-width:520px){
-  .lc-main--home .lc-home-hero-in{gap:36px;padding-block:36px 64px}
+  .lc-main--home .lc-home-hero-in{gap:36px;padding-block:36px calc(var(--cell) * 2 + 56px)}
+  .lc-main--home .lc-home-hero .lc-bgword{font-size:min(44px, calc((100vw - 40px) / 8.2))}
   .lc-main--home .lc-home-hero-copy{gap:16px}
   .lc-main--home .lc-home-title{font-size:31px}
   .lc-main--home .lc-home-lede{font-size:18px}

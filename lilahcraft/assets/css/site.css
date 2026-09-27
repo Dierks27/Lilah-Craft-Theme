@@ -142,11 +142,13 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-hero-light .lc-hero.lc-mat--stone::after{background-image:url(../img/tex-stone-light.svg)}
 .lc-hero-in{display:flex;flex-direction:column;gap:14px;padding-block:56px 64px}
 .lc-hero-in>*{max-width:calc(100% - 400px)}
+.lc-hero-in>.lc-lede{max-width:min(660px, calc(100% - 400px))}
 .lc-hero .lc-kicker{color:var(--hero-kicker)}
 .lc-hero .lc-h1,.lc-hero h1{color:var(--hero-text)}
 .lc-hero .lc-lede,.lc-hero p{color:var(--hero-muted)}
-.lc-hero a:not(.lc-btn){color:var(--purple-light)}
-.lc-hero-light .lc-hero a:not(.lc-btn){color:var(--purple)}
+/* Links, not buttons (a core Button block puts .lc-btn on its wrapper, not on the link) */
+.lc-hero a:not(.lc-btn,.wp-block-button__link){color:var(--purple-light)}
+.lc-hero-light .lc-hero a:not(.lc-btn,.wp-block-button__link){color:var(--purple)}
 .lc-hero code{background:transparent;padding:0;color:var(--purple-light)}
 .lc-hero-light .lc-hero code{color:var(--purple-deep)}
 /* The huge background word (Home: MINE · SELL). Solid tinted letters, decorative only. */
@@ -158,6 +160,7 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
   .lc-hero[class*="lc-mat--"]::after{left:0;right:0;top:auto;bottom:0;width:auto;height:calc(var(--cell) * 2);background-size:calc(var(--cell) * 9) calc(var(--cell) * 9);background-repeat:repeat-x;background-position:0 100%}
   .lc-hero-in{padding-block:44px calc(52px + var(--cell) * 2)}
   .lc-hero-in>*{max-width:none}
+  .lc-hero-in>.lc-lede{max-width:660px}
   .lc-bgword{font-size:72px;left:20px;bottom:calc(var(--cell) * 2 - 10px)}
 }
 @media (max-width:520px){
@@ -174,8 +177,9 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-card .lc-text,.lc-card p{color:var(--text)}
 .lc-card--dark p,.lc-card--dark .lc-text{color:var(--muted-dark)}
 @media (max-width:520px){.lc-card{padding:20px}}
-/* A 12×2 material strip across the top of a card: <div class="lc-strip lc-strip--copper" aria-hidden="true"></div> as the card's first child */
-.lc-strip{height:60px;margin:-24px -24px 6px;border-bottom:3px solid var(--charcoal);background:no-repeat 0 0/100% 100%;image-rendering:pixelated}
+/* A 12×2 material strip across the top of a card: <div class="lc-strip lc-strip--copper" aria-hidden="true"></div> as the card's first child.
+   Wide cards repeat the pattern (a whole number of copies) so the cells stay about square. */
+.lc-strip{height:60px;margin:-24px -24px 6px;border-bottom:3px solid var(--charcoal);background:0 0/auto 100% round no-repeat;image-rendering:pixelated}
 .lc-card--sm>.lc-strip{margin:-20px -20px 6px}
 @media (max-width:520px){.lc-strip{height:48px;margin:-20px -20px 6px}}
 .lc-strip--copper{background-image:url(../img/strip-copper.svg)}
@@ -189,13 +193,13 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 @media (max-width:920px){.lc-board{box-shadow:6px 6px 0 var(--orange);margin-right:6px}.lc-board--pink{box-shadow:6px 6px 0 var(--pink)}}
 
 /* "Sample data" and other quiet labels */
-.lc-sample{font-size:13px;font-weight:700;color:var(--mid)}
+.lc-sample{font-size:13px;font-weight:700;color:var(--muted)}
 :is(.lc-dark,.lc-sec--dark,.lc-hero) .lc-sample{color:var(--muted-dark)}
 .lc-hero .lc-sample{color:var(--hero-muted)}
 
 /* The join bar: purple band, pink offset shadow, the address big, an orange copy button */
 .lc-join{display:flex;justify-content:space-between;align-items:center;gap:20px 32px;flex-wrap:wrap;padding:28px 32px;background:var(--purple);color:#fff;box-shadow:10px 10px 0 var(--pink)}
-.lc-join-label{display:block;font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#e3d9ff}
+.lc-join-label{display:block;font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#efe9ff}
 .lc-join-addr{display:block;font-family:var(--mono);font-weight:700;font-size:38px;line-height:1.1;color:#fff}
 .lc-join :focus-visible{outline-color:#fff}
 @media (max-width:920px){.lc-join{box-shadow:6px 6px 0 var(--pink);margin-right:6px;padding:24px}.lc-join-addr{font-size:28px}}
@@ -211,7 +215,9 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-btn--charcoal{--b-bg:var(--charcoal);--b-fg:#fff;--b-deep:#0e0d10}
 .lc-btn--ghost{--b-bg:transparent;--b-fg:var(--hero-text);--b-deep:transparent;--b-line:var(--hero-muted)}
 .lc-btn--outline{--b-bg:#fff;--b-fg:var(--charcoal);--b-deep:var(--light);--b-line:var(--charcoal);--b-h:44px;--b-size:16px}
-a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--b-h);padding:0 22px;border:2px solid var(--b-line);border-radius:0;background:var(--b-bg);color:var(--b-fg);font-family:var(--body);font-weight:800;font-size:var(--b-size);line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--b-deep);cursor:pointer;text-align:center}
+a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--b-h);padding:0 22px;border:0;border-radius:0;background:var(--b-bg);color:var(--b-fg);font-family:var(--body);font-weight:800;font-size:var(--b-size);line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--b-deep);cursor:pointer;text-align:center}
+/* Filled buttons have no border, so the bevel reaches the edge; the two outline variants draw theirs */
+.lc-btn--ghost:is(a,button),.lc-btn--outline:is(a,button),.wp-block-button:is(.lc-btn--ghost,.lc-btn--outline)>.wp-block-button__link{border:2px solid var(--b-line)}
 .lc-btn--outline:is(a,button),.wp-block-button.lc-btn--outline>.wp-block-button__link{padding:0 16px}
 a.lc-btn:hover,button.lc-btn:hover,.wp-block-button.lc-btn>.wp-block-button__link:hover{color:var(--b-fg);filter:brightness(1.07)}
 a.lc-btn:active,button.lc-btn:active,.wp-block-button.lc-btn>.wp-block-button__link:active{box-shadow:inset 4px 4px 0 var(--b-deep)}
@@ -269,6 +275,11 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 .wp-site-blocks:not(.is-root-container)>.wp-block-template-part:first-child{display:contents}
 .wp-block-template-part:has(>.lc-top){display:contents}
 .lc-top{position:sticky;top:var(--wp-admin--admin-bar--height,0px);z-index:50;background:var(--hero-bg);border-bottom:1px solid var(--hero-line);color:var(--hero-muted)}
+/* The header's own controls sit inside html's scroll-padding band; cancel it for them, or focusing one
+   scrolls the page to "reveal" a control that is already on screen. The folded menu, which scrolls by itself
+   in a short window, puts the same amount back as its scroll-padding (plus room for the focus ring).
+   The static no-JS header (1150 px and below) scrolls away with the page, so there both go back to 0. */
+.lc-top :is(a,button){scroll-margin-top:calc(-1 * (var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 16px))}
 .lc-top-in{position:relative;max-width:1280px;margin:0 auto;height:var(--header-h);padding:0 var(--gutter);display:flex;align-items:center;gap:28px}
 /* The mark: a 2×2 block of purple, pink, orange and gray, then the name */
 .lc-mark{display:inline-flex;align-items:center;gap:12px;min-height:44px;font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.01em;color:var(--hero-text);text-decoration:none;white-space:nowrap;line-height:1}
@@ -289,11 +300,12 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 .lc-status{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--hero-muted);white-space:nowrap}
 .lc-dot{width:8px;height:8px;background:#5fd38d;flex:none}
 .lc-menu-btn{display:none}
+.lc-menu-btn svg{flex:none}
 @media (max-width:1150px){
   .lc-top-in{gap:16px}
   .lc-menu-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto;min-height:44px;padding:0 14px;border:2px solid var(--hero-line);border-radius:0;background:transparent;color:var(--hero-text);font-family:var(--body);font-weight:800;font-size:16px;cursor:pointer}
   .lc-menu-btn[aria-expanded="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
-  .lc-menu{display:block;position:absolute;top:100%;left:0;right:0;padding:12px var(--gutter) 22px;background:var(--hero-bg);border-bottom:3px solid var(--charcoal);box-shadow:0 10px 0 rgba(38,36,43,.25);max-height:calc(100vh - var(--header-h));overflow-y:auto}
+  .lc-menu{display:block;position:absolute;top:100%;left:0;right:0;padding:12px var(--gutter) 22px;background:var(--hero-bg);border-bottom:3px solid var(--charcoal);box-shadow:0 10px 0 rgba(38,36,43,.25);max-height:calc(100vh - var(--header-h));overflow-y:auto;scroll-padding-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 24px)}
   .lc-js .lc-menu{display:none}
   .lc-js .lc-top.is-open .lc-menu{display:block}
   .lc-nav ul{flex-direction:column;align-items:stretch;gap:2px}
@@ -302,9 +314,12 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
   html:not(.lc-js) .lc-menu-btn{display:none}
   html:not(.lc-js) .lc-top{position:static}
   html:not(.lc-js) .lc-top-in{height:auto;min-height:var(--header-h);flex-wrap:wrap}
-  html:not(.lc-js) .lc-menu{position:static;width:100%;box-shadow:none;border:0;padding:0 0 16px}
+  html:not(.lc-js) .lc-menu{position:static;width:100%;box-shadow:none;border:0;padding:0 0 16px;scroll-padding-top:0}
+  html:not(.lc-js) .lc-top :is(a,button){scroll-margin-top:0}
 }
 @media (max-width:600px){.admin-bar .lc-top{top:0}}
+/* Very narrow phones: a smaller name and a tighter Menu button, so both fit */
+@media (max-width:360px){.lc-mark{font-size:19px;gap:10px}.lc-menu-btn{padding:0 10px;gap:6px}}
 
 /* ---------- footer ---------- */
 .lc-foot{background:var(--charcoal);color:var(--muted-dark)}
@@ -347,12 +362,22 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 .lc-entry li+li{margin-top:.4em}
 .lc-entry blockquote{padding-left:18px;border-left:4px solid var(--purple);color:var(--text)}
 .lc-entry .wp-block-image{margin-inline:0}
+/* Search results (search.html, and index.html's list): the title link covers the whole card; its focus ring goes around the card.
+   Not in the Site Editor, where the card's other blocks must stay clickable. */
+:is(.lc-main--search,.lc-main--index) .lc-card{position:relative}
+body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a::after{content:"";position:absolute;inset:-3px}
+body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a:focus-visible{outline:0}
+body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a:focus-visible::after{outline:3px solid var(--purple);outline-offset:3px}
 
 /* Forced colors replace backgrounds, which is all that marks the pressed chip; the current page's bars too.
-   Their focus ring keeps the system colour the other controls get. */
+   Their focus ring keeps the system colour the other controls get. Filled buttons get an edge back,
+   the decorative background word goes (it would turn into full-strength system text), and the logo's squares keep their colours. */
 @media (forced-colors:active){
   .lc-chip[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight;outline-color:Highlight}
   .lc-nav a[aria-current]{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
+  a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{border:2px solid ButtonText}
+  .lc-bgword{display:none}
+  .lc-logo i{forced-color-adjust:none}
 }
 
 @media (prefers-reduced-motion:reduce){
