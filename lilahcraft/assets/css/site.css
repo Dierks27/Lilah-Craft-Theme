@@ -1,45 +1,52 @@
-/* LilahCraft 2.0: shared styles for every page.
+/* LilahCraft 2.1 "Pixel pop": shared styles for every page.
    Page-only styles live in page-{key}.css, scoped under .lc-main--{key}.
-   Breakpoints: 1150px (header menu button), 920px (grids to one or two columns, as 1.0), 520px (phones). */
+   Breakpoints: 1150px (header menu button), 920px (grids to one or two columns), 520px (phones). */
 
 :root{
-  /* 1.0 tokens, set to the approved v2 design values */
-  --night:#1d2150; --night2:#2b3172; --pink:#ff7ac0; --cyan:#63e3ea;
-  --page:#f4f2fb; --ink:#23244a; --soft:#55577a; --line:#dcd8ec; --raised:#fff;
-  --up:#1d7a4b; --down:#b8421c; --flat:#6b6d8f;
-  --display:"Bricolage Grotesque",system-ui,sans-serif;
-  --body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  /* Pixel pop tokens */
+  --charcoal:#26242b; --charcoal-2:#3a3740; --panel-dark:#2f2c35;
+  --muted:#5f5c66; --muted-dark:#bdb9c6; --mid:#8d8a94; --light:#ecebef; --page:#f5f4f7; --white:#fff;
+  --purple:#6c46e0; --purple-deep:#4b2fa8; --purple-light:#b39cff;
+  --pink:#ff5fa8; --pink-deep:#c93a7c;
+  --orange:#ff8a2b; --orange-deep:#c95f14;
+  --ink:#26242b; --text:#4a4752; --line:#ecebef;
+  /* price moves: light by default; dark contexts (.lc-dark, .lc-hero, .lc-sec--dark) switch these */
+  --up:#1f9d55; --down:#e5484d; --flat:#5f5c66;
+  --up-dark:#5fd38d; --down-dark:#ff7a7e; --flat-dark:#bdb9c6;
+  --display:"Unbounded",system-ui,sans-serif;
+  --body:"Figtree",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,monospace;
-  /* v2 additions */
-  --deep:#12153a; --panel:#1b1f4d; --rule-dark:#2a2f6b; --row-dark:#23285e; --edge-dark:#3a4088;
-  --pink-shade:#b3437d; --cyan-shade:#2f9aa1;
-  --lilac:#eae6f8; --text:#4a4c72; --head-ink:#3f416a; --line-soft:#ece9f5; --chip-line:#cfcae3; --dash:#b9b3d6;
-  --on-night:#c9ccf2; --on-night-soft:#aeb2e4; --on-night-bright:#e9eaff;
-  --link:#1e6f78; --link-hover:#b8327a; --kicker:#b8327a; --code:#1e5f88;
-  --up-dark:#5fd38d; --down-dark:#ff9a7a; --flat-dark:#aeb2e4;
-  --radius:8px;
+  --pixel:"Silkscreen","Courier New",monospace;
+  /* hero and header: Charcoal (default). Settings > LilahCraft > Hero style: Light adds body.lc-hero-light */
+  --hero-bg:#26242b; --hero-line:#3a3740; --hero-text:#fff; --hero-muted:#bdb9c6; --addr-bg:#1c1b20; --hero-kicker:#ff5fa8;
+  --bg-mine:rgba(255,138,43,.30); --bg-sell:rgba(255,95,168,.30); --bg-dot:rgba(179,156,255,.40);
   --gutter:48px;
-  --header-h:72px;
+  --header-h:70px;
   --sticky-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 24px);
+  --cell:46px;
 }
-@media (max-width:920px){:root{--gutter:28px}}
-@media (max-width:520px){:root{--gutter:20px;--header-h:64px}}
+.lc-hero-light{
+  --hero-bg:#ecebef; --hero-line:#d8d6de; --hero-text:#26242b; --hero-muted:#5f5c66; --addr-bg:#fff; --hero-kicker:#c93a7c;
+  --bg-mine:rgba(255,138,43,.38); --bg-sell:rgba(255,95,168,.36); --bg-dot:rgba(108,70,224,.35);
+}
+@media (max-width:920px){:root{--gutter:28px;--cell:30px}}
+@media (max-width:520px){:root{--gutter:20px;--header-h:64px;--cell:20px}}
 
 /* ---------- base ---------- */
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 16px);-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--page);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.55;overflow-wrap:break-word}
 [hidden]{display:none!important}
-a{color:var(--link);text-underline-offset:3px}
-a:hover{color:var(--link-hover)}
-:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
-h1,h2,h3,h4{font-family:var(--display);color:inherit;letter-spacing:-.02em;margin:0;line-height:1.1}
+a{color:var(--purple);text-underline-offset:3px}
+a:hover{color:var(--pink-deep)}
+:focus-visible{outline:3px solid var(--purple);outline-offset:3px}
+h1,h2,h3,h4{font-family:var(--display);color:inherit;letter-spacing:-.02em;margin:0;line-height:1.15}
 p,ul,ol,dl,dd,figure,blockquote{margin:0}
 img,svg{max-width:100%}
 img{height:auto}
 button,input,select,textarea{font:inherit;color:inherit}
 code,kbd,samp{font-family:var(--mono);font-size:.86em}
-code{background:#e8e4f6;padding:1px 6px;border-radius:3px}
+code{background:var(--light);padding:1px 6px}
 .wp-site-blocks{padding:0}
 .wp-site-blocks>*,.wp-site-blocks>*+*{margin-block:0}
 /* Short pages (404, empty search): the footer still reaches the bottom of the window. Not in the Site Editor. */
@@ -49,13 +56,21 @@ code{background:#e8e4f6;padding:1px 6px;border-radius:3px}
 .lc-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .lc-nowrap{white-space:nowrap}
 
+/* Dark surfaces: light price colours, light links, orange focus rings */
+.lc-dark,.lc-hero,.lc-sec--dark,.lc-top,.lc-foot{--up:var(--up-dark);--down:var(--down-dark);--flat:var(--flat-dark)}
+.lc-hero-light .lc-hero,.lc-hero-light .lc-top{--up:#1f9d55;--down:#e5484d;--flat:#5f5c66}
+:is(.lc-dark,.lc-sec--dark,.lc-foot) a{color:var(--purple-light)}
+:is(.lc-dark,.lc-sec--dark,.lc-foot) a:hover{color:var(--pink)}
+:is(.lc-dark,.lc-hero,.lc-sec--dark,.lc-top,.lc-foot) :focus-visible{outline-color:var(--orange)}
+.lc-hero-light :is(.lc-hero,.lc-top) :focus-visible{outline-color:var(--purple)}
+
 /* ---------- layout ---------- */
 .lc-main{display:block}
 .lc-wrap{width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
-.lc-sec{padding-block:72px}
-.lc-sec--lilac{background:var(--lilac)}
-.lc-sec--night{background:var(--night);color:var(--on-night-bright)}
-.lc-sec--night .lc-h2,.lc-sec--night h2{color:#fff}
+.lc-sec{padding-block:64px}
+.lc-sec--gray{background:var(--light)}
+.lc-sec--dark{background:var(--charcoal);color:var(--page)}
+.lc-sec--dark .lc-h2,.lc-sec--dark h2{color:#fff}
 .lc-sec.lc-sec--flush{padding-top:0}
 .lc-stack{display:flex;flex-direction:column;gap:14px}
 .lc-stack--lg{gap:28px}
@@ -72,111 +87,168 @@ code{background:#e8e4f6;padding:1px 6px;border-radius:3px}
 @media (max-width:920px){
   .lc-cols-2,.lc-cols-3{grid-template-columns:minmax(0,1fr)}
   .lc-cols-4,.lc-cols-5{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .lc-sec{padding-block:56px}
+  .lc-sec{padding-block:52px}
 }
 @media (max-width:520px){
   .lc-cols-4,.lc-cols-5{grid-template-columns:minmax(0,1fr)}
-  .lc-sec{padding-block:48px}
+  .lc-sec{padding-block:44px}
 }
 
 /* ---------- type ---------- */
-.lc-pagehead{padding-block:64px 44px;display:flex;flex-direction:column;gap:12px}
-.lc-kicker{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--kicker)}
-.lc-h1{font-family:var(--display);font-weight:800;font-size:56px;line-height:1;letter-spacing:-.03em}
-.lc-h2{font-family:var(--display);font-weight:800;font-size:44px;line-height:1.05;letter-spacing:-.02em}
-.lc-h2--md{font-size:36px;line-height:1.1}
-.lc-h2--sm{font-size:32px;line-height:1.1}
-.lc-h3{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.2;letter-spacing:-.01em}
+.lc-kicker{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pink-deep)}
+.lc-h1{font-family:var(--display);font-weight:800;font-size:48px;line-height:1.12;letter-spacing:-.02em}
+.lc-h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.15;letter-spacing:-.02em}
+.lc-h2--md{font-size:28px}
+.lc-h2--sm{font-size:24px}
+.lc-h3{font-family:var(--display);font-weight:800;font-size:21px;line-height:1.2;letter-spacing:-.01em}
 .lc-lede{font-size:19px;color:var(--text);max-width:660px}
 .lc-text{font-size:17px;color:var(--text)}
-.lc-note{font-size:16px;color:var(--soft)}
-.lc-small{font-size:15px;color:var(--soft)}
+.lc-note{font-size:16px;color:var(--muted)}
+.lc-small{font-size:15px;color:var(--muted)}
 .lc-mono{font-family:var(--mono)}
-.lc-addr{font-family:var(--mono);font-weight:600;color:var(--cyan)}
-.lc-cmd{font-family:var(--mono);color:var(--code)}
-.lc-sec--night .lc-cmd,.lc-board .lc-cmd{color:var(--cyan)}
-kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid currentColor;border-bottom-width:2px;border-radius:4px;font-family:var(--mono);font-size:.82em;font-weight:600;line-height:1.35;text-align:center;vertical-align:.08em}
+.lc-addr{font-family:var(--mono);font-weight:700;color:var(--ink)}
+.lc-cmd{font-family:var(--mono);color:var(--purple-deep)}
+:is(.lc-dark,.lc-sec--dark,.lc-hero) .lc-cmd{color:var(--purple-light)}
+/* The key phrase in a headline, in an orange block */
+.lc-hl{padding:0 10px;background:var(--orange);color:var(--charcoal);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid currentColor;border-bottom-width:3px;font-family:var(--mono);font-size:.82em;font-weight:700;line-height:1.35;text-align:center;vertical-align:.08em}
 @media (max-width:920px){
-  .lc-h1{font-size:44px}
-  .lc-h2{font-size:36px}
-  .lc-h2--md,.lc-h2--sm{font-size:30px}
-  .lc-pagehead{padding-block:48px 32px}
+  .lc-h1{font-size:36px}
+  .lc-h2{font-size:28px}
+  .lc-h2--md{font-size:24px}
+  .lc-h2--sm{font-size:22px}
 }
 @media (max-width:520px){
-  .lc-h1{font-size:38px}
-  .lc-h2{font-size:31px}
-  .lc-h2--md,.lc-h2--sm{font-size:27px}
+  .lc-h1{font-size:30px}
+  .lc-h2{font-size:25px}
+  .lc-h2--md,.lc-h2--sm{font-size:21px}
+  .lc-h3{font-size:19px}
   .lc-lede{font-size:18px}
 }
 
-/* ---------- cards and panels ---------- */
-.lc-card{display:flex;flex-direction:column;gap:10px;padding:28px;background:var(--raised);border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
-.lc-card--sm{padding:22px}
-.lc-card--dashed{border:1px dashed var(--dash)}
-.lc-card--night{background:var(--deep);border:2px solid var(--rule-dark);color:var(--on-night)}
-.lc-card--night .lc-h3{color:#fff}
-.lc-card .lc-text,.lc-card p{color:var(--text)}
-.lc-card--night p{color:var(--on-night)}
-@media (max-width:520px){.lc-card{padding:22px}}
+/* ---------- hero band: every page's top, with its material texture ----------
+   <section class="lc-hero lc-mat--amethyst|copper|wool|stone"><div class="lc-wrap lc-hero-in">kicker, h1, lede</div></section>
+   The texture is a fixed 9×9 block grid bleeding off the right; body text never sits on it at desktop widths. */
+.lc-hero{position:relative;overflow:hidden;background:var(--hero-bg);color:var(--hero-text);border-bottom:1px solid var(--hero-line)}
+.lc-hero>*{position:relative;z-index:1}
+.lc-hero[class*="lc-mat--"]::after{content:"";position:absolute;z-index:0;right:-44px;top:36px;width:calc(var(--cell) * 9);height:calc(var(--cell) * 9);background:no-repeat 0 0/100% 100%;image-rendering:pixelated;pointer-events:none}
+.lc-hero.lc-mat--amethyst::after{background-image:url(../img/tex-amethyst-dark.svg)}
+.lc-hero.lc-mat--copper::after{background-image:url(../img/tex-copper-dark.svg)}
+.lc-hero.lc-mat--wool::after{background-image:url(../img/tex-wool-dark.svg)}
+.lc-hero.lc-mat--stone::after{background-image:url(../img/tex-stone-dark.svg)}
+.lc-hero-light .lc-hero.lc-mat--amethyst::after{background-image:url(../img/tex-amethyst-light.svg)}
+.lc-hero-light .lc-hero.lc-mat--copper::after{background-image:url(../img/tex-copper-light.svg)}
+.lc-hero-light .lc-hero.lc-mat--wool::after{background-image:url(../img/tex-wool-light.svg)}
+.lc-hero-light .lc-hero.lc-mat--stone::after{background-image:url(../img/tex-stone-light.svg)}
+.lc-hero-in{display:flex;flex-direction:column;gap:14px;padding-block:56px 64px}
+.lc-hero-in>*{max-width:calc(100% - 400px)}
+.lc-hero .lc-kicker{color:var(--hero-kicker)}
+.lc-hero .lc-h1,.lc-hero h1{color:var(--hero-text)}
+.lc-hero .lc-lede,.lc-hero p{color:var(--hero-muted)}
+.lc-hero a:not(.lc-btn){color:var(--purple-light)}
+.lc-hero-light .lc-hero a:not(.lc-btn){color:var(--purple)}
+.lc-hero code{background:transparent;padding:0;color:var(--purple-light)}
+.lc-hero-light .lc-hero code{color:var(--purple-deep)}
+/* The huge background word (Home: MINE · SELL). Solid tinted letters, decorative only. */
+.lc-bgword{position:absolute;z-index:0;left:40px;bottom:-22px;margin:0;font-family:var(--pixel);font-weight:700;font-size:128px;line-height:1;letter-spacing:.02em;white-space:nowrap;pointer-events:none;user-select:none}
+.lc-bgword-a{color:var(--bg-mine)} .lc-bgword-dot{color:var(--bg-dot)} .lc-bgword-b{color:var(--bg-sell)}
+@media (max-width:920px){
+  .lc-hero[class*="lc-mat--"]::after{right:calc(var(--cell) * -2);top:0;opacity:.55}
+  .lc-hero-in{padding-block:44px 52px}
+  .lc-hero-in>*{max-width:none}
+  .lc-bgword{font-size:72px;left:20px;bottom:-12px}
+}
+@media (max-width:520px){
+  .lc-hero[class*="lc-mat--"]::after{opacity:.4}
+  .lc-hero-in{padding-block:36px 44px}
+  .lc-bgword{font-size:44px;bottom:-8px}
+}
 
-/* The one loud thing: dark panel, cyan border, pink block shadow */
-.lc-board{background:var(--deep);border:3px solid var(--cyan);box-shadow:8px 8px 0 var(--pink);border-radius:2px;color:var(--on-night-bright)}
-.lc-board h2,.lc-board h3{color:#fff}
-@media (max-width:920px){.lc-board{box-shadow:5px 5px 0 var(--pink);margin-right:5px}}
+/* ---------- cards and boxes ---------- */
+.lc-card{display:flex;flex-direction:column;gap:10px;padding:24px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+.lc-card--sm{padding:20px}
+.lc-card--dashed{border-style:dashed;border-color:var(--mid)}
+.lc-card--dark{background:var(--charcoal);border-color:var(--charcoal);color:var(--muted-dark)}
+.lc-card--dark .lc-h3,.lc-card--dark h2,.lc-card--dark h3{color:#fff}
+.lc-card .lc-text,.lc-card p{color:var(--text)}
+.lc-card--dark p{color:var(--muted-dark)}
+@media (max-width:520px){.lc-card{padding:20px}}
+/* A 12×2 material strip across the top of a card: <div class="lc-strip lc-strip--copper" aria-hidden="true"></div> as the card's first child */
+.lc-strip{height:60px;margin:-24px -24px 6px;border-bottom:3px solid var(--charcoal);background:no-repeat 0 0/100% 100%;image-rendering:pixelated}
+.lc-card--sm>.lc-strip{margin:-20px -20px 6px}
+@media (max-width:520px){.lc-strip{height:48px;margin:-20px -20px 6px}}
+.lc-strip--copper{background-image:url(../img/strip-copper.svg)}
+.lc-strip--amethyst{background-image:url(../img/strip-amethyst.svg)}
+.lc-strip--wool{background-image:url(../img/strip-wool.svg)}
+.lc-strip--stone{background-image:url(../img/strip-stone.svg)}
+
+/* Loud boxes: white, 3 px charcoal border, hard 10 px offset shadow (orange, or pink) */
+.lc-board{background:#fff;border:3px solid var(--charcoal);box-shadow:10px 10px 0 var(--orange);color:var(--ink)}
+.lc-board--pink{box-shadow:10px 10px 0 var(--pink)}
+@media (max-width:920px){.lc-board{box-shadow:6px 6px 0 var(--orange);margin-right:6px}.lc-board--pink{box-shadow:6px 6px 0 var(--pink)}}
 
 /* "Sample data" and other quiet labels */
-.lc-sample{font-size:14px;color:var(--soft)}
-.lc-board .lc-sample{color:var(--on-night-soft)}
+.lc-sample{font-size:13px;font-weight:700;color:var(--mid)}
+:is(.lc-dark,.lc-sec--dark,.lc-hero) .lc-sample{color:var(--muted-dark)}
 
-/* ---------- buttons ----------
-   Use <a class="lc-btn lc-btn--cyan"> in HTML, or a core Button block with the same classes
-   (the class lands on the wrapper; the link inside picks it up). */
-.lc-btn{--b-bg:var(--pink);--b-fg:var(--night);--b-line:transparent;--b-shadow:none;--b-h:48px;--b-size:17px}
-.lc-btn--pink{--b-shadow:0 4px 0 var(--pink-shade)}
-.lc-btn--cyan{--b-bg:var(--cyan)}
-.lc-btn--night{--b-bg:var(--night);--b-fg:#fff}
-.lc-btn--ghost{--b-bg:transparent;--b-fg:#fff;--b-line:var(--on-night)}
-.lc-btn--outline{--b-bg:transparent;--b-fg:var(--night);--b-line:var(--night);--b-h:44px;--b-size:16px}
-a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--b-h);padding:0 22px;border:2px solid var(--b-line);border-radius:6px;background:var(--b-bg);color:var(--b-fg);font-family:var(--body);font-weight:700;font-size:var(--b-size);line-height:1.2;text-decoration:none;box-shadow:var(--b-shadow);cursor:pointer;text-align:center}
+/* The join bar: purple band, pink offset shadow, the address big, an orange copy button */
+.lc-join{display:flex;justify-content:space-between;align-items:center;gap:20px 32px;flex-wrap:wrap;padding:28px 32px;background:var(--purple);color:#fff;box-shadow:10px 10px 0 var(--pink)}
+.lc-join-label{display:block;font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#e3d9ff}
+.lc-join-addr{display:block;font-family:var(--mono);font-weight:700;font-size:38px;line-height:1.1;color:#fff}
+.lc-join :focus-visible{outline-color:#fff}
+@media (max-width:920px){.lc-join{box-shadow:6px 6px 0 var(--pink);margin-right:6px;padding:24px}.lc-join-addr{font-size:28px}}
+@media (max-width:520px){.lc-join-addr{font-size:22px}}
+
+/* ---------- buttons: flat colour, square, pixel bevel ----------
+   <a class="lc-btn lc-btn--orange"> or a core Button block with the same classes (the link inside picks them up).
+   Variants: (default) purple, --orange, --pink, --charcoal, --ghost (outline on a dark band), --outline (on light). */
+.lc-btn{--b-bg:var(--purple);--b-fg:#fff;--b-deep:var(--purple-deep);--b-line:transparent;--b-h:48px;--b-size:17px}
+.lc-btn--purple{--b-bg:var(--purple);--b-fg:#fff;--b-deep:var(--purple-deep)}
+.lc-btn--orange{--b-bg:var(--orange);--b-fg:var(--charcoal);--b-deep:var(--orange-deep)}
+.lc-btn--pink{--b-bg:var(--pink);--b-fg:var(--charcoal);--b-deep:var(--pink-deep)}
+.lc-btn--charcoal{--b-bg:var(--charcoal);--b-fg:#fff;--b-deep:#0e0d10}
+.lc-btn--ghost{--b-bg:transparent;--b-fg:var(--hero-text);--b-deep:transparent;--b-line:var(--hero-muted)}
+.lc-btn--outline{--b-bg:#fff;--b-fg:var(--charcoal);--b-deep:var(--light);--b-line:var(--charcoal);--b-h:44px;--b-size:16px}
+a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--b-h);padding:0 22px;border:2px solid var(--b-line);border-radius:0;background:var(--b-bg);color:var(--b-fg);font-family:var(--body);font-weight:800;font-size:var(--b-size);line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--b-deep);cursor:pointer;text-align:center}
 .lc-btn--outline:is(a,button),.wp-block-button.lc-btn--outline>.wp-block-button__link{padding:0 16px}
-a.lc-btn:hover,button.lc-btn:hover,.wp-block-button.lc-btn>.wp-block-button__link:hover{color:var(--b-fg);filter:brightness(1.06)}
-a.lc-btn--pink:active,button.lc-btn--pink:active,.wp-block-button.lc-btn--pink>.wp-block-button__link:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-shade)}
-button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-shade)}
+a.lc-btn:hover,button.lc-btn:hover,.wp-block-button.lc-btn>.wp-block-button__link:hover{color:var(--b-fg);filter:brightness(1.07)}
+a.lc-btn:active,button.lc-btn:active,.wp-block-button.lc-btn>.wp-block-button__link:active{box-shadow:inset 4px 4px 0 var(--b-deep)}
+button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-deep:#1f9d55}
 .lc-actions{display:flex;flex-wrap:wrap;gap:12px}
 .wp-block-buttons.lc-actions>.wp-block-button{margin:0}
 
-/* ---------- chips and pills ---------- */
+/* ---------- chips (filters, tabs) and pills ---------- */
 .lc-chips{display:flex;flex-wrap:wrap;gap:8px}
-.lc-chip{min-height:44px;padding:0 14px;border-radius:999px;border:2px solid var(--chip-line);background:#fff;color:var(--ink);font-family:var(--body);font-weight:700;font-size:15px;cursor:pointer}
-.lc-chip:hover{border-color:var(--night)}
-.lc-chip[aria-pressed="true"]{background:var(--night);border-color:var(--night);color:#fff}
-.lc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-weight:700;font-size:13px;line-height:1.4;white-space:nowrap}
-.lc-pill.lc-pill--soon{background:#fff1d1;color:#7d4f06}
-.lc-pill.lc-pill--night{background:var(--night);color:#fff}
-.lc-pill--code{background:var(--row-dark);color:var(--cyan);font-family:var(--mono);font-weight:600;font-size:14px}
+.lc-chip{min-height:44px;padding:0 14px;border:2px solid var(--charcoal);border-radius:0;background:#fff;color:var(--charcoal);font-family:var(--body);font-weight:700;font-size:15px;cursor:pointer}
+.lc-chip:hover{background:var(--light)}
+.lc-chip[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+.lc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;font-weight:800;font-size:13px;line-height:1.4;white-space:nowrap}
+.lc-pill.lc-pill--soon{background:#ffe3cc;color:#8a3c06}
+.lc-pill.lc-pill--dark{background:var(--charcoal);color:#fff}
+.lc-pill--code{background:var(--charcoal);color:#fff;font-family:var(--mono);font-weight:700;font-size:14px}
 
 /* ---------- forms ---------- */
 .lc-field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.lc-label{font-weight:700;font-size:15px}
-.lc-input,.lc-select{width:100%;min-height:46px;padding:0 14px;border:2px solid var(--ink);border-radius:6px;background:#fff;font-family:var(--body);font-size:17px;color:var(--ink)}
+.lc-label{font-weight:800;font-size:15px}
+.lc-input,.lc-select{width:100%;min-height:46px;padding:0 14px;border:2px solid var(--charcoal);border-radius:0;background:#fff;font-family:var(--body);font-size:17px;color:var(--ink)}
 .lc-select{padding:0 12px}
 .lc-check{display:inline-flex;align-items:center;gap:10px;min-height:46px;font-size:16px;font-weight:700;cursor:pointer}
-.lc-check input{width:20px;height:20px;margin:0;accent-color:var(--night)}
-.lc-empty{padding:24px;background:#fff;border:1px dashed var(--chip-line);border-radius:var(--radius);font-size:17px;color:var(--soft);text-align:center}
+.lc-check input{width:20px;height:20px;margin:0;accent-color:var(--purple)}
+.lc-empty{padding:24px;background:#fff;border:3px dashed var(--mid);font-size:17px;color:var(--muted);text-align:center}
 
 /* ---------- facts list (dl) ---------- */
-.lc-facts{padding:8px 22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
-.lc-facts>div{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid var(--line-soft)}
-.lc-facts dt{color:var(--soft)}
-.lc-facts dd{margin:0;font-weight:700;text-align:right}
+.lc-facts{padding:8px 22px;background:#fff;border:3px solid var(--charcoal)}
+.lc-facts>div{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid var(--line)}
+.lc-facts dt{color:var(--muted)}
+.lc-facts dd{margin:0;font-weight:800;text-align:right}
 
-/* ---------- Minis: rarity colours and heads ---------- */
+/* ---------- Minis: rarity colours (content, not theme) and heads ---------- */
 .lc-r--common{--r-gem:#8a938a;--r-bg:#e9ece9;--r-fg:#40493f;--r-shadow:#cfd4cf}
 .lc-r--uncommon{--r-gem:#4caf6a;--r-bg:#dff2e6;--r-fg:#1d6538;--r-shadow:#bfe3cb}
 .lc-r--rare{--r-gem:#4a8fe0;--r-bg:#e1ecfb;--r-fg:#1b529a;--r-shadow:#bcd4f4}
 .lc-r--epic{--r-gem:#a064e0;--r-bg:#efe5fb;--r-fg:#652ca8;--r-shadow:#dcc7f4}
 .lc-r--legendary{--r-gem:#e0a83a;--r-bg:#fbf0dc;--r-fg:#7d4f06;--r-shadow:#f1d9a8}
-.lc-rarity{display:inline-flex;align-items:center;gap:8px;padding:3px 10px;border-radius:999px;background:var(--r-bg);color:var(--r-fg);font-weight:700;font-size:13px;white-space:nowrap}
+.lc-rarity{display:inline-flex;align-items:center;gap:8px;padding:3px 10px;background:var(--r-bg);color:var(--r-fg);font-weight:800;font-size:13px;white-space:nowrap}
 .lc-gem{flex:none;fill:var(--r-gem)}
 /* LCData.minis.head(): face (8,8) with the hat (40,8) on top, from a 64×64 skin (or 64×32 legacy) */
 .lc-head{display:block;flex:none;width:var(--head,88px);height:var(--head,88px);background-repeat:no-repeat;background-size:100% 100%;image-rendering:pixelated;box-shadow:0 6px 0 var(--r-shadow,#cfd4cf)}
@@ -185,7 +257,6 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 
 /* ---------- market colours ---------- */
 .lc-up{color:var(--up)} .lc-down{color:var(--down)} .lc-flat{color:var(--flat)}
-.lc-board .lc-up{color:var(--up-dark)} .lc-board .lc-down{color:var(--down-dark)} .lc-board .lc-flat{color:var(--flat-dark)}
 
 /* ---------- header ---------- */
 /* The header part wrapper is only as tall as the header, so let the header stick to the page instead.
@@ -193,33 +264,37 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
    Not in the Site Editor, whose root container is also .wp-site-blocks. */
 .wp-site-blocks:not(.is-root-container)>.wp-block-template-part:first-child{display:contents}
 .wp-block-template-part:has(>.lc-top){display:contents}
-.lc-top{position:sticky;top:var(--wp-admin--admin-bar--height,0px);z-index:50;background:var(--night);border-bottom:1px solid var(--edge-dark);color:var(--on-night)}
+.lc-top{position:sticky;top:var(--wp-admin--admin-bar--height,0px);z-index:50;background:var(--hero-bg);border-bottom:1px solid var(--hero-line);color:var(--hero-muted)}
 .lc-top-in{position:relative;max-width:1280px;margin:0 auto;height:var(--header-h);padding:0 var(--gutter);display:flex;align-items:center;gap:28px}
-.lc-mark{display:inline-flex;align-items:center;min-height:44px;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em;color:#fff;text-decoration:none;white-space:nowrap;line-height:1}
-.lc-mark span{color:var(--pink)}
-.lc-mark:hover{color:#fff}
+/* The mark: a 2×2 block of purple, pink, orange and gray, then the name */
+.lc-mark{display:inline-flex;align-items:center;gap:12px;min-height:44px;font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.01em;color:var(--hero-text);text-decoration:none;white-space:nowrap;line-height:1}
+.lc-mark:hover{color:var(--hero-text)}
+.lc-logo{display:grid;grid-template-columns:repeat(2,12px);grid-auto-rows:12px;gap:2px;flex:none}
+.lc-logo i:nth-child(1){background:var(--purple)} .lc-logo i:nth-child(2){background:var(--pink)}
+.lc-logo i:nth-child(3){background:var(--orange)} .lc-logo i:nth-child(4){background:var(--mid)}
 .lc-menu{display:contents}
 .lc-nav{flex-grow:1}
 .lc-nav ul{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:4px}
-.lc-nav a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:6px;font-size:16px;font-weight:700;color:var(--on-night);text-decoration:none;white-space:nowrap}
-.lc-nav a:hover{color:var(--cyan)}
-.lc-nav a[aria-current]{background:var(--cyan);color:var(--night)}
+.lc-nav a{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:700;color:var(--hero-muted);text-decoration:none;white-space:nowrap}
+/* Three small bars under the current page: orange, pink, purple (room kept under the others so nothing shifts) */
+.lc-nav a::after{content:"";display:block;width:28px;height:4px;margin-top:4px;background:transparent}
+.lc-nav a:hover{color:var(--hero-text)}
+.lc-nav a[aria-current]{color:var(--hero-text)}
+.lc-nav a[aria-current]::after{background:linear-gradient(90deg,var(--orange) 0 8px,transparent 8px 10px,var(--pink) 10px 18px,transparent 18px 20px,var(--purple) 20px 28px)}
 .lc-tools{display:flex;align-items:center;gap:20px}
-.lc-status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--on-night);white-space:nowrap}
-.lc-dot{width:10px;height:10px;border-radius:5px;background:var(--up-dark);flex:none}
-.lc-addr-btn{min-height:44px;padding:0 16px;border:2px solid var(--cyan);border-radius:6px;background:var(--night);color:var(--cyan);font-family:var(--mono);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
-.lc-addr-btn:hover,.lc-addr-btn[data-done="1"]{background:var(--cyan);color:var(--night)}
+.lc-status{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--hero-muted);white-space:nowrap}
+.lc-dot{width:8px;height:8px;background:#5fd38d;flex:none}
 .lc-menu-btn{display:none}
 @media (max-width:1150px){
   .lc-top-in{gap:16px}
-  .lc-menu-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto;min-height:44px;padding:0 14px;border:2px solid var(--edge-dark);border-radius:6px;background:transparent;color:#fff;font-family:var(--body);font-weight:700;font-size:16px;cursor:pointer}
-  .lc-menu-btn[aria-expanded="true"]{background:var(--cyan);border-color:var(--cyan);color:var(--night)}
-  .lc-menu{display:block;position:absolute;top:100%;left:0;right:0;padding:12px var(--gutter) 22px;background:var(--night);border-bottom:1px solid var(--edge-dark);box-shadow:0 14px 24px rgba(18,21,58,.35);max-height:calc(100vh - var(--header-h));overflow-y:auto}
+  .lc-menu-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto;min-height:44px;padding:0 14px;border:2px solid var(--hero-line);border-radius:0;background:transparent;color:var(--hero-text);font-family:var(--body);font-weight:800;font-size:16px;cursor:pointer}
+  .lc-menu-btn[aria-expanded="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+  .lc-menu{display:block;position:absolute;top:100%;left:0;right:0;padding:12px var(--gutter) 22px;background:var(--hero-bg);border-bottom:3px solid var(--charcoal);box-shadow:0 10px 0 rgba(38,36,43,.25);max-height:calc(100vh - var(--header-h));overflow-y:auto}
   .lc-js .lc-menu{display:none}
   .lc-js .lc-top.is-open .lc-menu{display:block}
   .lc-nav ul{flex-direction:column;align-items:stretch;gap:2px}
-  .lc-nav a{min-height:48px;font-size:17px}
-  .lc-tools{flex-direction:column;align-items:flex-start;gap:14px;margin-top:12px;padding-top:16px;border-top:1px solid var(--edge-dark)}
+  .lc-nav a{min-height:52px;font-size:17px}
+  .lc-tools{flex-direction:column;align-items:flex-start;gap:14px;margin-top:12px;padding-top:16px;border-top:1px solid var(--hero-line)}
   html:not(.lc-js) .lc-menu-btn{display:none}
   html:not(.lc-js) .lc-top{position:static}
   html:not(.lc-js) .lc-top-in{height:auto;min-height:var(--header-h);flex-wrap:wrap}
@@ -228,20 +303,20 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 @media (max-width:600px){.admin-bar .lc-top{top:0}}
 
 /* ---------- footer ---------- */
-.lc-foot{background:var(--night);color:var(--on-night)}
+.lc-foot{background:var(--charcoal);color:var(--muted-dark)}
 .lc-foot-in{max-width:1280px;margin:0 auto;padding:44px var(--gutter) 28px;display:flex;flex-direction:column;gap:32px}
 .lc-foot-cols{display:flex;gap:72px}
 .lc-foot-brand{flex-grow:1;display:flex;flex-direction:column;gap:10px}
-.lc-foot-brand .lc-mark{font-size:26px;align-self:flex-start}
+.lc-foot-brand .lc-mark{font-size:22px;align-self:flex-start;color:#fff}
 .lc-foot-brand p{font-size:16px}
-.lc-foot-addr{font-family:var(--mono);font-size:15px;color:var(--cyan)}
+.lc-foot-addr{font-family:var(--mono);font-weight:700;font-size:15px;color:#fff}
 .lc-foot-nav{display:flex;flex-wrap:wrap;gap:72px}
 .lc-foot-col{display:flex;flex-direction:column;min-width:150px}
-.lc-foot-col h2{margin:0 0 4px;font-family:var(--body);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+.lc-foot-col h2{margin:0 0 4px;font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#fff}
 .lc-foot-col ul{list-style:none;margin:0;padding:0}
-.lc-foot-col a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;color:var(--on-night);text-decoration:none;font-size:16px}
-.lc-foot-col a:hover{color:var(--cyan);text-decoration:underline}
-.lc-legal{padding-top:16px;border-top:1px solid var(--edge-dark);font-size:13px;color:#a4a8dc}
+.lc-foot .lc-foot-col a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;color:var(--muted-dark);text-decoration:none;font-size:16px}
+.lc-foot .lc-foot-col a:hover{color:#fff;text-decoration:underline}
+.lc-legal{padding-top:16px;border-top:1px solid var(--charcoal-2);font-size:13px;color:var(--mid)}
 /* Side by side, the brand text wraps before the three link columns do */
 @media (min-width:921px){.lc-foot-nav{flex-shrink:0}}
 @media (max-width:1100px){.lc-foot-cols,.lc-foot-nav{gap:40px}}
@@ -249,34 +324,34 @@ button.lc-btn[data-done="1"]{--b-bg:var(--cyan);--b-shadow:0 4px 0 var(--cyan-sh
 @media (max-width:520px){.lc-foot-nav{flex-direction:column;gap:20px}}
 
 /* ---------- House rules (pattern patterns/house-rules.php, inserted into the Play page) ---------- */
-.lc-rules-wrap{width:100%;max-width:1280px;margin-inline:auto;padding:0 var(--gutter) 72px}
-.lc-rules{display:flex;flex-direction:column;gap:14px;padding:36px;background:var(--night);border-radius:var(--radius);color:var(--on-night-bright)}
+.lc-rules-wrap{width:100%;max-width:1280px;margin-inline:auto;padding:0 var(--gutter) 64px}
+.lc-rules{display:flex;flex-direction:column;gap:14px;padding:32px;background:var(--charcoal);color:var(--page);box-shadow:10px 10px 0 var(--orange)}
 .lc-rules h2{color:#fff}
-.lc-rules ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 40px;margin:0;padding-left:22px;font-size:17px;color:var(--on-night)}
+.lc-rules ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 40px;margin:0;padding-left:22px;font-size:17px;color:var(--muted-dark)}
 .lc-rules li:empty{display:none}
 /* No rule typed yet: hide the whole card (in the editor the empty items aren't :empty, so it stays editable) */
 .lc-rules-wrap:not(:has(li:not(:empty))){display:none}
-@media (max-width:920px){.lc-rules-wrap{padding-bottom:56px}.lc-rules ol{grid-template-columns:minmax(0,1fr)}.lc-rules{padding:28px 22px}}
-@media (max-width:520px){.lc-rules-wrap{padding-bottom:48px}}
+@media (max-width:920px){.lc-rules-wrap{padding-bottom:52px}.lc-rules ol{grid-template-columns:minmax(0,1fr)}.lc-rules{padding:26px 22px;box-shadow:6px 6px 0 var(--orange);margin-right:6px}}
+@media (max-width:520px){.lc-rules-wrap{padding-bottom:44px}}
 
 /* ---------- plain pages and posts (page.html, single.html, index.html) ---------- */
 .lc-entry{max-width:760px}
 .lc-entry>*+*{margin-top:1.1em}
-.lc-entry h2{font-size:32px;margin-top:1.6em}
-.lc-entry h3{font-size:24px;margin-top:1.4em}
+.lc-entry h2{font-size:28px;margin-top:1.6em}
+.lc-entry h3{font-size:21px;margin-top:1.4em}
 .lc-entry ul,.lc-entry ol{padding-left:1.3em}
 .lc-entry li+li{margin-top:.4em}
-.lc-entry img{border-radius:var(--radius)}
-.lc-entry blockquote{padding-left:18px;border-left:4px solid var(--pink);color:var(--text)}
+.lc-entry blockquote{padding-left:18px;border-left:4px solid var(--purple);color:var(--text)}
 .lc-entry .wp-block-image{margin-inline:0}
 
-/* Forced colors replace backgrounds, which is all that marks the pressed chip and the current page link.
+/* Forced colors replace backgrounds, which is all that marks the pressed chip; the current page's bars too.
    Their focus ring keeps the system colour the other controls get. */
 @media (forced-colors:active){
-  .lc-chip[aria-pressed="true"],.lc-nav a[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight;outline-color:Highlight}
+  .lc-chip[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight;outline-color:Highlight}
+  .lc-nav a[aria-current]{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
 }
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important}
+  *,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;animation-iteration-count:1!important}
 }

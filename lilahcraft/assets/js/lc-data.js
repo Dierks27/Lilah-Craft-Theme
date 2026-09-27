@@ -245,29 +245,76 @@
     return ((item && item.history) || []).map(function (h) { return h && h.p; }).filter(isNum);
   }
 
-  /* Sample market: the design's twelve items in the real feed's shape, 96 half-hour snapshots each. */
-  var MARKET_SRC = [
-    ['cobblestone', 'Cobblestone', 'COBBLESTONE', 0.08, 2.4, 86, 1],
-    ['stone', 'Stone', 'STONE', 0.12, 1.2, 78, 2],
-    ['oak_log', 'Oak Log', 'OAK_LOG', 0.35, -1.1, 64, 3],
-    ['wheat', 'Wheat', 'WHEAT', 0.22, -2.0, 71, 4],
-    ['coal', 'Coal', 'COAL', 0.62, 5.8, 48, 5],
-    ['copper_ingot', 'Copper Ingot', 'COPPER_INGOT', 0.95, -3.2, 51, 6],
-    ['redstone', 'Redstone Dust', 'REDSTONE', 0.55, 1.7, 58, 7],
-    ['iron_ingot', 'Iron Ingot', 'IRON_INGOT', 2.40, 0.9, 42, 8],
-    ['lapis_lazuli', 'Lapis Lazuli', 'LAPIS_LAZULI', 1.80, 4.1, 35, 9],
-    ['gold_ingot', 'Gold Ingot', 'GOLD_INGOT', 6.15, -0.6, 23, 10],
-    ['emerald', 'Emerald', 'EMERALD', 18.40, 12.3, 12, 11],
-    ['diamond', 'Diamond', 'DIAMOND', 96.00, 0, 0, 12]
-  ];
-  function wave(seed, trend, n) {
-    var out = [];
-    for (var i = 0; i < n; i++) {
-      var t = i / (n - 1);
-      out.push(Math.sin(i * 0.21 + seed) * 0.06 + Math.sin(i * 0.9 + seed * 1.7) * 0.03 + trend * 0.06 * t);
+  /* Short sector names for tabs (the long ones are in CATEGORIES). */
+  var SECTOR_SHORT = { all: 'All', ores: 'Ores', stone: 'Stone', wood: 'Wood', farm: 'Farm', mob: 'Mob', nether: 'Nether', other: 'Other' };
+
+  /* Ticker symbols: a table for common items, otherwise a short code from the id. Always unique. */
+  var SYMBOL = {
+    COBBLESTONE: 'COBL', STONE: 'STON', DIRT: 'DIRT', OAK_LOG: 'OAK', SPRUCE_LOG: 'SPRC', BIRCH_LOG: 'BRCH', JUNGLE_LOG: 'JNGL',
+    ACACIA_LOG: 'ACAC', DARK_OAK_LOG: 'DOAK', MANGROVE_LOG: 'MNGR', CHERRY_LOG: 'CHRY', WHEAT: 'WHT', CARROT: 'CARR', POTATO: 'POTA',
+    BEETROOT: 'BEET', PUMPKIN: 'PUMP', MELON_SLICE: 'MELN', SUGAR_CANE: 'CANE', APPLE: 'APPL', EGG: 'EGG', BAMBOO: 'BMBO', KELP: 'KELP',
+    COAL: 'COAL', COPPER_INGOT: 'COPR', IRON_INGOT: 'IRON', GOLD_INGOT: 'GOLD', LAPIS_LAZULI: 'LAPS', REDSTONE: 'RDST', EMERALD: 'EMRD',
+    DIAMOND: 'DIAM', AMETHYST_SHARD: 'AMTH', RAW_IRON: 'RIRN', RAW_GOLD: 'RGLD', RAW_COPPER: 'RCPR', BONE: 'BONE', STRING: 'STRG',
+    GUNPOWDER: 'GUNP', ROTTEN_FLESH: 'FLSH', SPIDER_EYE: 'SPEY', SLIME_BALL: 'SLME', LEATHER: 'LTHR', FEATHER: 'FTHR', INK_SAC: 'INKS',
+    QUARTZ: 'QRTZ', ENDER_PEARL: 'ENDP', NETHERRACK: 'NRCK', BLAZE_ROD: 'BLZR', GLOWSTONE_DUST: 'GLOW', GHAST_TEAR: 'GHST',
+    NETHERITE_INGOT: 'NTHR', NETHERITE_SCRAP: 'NSCR', ANCIENT_DEBRIS: 'DEBR', END_STONE: 'ENDS', OBSIDIAN: 'OBSD', SAND: 'SAND',
+    GRAVEL: 'GRVL', CLAY_BALL: 'CLAY', DEEPSLATE: 'DPSL', COBBLED_DEEPSLATE: 'CDPS', GRANITE: 'GRNT', DIORITE: 'DIOR', ANDESITE: 'ANDS'
+  };
+  function codeFrom(id) {
+    var words = String(id || 'item').toUpperCase().replace(/[^A-Z0-9_]/g, '').split('_').filter(Boolean);
+    if (!words.length) { return 'ITEM'; }
+    if (words.length === 1) {
+      var w = words[0];
+      return (w.charAt(0) + w.slice(1).replace(/[AEIOU]/g, '')).slice(0, 4) || w.slice(0, 4);
     }
+    return (words[0].slice(0, 2) + words[words.length - 1].slice(0, 2)).slice(0, 4);
+  }
+  /* { id: symbol } for a list of items. Stable across refreshes and feed order (worked out in id order):
+     table symbols first, then codes from the ids, numbered when two would clash. */
+  function symbols(items) {
+    var out = {}, used = {};
+    var list = (items || []).slice().sort(function (a, b) {
+      return String(a.id) < String(b.id) ? -1 : (String(a.id) > String(b.id) ? 1 : 0);
+    });
+    list.forEach(function (it) {
+      var t = SYMBOL[String(it.material || '').toUpperCase()] || SYMBOL[String(it.id || '').toUpperCase()];
+      if (t && !used[t]) { out[it.id] = t; used[t] = true; }
+    });
+    list.forEach(function (it) {
+      if (out[it.id]) { return; }
+      var base = codeFrom(it.id), sym = base, n = 2;
+      while (used[sym]) { sym = base.slice(0, 3) + n; n++; if (n > 9) { base = base.slice(0, 2) + base.charAt(3); n = 2; } }
+      out[it.id] = sym;
+      used[sym] = true;
+    });
     return out;
   }
+
+  /* Sample market: the trader design's twenty items in the real feed's shape, 96 half-hour snapshots
+     each. Price, stock history and the 24h change agree with each other. */
+  var MARKET_SRC = [
+    // id, name, material, price, 24h change %, shelf %, maxStock, seed
+    ['cobblestone', 'Cobblestone', 'COBBLESTONE', 0.08, 2.4, 86, 50000, 1],
+    ['stone', 'Stone', 'STONE', 0.12, 1.2, 78, 50000, 2],
+    ['dirt', 'Dirt', 'DIRT', 0.04, -0.5, 92, 50000, 3],
+    ['oak_log', 'Oak Log', 'OAK_LOG', 0.35, -1.1, 64, 20000, 4],
+    ['spruce_log', 'Spruce Log', 'SPRUCE_LOG', 0.33, 0.6, 70, 20000, 5],
+    ['wheat', 'Wheat', 'WHEAT', 0.22, -2.0, 71, 20000, 6],
+    ['carrot', 'Carrot', 'CARROT', 0.18, 3.1, 66, 20000, 7],
+    ['coal', 'Coal', 'COAL', 0.62, 5.8, 48, 10000, 8],
+    ['copper_ingot', 'Copper Ingot', 'COPPER_INGOT', 0.95, -3.2, 51, 10000, 9],
+    ['iron_ingot', 'Iron Ingot', 'IRON_INGOT', 2.40, 0.9, 42, 10000, 10],
+    ['gold_ingot', 'Gold Ingot', 'GOLD_INGOT', 6.15, -0.6, 23, 5000, 11],
+    ['lapis_lazuli', 'Lapis Lazuli', 'LAPIS_LAZULI', 1.80, 4.1, 35, 5000, 12],
+    ['redstone', 'Redstone Dust', 'REDSTONE', 0.55, 1.7, 58, 10000, 13],
+    ['emerald', 'Emerald', 'EMERALD', 18.40, 12.3, 12, 2000, 14],
+    ['diamond', 'Diamond', 'DIAMOND', 96.00, 0, 0, 2000, 15],
+    ['bone', 'Bone', 'BONE', 0.30, -1.4, 60, 10000, 16],
+    ['string', 'String', 'STRING', 0.28, 2.2, 55, 10000, 17],
+    ['gunpowder', 'Gunpowder', 'GUNPOWDER', 0.85, -4.6, 30, 5000, 18],
+    ['quartz', 'Nether Quartz', 'QUARTZ', 0.75, 1.9, 44, 10000, 19],
+    ['ender_pearl', 'Ender Pearl', 'ENDER_PEARL', 4.20, 6.5, 18, 2000, 20]
+  ];
   var marketCache = null;
   function marketSample() {
     if (marketCache) { return marketCache; }
@@ -277,16 +324,32 @@
       generatedAt: now,
       refreshSeconds: 30,
       items: MARKET_SRC.map(function (s) {
-        var price = s[3], out = s[5] === 0, stock = s[5] * 100;
-        var v = out ? null : wave(s[6], s[4] >= 0 ? 1 : -1, N);
-        var history = [];
-        for (var i = 0; i < N; i++) {
-          history.push({ t: now - (N - 1 - i) * step, p: out ? price : round(price * (1 + v[i] - v[N - 1]), 4), s: stock });
+        var price = s[3], ch = s[4], shelf = s[5] / 100, max = s[6], seed = s[7], out = s[5] === 0;
+        var history = [], raw = [], i;
+        // Gentle waves, then a steady drift chosen so the last 24 hours move exactly by the item's change.
+        for (i = 0; i < N; i++) {
+          raw.push(Math.sin(i * 0.21 + seed) * 0.02 + Math.sin(i * 0.9 + seed * 1.7) * 0.008 + Math.sin(i * 2.3 + seed) * 0.003);
+        }
+        var k = Math.log(1 + ch / 100) - (raw[N - 1] - raw[N - 49]);
+        for (i = 0; i < N; i++) { raw[i] = out ? price : Math.exp(raw[i] + k * (i - (N - 1)) / 48); }
+        var last = raw[N - 1];
+        for (i = 0; i < N; i++) {
+          var p = out ? price : round(raw[i] * price / last, 4);
+          var ago = N - 1 - i, st;
+          if (out) {
+            // A sold-out item ran dry over the last seven hours.
+            st = ago < 14 ? Math.round(max * 0.06 * ago / 14) : Math.round(max * (0.06 + (ago - 14) * 0.0008));
+          } else {
+            // More on the shelf when the price is lower.
+            st = Math.round(max * shelf * (1 - (p / price - 1) * 2.5));
+          }
+          history.push({ t: now - ago * step, p: p, s: Math.max(0, Math.min(max, st)) });
         }
         return {
           id: s[0], name: s[1], material: s[2], price: price,
           buy: out ? null : round(price * 1.05, 4), sell: round(price * 0.95, 4),
-          stock: stock, maxStock: 10000, change24h: out ? 0 : s[4], history: history
+          stock: out ? 0 : Math.round(max * shelf), maxStock: max,
+          change24h: out ? 0 : round((price / history[N - 49].p - 1) * 100, 1), history: history
         };
       })
     };
@@ -416,7 +479,7 @@
     load: load, watch: watch, sparkPoints: sparkPoints,
     market: {
       CATEGORIES: CATEGORIES, categoryOf: categoryOf, categoryLabel: categoryLabel, swatchOf: swatchOf,
-      stockFraction: stockFraction, soldOut: soldOut, change: change, priceSeries: priceSeries, sample: marketSample
+      stockFraction: stockFraction, soldOut: soldOut, symbols: symbols, SECTOR_SHORT: SECTOR_SHORT, change: change, priceSeries: priceSeries, sample: marketSample
     },
     minis: {
       RARITY_ORDER: RARITY_ORDER, RARITIES: RARITIES, CATEGORY_ORDER: CATEGORY_ORDER, rarityKey: rarityKey,

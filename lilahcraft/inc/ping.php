@@ -33,6 +33,13 @@ function lilahcraft_server_status() {
 		$out = array( 'online' => true ) + $ping;
 	}
 	set_transient( 'lilahcraft_status', $out, 60 );
+
+	/**
+	 * A fresh ping result (not a cached one). inc/activity.php logs the player count from it.
+	 *
+	 * @param array $out { online, players?, max?, version? }
+	 */
+	do_action( 'lilahcraft_status_fresh', $out );
 	return $out;
 }
 

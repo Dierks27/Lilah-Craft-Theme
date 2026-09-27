@@ -46,12 +46,13 @@ function lilahcraft_version() {
 }
 
 /**
- * Google Fonts, as in 1.0.
+ * Google Fonts for the Pixel pop look: Unbounded (headings), Figtree (body), JetBrains Mono (prices,
+ * addresses, kickers) and Silkscreen (the big background word only).
  *
  * @return string
  */
 function lilahcraft_fonts_url() {
-	return 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;600&display=swap';
+	return 'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400..800;1,400&family=JetBrains+Mono:wght@500..700&family=Silkscreen:wght@700&family=Unbounded:wght@600;800;900&display=swap';
 }
 
 add_action(

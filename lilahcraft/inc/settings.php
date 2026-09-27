@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings > LilahCraft: feed URLs, the server to ping, versions and cache time.
+ * Settings > LilahCraft: feed URLs, the server to ping, versions, cache time and the hero style.
  *
  * Everything lives in one option, lilahcraft_settings. Read it with lilahcraft_setting( 'key' ).
  *
@@ -26,6 +26,7 @@ function lilahcraft_defaults() {
 		'cb_version'    => '0.4.0',
 		'cb_url'        => 'https://github.com/Dierks27/CraftBridge-Client/releases/download/v{version}/craftbridge-client-{mc}-{loader}-{version}.jar',
 		'cache_seconds' => 60,
+		'hero_style'    => 'charcoal',
 	);
 }
 
@@ -54,6 +55,7 @@ function lilahcraft_setting_labels() {
 		'mc_version'    => __( 'Minecraft version', 'lilahcraft' ),
 		'cb_version'    => __( 'CraftBridge Client version', 'lilahcraft' ),
 		'cb_url'        => __( 'CraftBridge download URL pattern', 'lilahcraft' ),
+		'hero_style'    => __( 'Hero style', 'lilahcraft' ),
 	);
 }
 
@@ -173,6 +175,14 @@ function lilahcraft_sanitize_settings( $in ) {
 		$out['cache_seconds'] = lilahcraft_setting_rejected( 'cache_seconds', __( 'it must be a whole number from 5 to 3600.', 'lilahcraft' ) );
 	}
 
+	// Only the two looks the design draws.
+	$hero = $val( 'hero_style' );
+	if ( '' === $hero || in_array( $hero, array( 'charcoal', 'light' ), true ) ) {
+		$out['hero_style'] = '' === $hero ? $d['hero_style'] : $hero;
+	} else {
+		$out['hero_style'] = lilahcraft_setting_rejected( 'hero_style', __( 'pick Charcoal or Light.', 'lilahcraft' ) );
+	}
+
 	return $out;
 }
 
@@ -216,6 +226,7 @@ add_action(
 		add_settings_section( 'lilahcraft_feeds', __( 'Live data', 'lilahcraft' ), '__return_false', 'lilahcraft' );
 		add_settings_section( 'lilahcraft_server', __( 'Server', 'lilahcraft' ), '__return_false', 'lilahcraft' );
 		add_settings_section( 'lilahcraft_downloads', __( 'Downloads', 'lilahcraft' ), '__return_false', 'lilahcraft' );
+		add_settings_section( 'lilahcraft_look', __( 'Look', 'lilahcraft' ), '__return_false', 'lilahcraft' );
 
 		$l      = lilahcraft_setting_labels();
 		$fields = array(
@@ -227,6 +238,7 @@ add_action(
 			array( 'mc_version', $l['mc_version'], 'lilahcraft_server', 'text', __( 'The version the server is on, like 26.2. Shown on Downloads. Leave blank to hide that line.', 'lilahcraft' ) ),
 			array( 'cb_version', $l['cb_version'], 'lilahcraft_downloads', 'text', __( 'Shown on Downloads and used in the download link.', 'lilahcraft' ) ),
 			array( 'cb_url', $l['cb_url'], 'lilahcraft_downloads', 'url', __( '{version}, {mc} and {loader} are filled in for each pick. If a file is missing, the button links to the release page instead.', 'lilahcraft' ) ),
+			array( 'hero_style', $l['hero_style'], 'lilahcraft_look', 'select', __( 'The top band of every page and the header: charcoal with white text, or light gray with charcoal text.', 'lilahcraft' ) ),
 		);
 
 		foreach ( $fields as $f ) {
@@ -256,6 +268,19 @@ function lilahcraft_render_field( $args ) {
 	$key   = $args['key'];
 	$value = lilahcraft_setting( $key );
 	$id    = 'lilahcraft_' . $key;
+	if ( 'select' === $args['type'] ) {
+		$options = array(
+			'charcoal' => __( 'Charcoal (default)', 'lilahcraft' ),
+			'light'    => __( 'Light', 'lilahcraft' ),
+		);
+		printf( '<select id="%1$s" name="lilahcraft_settings[%2$s]" aria-describedby="%1$s_help">', esc_attr( $id ), esc_attr( $key ) );
+		foreach ( $options as $opt => $label ) {
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $opt ), selected( $value, $opt, false ), esc_html( $label ) );
+		}
+		echo '</select>';
+		printf( '<p class="description" id="%s_help">%s</p>', esc_attr( $id ), esc_html( $args['help'] ) );
+		return;
+	}
 	$type  = 'number' === $args['type'] ? 'number' : ( 'url' === $args['type'] ? 'url' : 'text' );
 	$class = 'number' === $type ? 'small-text' : ( 'url' === $type ? 'large-text code' : 'regular-text' );
 	if ( 'cb_url' === $key ) {

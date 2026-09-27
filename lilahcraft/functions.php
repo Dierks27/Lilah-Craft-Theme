@@ -4,6 +4,7 @@
  *
  * inc/settings.php  Settings > LilahCraft
  * inc/ping.php      Java server list ping for the header status
+ * inc/activity.php  player counts over the day ("When are people on?" on Play)
  * inc/feeds.php     /wp-json/lilahcraft/v1/{market,minis,status}
  * inc/setup.php     creates the pages and sets Reading on activation or update, names the page templates
  * inc/assets.php    styles and scripts, per page
@@ -19,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require get_template_directory() . '/inc/settings.php';
 require get_template_directory() . '/inc/ping.php';
+require get_template_directory() . '/inc/activity.php';
 require get_template_directory() . '/inc/feeds.php';
 require get_template_directory() . '/inc/setup.php';
 require get_template_directory() . '/inc/assets.php';
@@ -37,6 +39,17 @@ add_action(
 	'init',
 	function () {
 		register_block_pattern_category( 'lilahcraft', array( 'label' => __( 'LilahCraft', 'lilahcraft' ) ) );
+	}
+);
+
+// Settings > LilahCraft > Hero style: Light swaps the hero and header tokens (site.css .lc-hero-light).
+add_filter(
+	'body_class',
+	function ( $classes ) {
+		if ( 'light' === lilahcraft_setting( 'hero_style' ) ) {
+			$classes[] = 'lc-hero-light';
+		}
+		return $classes;
 	}
 );
 
