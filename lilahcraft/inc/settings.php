@@ -27,6 +27,7 @@ function lilahcraft_defaults() {
 		'cb_url'        => 'https://github.com/Dierks27/CraftBridge-Client/releases/download/v{version}/craftbridge-client-{mc}-{loader}-{version}.jar',
 		'cache_seconds' => 60,
 		'hero_style'    => 'charcoal',
+		'feed_token'    => '',
 	);
 }
 
@@ -56,6 +57,7 @@ function lilahcraft_setting_labels() {
 		'cb_version'    => __( 'CraftBridge Client version', 'lilahcraft' ),
 		'cb_url'        => __( 'CraftBridge download URL pattern', 'lilahcraft' ),
 		'hero_style'    => __( 'Hero style', 'lilahcraft' ),
+		'feed_token'    => __( 'Feed token', 'lilahcraft' ),
 	);
 }
 
@@ -175,6 +177,14 @@ function lilahcraft_sanitize_settings( $in ) {
 		$out['cache_seconds'] = lilahcraft_setting_rejected( 'cache_seconds', __( 'it must be a whole number from 5 to 3600.', 'lilahcraft' ) );
 	}
 
+	// A shared secret for HomeCraftMgmt: printable, no spaces. Blank means none.
+	$token = $val( 'feed_token' );
+	if ( '' === $token || preg_match( '/^[\x21-\x7E]{8,200}$/', $token ) ) {
+		$out['feed_token'] = $token;
+	} else {
+		$out['feed_token'] = lilahcraft_setting_rejected( 'feed_token', __( 'it must be 8 to 200 characters with no spaces.', 'lilahcraft' ) );
+	}
+
 	// Only the two looks the design draws.
 	$hero = $val( 'hero_style' );
 	if ( '' === $hero || in_array( $hero, array( 'charcoal', 'light' ), true ) ) {
@@ -232,6 +242,7 @@ add_action(
 		$fields = array(
 			array( 'market_url', $l['market_url'], 'lilahcraft_feeds', 'url', __( 'The HomeCraftMgmt dashboard\'s /api/market address. Leave blank to show labelled sample data.', 'lilahcraft' ) ),
 			array( 'minis_url', $l['minis_url'], 'lilahcraft_feeds', 'url', __( 'The HomeCraftMgmt dashboard\'s /api/minis address. Leave blank to show labelled sample data.', 'lilahcraft' ) ),
+			array( 'feed_token', $l['feed_token'], 'lilahcraft_feeds', 'password', __( 'Optional. If HomeCraftMgmt is set up with a token, paste the same token here: WordPress sends it with every feed request (as Authorization: Bearer). Visitors never see it. Leave blank for none.', 'lilahcraft' ) ),
 			array( 'cache_seconds', $l['cache_seconds'], 'lilahcraft_feeds', 'number', __( 'How long WordPress keeps a copy of each feed before asking again. Visitors never reach your server directly.', 'lilahcraft' ) ),
 			array( 'server_host', $l['server_host'], 'lilahcraft_server', 'text', __( 'Pinged for the player count in the header. If the ping fails, the count is hidden.', 'lilahcraft' ) ),
 			array( 'server_port', $l['server_port'], 'lilahcraft_server', 'number', __( 'Java port, usually 25565.', 'lilahcraft' ) ),
@@ -268,6 +279,29 @@ function lilahcraft_render_field( $args ) {
 	$key   = $args['key'];
 	$value = lilahcraft_setting( $key );
 	$id    = 'lilahcraft_' . $key;
+	if ( 'password' === $args['type'] ) {
+		printf(
+			'<input type="password" id="%1$s" name="lilahcraft_settings[%2$s]" value="%3$s" class="regular-text code" autocomplete="new-password" spellcheck="false" aria-describedby="%1$s_help">',
+			esc_attr( $id ),
+			esc_attr( $key ),
+			esc_attr( (string) $value )
+		);
+		printf( '<p class="description" id="%s_help">%s</p>', esc_attr( $id ), esc_html( $args['help'] ) );
+		// A token sent over plain http to somewhere on the internet can be read on the way.
+		if ( '' !== (string) $value ) {
+			foreach ( array( 'market_url', 'minis_url' ) as $feed_key ) {
+				$feed_url = (string) lilahcraft_setting( $feed_key );
+				$host     = (string) wp_parse_url( $feed_url, PHP_URL_HOST );
+				$is_http  = 0 === stripos( $feed_url, 'http://' );
+				$is_local = '' === $host || false === strpos( $host, '.' ) || preg_match( '/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/', $host );
+				if ( $is_http && ! $is_local ) {
+					printf( '<p class="description"><strong>%s</strong></p>', esc_html__( 'A feed address starts with http://, so the token travels unencrypted. Use https:// if the feed crosses the internet.', 'lilahcraft' ) );
+					break;
+				}
+			}
+		}
+		return;
+	}
 	if ( 'select' === $args['type'] ) {
 		$options = array(
 			'charcoal' => __( 'Charcoal (default)', 'lilahcraft' ),

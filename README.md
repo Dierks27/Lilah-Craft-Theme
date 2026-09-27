@@ -30,6 +30,7 @@ This works because `style.css` has `Update URI: https://github.com/Dierks27/Lila
 |---|---|
 | Market feed URL | HomeCraftMgmt's `/api/market` address. Blank = the Market page and the Home board show sample data, labelled "Sample data". |
 | Minis feed URL | HomeCraftMgmt's `/api/minis` address. Blank = labelled sample data. |
+| Feed token | Optional shared secret. When HomeCraftMgmt is set up with a token, paste the same one here; WordPress sends it with every feed request as `Authorization: Bearer …`. Visitors never see it. Use https feed addresses when the feed crosses the internet. |
 | Cache seconds | How long WordPress keeps each feed before asking again (default 60). |
 | Server address / port | Pinged for the header's player count (default `mc.lilahcraft.com`, `25565`). When the ping fails, the count is hidden. |
 | Minecraft version | The version the server is on, shown on Downloads. Blank hides that line. |
@@ -43,7 +44,7 @@ Under each feed URL the settings page says when the last fetch worked or why it 
 
 Browsers never talk to the game server. WordPress fetches, caches and serves same-origin routes:
 
-- `GET /wp-json/lilahcraft/v1/market`: the Market feed. Cached for the configured seconds. The last good copy is kept, and if a fetch fails it is served with `"stale": true`. No URL set: `{ "sample": true }`.
+- `GET /wp-json/lilahcraft/v1/market`: the Market feed (with `history7d` and `history30d` passed on when HomeCraftMgmt sends them; the Market page then turns on its 7D and 30D ranges). Cached for the configured seconds. The last good copy is kept, and if a fetch fails it is served with `"stale": true`. No URL set: `{ "sample": true }`.
 - `GET /wp-json/lilahcraft/v1/minis`: the same for the Minis feed. Only counts are passed on, never owners.
 - `GET /wp-json/lilahcraft/v1/status`: a Java server list ping from PHP (3 second timeout, cached 60 seconds): `{ online, players, max, version }`.
 

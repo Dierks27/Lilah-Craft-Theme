@@ -153,7 +153,7 @@ function lilahcraft_fetch_feed( $feed, $url ) {
 		array(
 			'timeout'     => 5,
 			'redirection' => 2,
-			'headers'     => array( 'Accept' => 'application/json' ),
+			'headers'     => lilahcraft_feed_headers(),
 			'user-agent'  => 'LilahCraft site/' . wp_get_theme( get_template() )->get( 'Version' ),
 		)
 	);
@@ -212,7 +212,51 @@ function lilahcraft_int( $n, $default = 0 ) {
 }
 
 /**
+ * Request headers for a feed: JSON, plus the shared secret when Settings > LilahCraft has one
+ * (HomeCraftMgmt checks it; visitors never see it).
+ *
+ * @return array
+ */
+function lilahcraft_feed_headers() {
+	$headers = array( 'Accept' => 'application/json' );
+	$token   = (string) lilahcraft_setting( 'feed_token' );
+	if ( '' !== $token ) {
+		$headers['Authorization'] = 'Bearer ' . $token;
+	}
+	return $headers;
+}
+
+/**
+ * Clean a price history: the newest $max points, oldest first, as { t, p, s }.
+ *
+ * @param mixed $list Points from the feed.
+ * @param int   $max  Most points kept.
+ * @return array
+ */
+function lilahcraft_clean_points( $list, $max ) {
+	$out = array();
+	if ( ! is_array( $list ) ) {
+		return $out;
+	}
+	foreach ( array_slice( $list, -$max ) as $h ) {
+		if ( ! is_array( $h ) || null === lilahcraft_num( isset( $h['p'] ) ? $h['p'] : null ) ) {
+			continue;
+		}
+		$out[] = array(
+			't' => lilahcraft_int( isset( $h['t'] ) ? $h['t'] : 0 ),
+			'p' => (float) $h['p'],
+			's' => lilahcraft_int( isset( $h['s'] ) ? $h['s'] : 0 ),
+		);
+	}
+	return $out;
+}
+
+/**
  * Keep only the Market fields the site uses.
+ *
+ * history is the last 48 hours (96 half-hour points). history7d (hourly, up to 168 points) and
+ * history30d (every 6 hours, up to 120 points) are passed on only when the feed has them; the
+ * Market page turns its 7D and 30D ranges on when they're there.
  *
  * @param array $j Decoded feed.
  * @return array|WP_Error
@@ -231,19 +275,7 @@ function lilahcraft_clean_market( $j ) {
 		if ( '' === $id || null === $price ) {
 			continue;
 		}
-		$history = array();
-		if ( isset( $it['history'] ) && is_array( $it['history'] ) ) {
-			foreach ( array_slice( $it['history'], -96 ) as $h ) {
-				if ( ! is_array( $h ) || null === lilahcraft_num( isset( $h['p'] ) ? $h['p'] : null ) ) {
-					continue;
-				}
-				$history[] = array(
-					't' => lilahcraft_int( isset( $h['t'] ) ? $h['t'] : 0 ),
-					'p' => (float) $h['p'],
-					's' => lilahcraft_int( isset( $h['s'] ) ? $h['s'] : 0 ),
-				);
-			}
-		}
+		$history = lilahcraft_clean_points( isset( $it['history'] ) ? $it['history'] : null, 96 );
 		$name    = lilahcraft_text( isset( $it['name'] ) ? $it['name'] : '' );
 		$stock   = isset( $it['stock'] ) ? lilahcraft_int( $it['stock'], null ) : null;
 		$max     = isset( $it['maxStock'] ) ? lilahcraft_int( $it['maxStock'], null ) : null;
@@ -259,6 +291,13 @@ function lilahcraft_clean_market( $j ) {
 			'change24h' => lilahcraft_num( isset( $it['change24h'] ) ? $it['change24h'] : null ),
 			'history'   => $history,
 		);
+		$last = count( $items ) - 1;
+		foreach ( array( 'history7d' => 168, 'history30d' => 120 ) as $key => $max ) {
+			$points = lilahcraft_clean_points( isset( $it[ $key ] ) ? $it[ $key ] : null, $max );
+			if ( $points ) {
+				$items[ $last ][ $key ] = $points;
+			}
+		}
 	}
 	$refresh = isset( $j['refreshSeconds'] ) ? lilahcraft_int( $j['refreshSeconds'], 30 ) : 30;
 	return array(
