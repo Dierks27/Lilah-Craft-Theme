@@ -1,9 +1,9 @@
 <!-- wp:template-part {"slug":"header","tagName":"div"} /-->
 
 <!-- wp:group {"tagName":"main","className":"lc-main lc-main--news"} -->
-<main class="wp-block-group lc-main lc-main--news"><!-- wp:group {"className":"lc-wrap"} -->
-<div class="wp-block-group lc-wrap"><!-- wp:group {"className":"lc-pagehead"} -->
-<div class="wp-block-group lc-pagehead"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<main class="wp-block-group lc-main lc-main--news"><!-- wp:group {"tagName":"section","className":"lc-hero lc-mat--wool"} -->
+<section class="wp-block-group lc-hero lc-mat--wool"><!-- wp:group {"className":"lc-wrap lc-hero-in"} -->
+<div class="wp-block-group lc-wrap lc-hero-in"><!-- wp:paragraph {"className":"lc-kicker"} -->
 <p class="lc-kicker">News</p>
 <!-- /wp:paragraph -->
 
@@ -14,15 +14,15 @@
 <!-- wp:paragraph {"className":"lc-lede"} -->
 <p class="lc-lede">Updates, new Minis and events on the server.</p>
 <!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-wrap lc-news-layout"} -->
-<div class="wp-block-group lc-wrap lc-news-layout"><!-- wp:group {"className":"lc-news-feed"} -->
+<!-- wp:group {"className":"lc-wrap lc-sec lc-news-layout"} -->
+<div class="wp-block-group lc-wrap lc-sec lc-news-layout"><!-- wp:group {"className":"lc-news-feed"} -->
 <div class="wp-block-group lc-news-feed"><!-- wp:query {"queryId":21,"query":{"perPage":1,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"ignore","inherit":false},"className":"lc-news-top"} -->
 <div class="wp-block-query lc-news-top"><!-- wp:post-template {"className":"lc-news-list"} -->
-<!-- wp:group {"className":"lc-news-feature"} -->
-<div class="wp-block-group lc-news-feature"><!-- wp:group {"className":"lc-news-meta"} -->
+<!-- wp:group {"className":"lc-news-feature lc-dark"} -->
+<div class="wp-block-group lc-news-feature lc-dark"><!-- wp:group {"className":"lc-news-meta"} -->
 <div class="wp-block-group lc-news-meta"><!-- wp:post-date {"format":"M j, Y"} /-->
 
 <!-- wp:post-terms {"term":"category","prefix":"· ","className":"lc-news-topic"} /--></div>
@@ -32,7 +32,7 @@
 
 <!-- wp:post-excerpt {"className":"lc-news-feature-text"} /-->
 
-<!-- wp:read-more {"content":"Read the whole update","className":"lc-news-more"} /--></div>
+<!-- wp:read-more {"content":"Read the whole update","className":"lc-news-more lc-btn lc-btn--orange"} /--></div>
 <!-- /wp:group -->
 <!-- /wp:post-template -->
 

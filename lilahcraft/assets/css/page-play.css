@@ -1,66 +1,165 @@
-/* LilahCraft 2.0: Play page (templates/page-play.html).
+/* LilahCraft 2.1 "Pixel pop": Play page (templates/page-play.html). Material: stone.
    Every rule is scoped under .lc-main--play (the editor loads all page files).
-   Headings inside cards are styled by position, not by class, so a card Jeff duplicates
-   or adds in the Site Editor looks right without extra classes.
-   Line heights match the design at desktop and tighten where titles can wrap
-   (1120px for the resource pack and mods headings, 920px for the rest). */
+   Headings and cards inside the world, mod and parent grids are styled by position, not by class,
+   so a card Jeff duplicates or adds in the Site Editor looks right without extra classes. */
 
 /* The Site Editor gives flow-layout children a 24px top margin that the front end doesn't;
    spacing here comes from flex and grid gaps, so the editor matches the page. */
 .lc-main--play.is-layout-flow>*,
 .lc-main--play .is-layout-flow>*{margin-block:0}
 
-.lc-main--play .lc-pagehead .lc-lede{max-width:640px}
+/* ---------- Getting in: the two path cards (loud boxes: Java orange, Bedrock pink) ---------- */
+.lc-main--play .lc-play-paths{gap:34px;align-items:stretch}
+.lc-main--play .lc-play-path{--step:var(--orange);display:flex;flex-direction:column;gap:16px;padding:30px;min-width:0}
+.lc-main--play .lc-play-path--bedrock{--step:var(--pink)}
+.lc-main--play .lc-play-path .lc-play-who{margin-top:-6px;font-size:16px;color:var(--muted)}
+/* Numbered steps in square pixel badges */
+.lc-main--play .lc-play-steps{list-style:none;counter-reset:lc-step;display:flex;flex-direction:column;gap:10px;margin:0;padding:0;font-size:17px;color:var(--ink)}
+.lc-main--play .lc-play-steps>li{position:relative;counter-increment:lc-step;min-height:28px;padding-left:42px}
+.lc-main--play .lc-play-steps>li::before{content:counter(lc-step);position:absolute;left:0;top:0;width:28px;height:28px;display:grid;place-items:center;background:var(--step);color:var(--charcoal);box-shadow:inset -3px -3px 0 rgba(38,36,43,.28);font-family:var(--mono);font-weight:700;font-size:14px;line-height:1}
+/* The address in a box, the copy button beside it (under it when there's no room) */
+.lc-main--play .lc-play-addr{display:flex;flex-wrap:wrap;align-items:stretch;margin-top:4px}
+.lc-main--play .lc-play-addr-box{flex:999 1 240px;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;min-height:66px;padding:9px 16px;background:var(--charcoal);border:2px solid var(--purple);color:#fff}
+.lc-main--play .lc-play-addr-label{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark)}
+.lc-main--play .lc-play-addr-val{font-family:var(--mono);font-weight:700;font-size:20px;line-height:1.3;color:#fff}
+.lc-main--play .lc-play-addr .lc-btn{flex:1 0 auto;min-width:164px;min-height:52px}
+.lc-main--play .lc-play-addr :focus-visible{outline-color:var(--purple)}
+/* The copy button needs the script; without it the address is still there to select. (Shown in the Site Editor.) */
+html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .lc-btn{display:none}
+/* Bedrock's one-tap link */
+.lc-main--play .lc-play-tap{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.lc-main--play .lc-play-tap .lc-btn{flex:none}
+.lc-main--play .lc-play-tap-note{flex:1 1 220px;font-size:15px;color:var(--muted)}
+.lc-main--play .lc-play-path .lc-play-pathnote{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
 
-/* ---------- Getting in: the two path cards ---------- */
-.lc-main--play .lc-play-path{--path-accent:var(--cyan);gap:14px;padding:30px;border-top:6px solid var(--path-accent)}
-.lc-main--play .lc-play-path--bedrock{--path-accent:var(--pink)}
-.lc-main--play .lc-play-path h2{font-size:28px;font-weight:800;line-height:1.55;letter-spacing:-.01em}
-.lc-main--play .lc-play-path .lc-play-who{font-size:16px;color:var(--soft)}
-.lc-main--play .lc-play-steps{display:flex;flex-direction:column;gap:8px;margin:0;padding-left:22px;font-size:17px;color:var(--ink)}
-.lc-main--play .lc-play-addrbox{display:flex;flex-direction:column;gap:2px;padding:14px 16px;background:var(--night);border-radius:6px}
-.lc-main--play .lc-play-addrbox p{color:var(--on-night-soft);font-size:13px}
-.lc-main--play .lc-play-addrbox .lc-addr{color:var(--cyan);font-size:18px}
-.lc-main--play .lc-play-path .lc-play-pathnote{font-size:15px;color:var(--soft)}
+/* ---------- When are people on? (hidden until the site has enough samples) ---------- */
+.lc-main--play .lc-play-act{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:24px 48px;align-items:end;padding:28px 30px}
+.lc-main--play .lc-play-act-text{display:flex;flex-direction:column;gap:12px;align-self:center}
+.lc-main--play .lc-play-act-busy{font-size:20px;font-weight:800;line-height:1.5;color:var(--ink)}
+.lc-main--play .lc-play-act-busy .lc-hl{white-space:nowrap}
+.lc-main--play .lc-play-act-bars{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:4px;align-items:end;height:150px;border-bottom:3px solid var(--charcoal)}
+.lc-main--play .lc-play-act-bars>span{display:block;min-height:0;background:var(--purple);box-shadow:inset -3px 0 0 var(--purple-deep)}
+.lc-main--play .lc-play-act-bars>span.is-peak{background:var(--orange);box-shadow:inset -3px 0 0 var(--orange-deep)}
+.lc-main--play .lc-play-act-bars>span.is-none{height:6px;background:repeating-linear-gradient(90deg,var(--mid) 0 3px,transparent 3px 6px);box-shadow:none}
+.lc-main--play .lc-play-act-axis{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:4px;margin-top:8px;font-family:var(--mono);font-weight:600;font-size:12px;line-height:1.2;color:var(--muted);white-space:nowrap}
+/* Forced colours drop backgrounds, which is all a bar is */
+@media (forced-colors:active){
+  .lc-main--play .lc-play-act-bars>span{forced-color-adjust:none;background:CanvasText;box-shadow:none}
+  .lc-main--play .lc-play-act-bars>span.is-peak{background:Highlight}
+  .lc-main--play .lc-play-act-bars>span.is-none{background:repeating-linear-gradient(90deg,CanvasText 0 3px,transparent 3px 6px)}
+}
 
 /* ---------- The worlds: one card (group) per world, any number of them ---------- */
-.lc-main--play .lc-play-worlds>.wp-block-group{display:flex;flex-direction:column;gap:10px;padding:28px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
-.lc-main--play .lc-play-worlds h3{font-size:24px;font-weight:800;line-height:1.55;letter-spacing:0}
+.lc-main--play .lc-play-worlds>.wp-block-group{display:flex;flex-direction:column;gap:10px;padding:24px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+.lc-main--play .lc-play-worlds h3{font-family:var(--display);font-size:24px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
 .lc-main--play .lc-play-worlds p{font-size:17px;color:var(--text)}
+/* The stone strip on top of a card bleeds to its edges (the flow-margin reset above would zero its margins) */
+.lc-main--play .lc-play-worlds .lc-strip{margin:-24px -24px 6px}
+
+/* ---------- Your first day: charcoal band, the checklist on a loud white board ---------- */
+.lc-main--play .lc-play-fd{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:32px 64px;align-items:start}
+.lc-main--play .lc-play-fd-intro{padding-top:8px}
+.lc-main--play .lc-sec--dark .lc-kicker{color:var(--pink)}
+.lc-main--play .lc-sec--dark .lc-lede,
+.lc-main--play .lc-sec--dark .lc-note{color:var(--muted-dark)}
+.lc-main--play .lc-play-check{display:flex;flex-direction:column;min-width:0}
+.lc-main--play .lc-play-check-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px;padding:16px 22px}
+.lc-main--play .lc-play-check-title{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.3;letter-spacing:-.01em}
+.lc-main--play .lc-play-check-count{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink)}
+/* Six cells fill as items are ticked, in the orange, pink, purple of the current-page bars */
+.lc-main--play .lc-play-check-bar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));height:16px;border-block:3px solid var(--charcoal);background:var(--light)}
+.lc-main--play .lc-play-check-bar i{display:block;background:transparent}
+.lc-main--play .lc-play-check-bar i+i{border-left:3px solid var(--charcoal)}
+.lc-main--play .lc-play-check-bar i.is-on:nth-child(3n+1){background:var(--orange)}
+.lc-main--play .lc-play-check-bar i.is-on:nth-child(3n+2){background:var(--pink)}
+.lc-main--play .lc-play-check-bar i.is-on:nth-child(3n){background:var(--purple)}
+/* Without the script there's no bar: a plain rule under the title instead */
+.lc-main--play .lc-play-check-bar[hidden]+.lc-play-check-list{border-top:3px solid var(--charcoal)}
+.lc-main--play .lc-play-check-list{list-style:none;margin:0;padding:0}
+.lc-main--play .lc-play-check-list>li+li{border-top:1px solid var(--line)}
+.lc-main--play .lc-play-check-item{display:flex;align-items:center;gap:14px;min-height:58px;padding:10px 22px;font-size:17px;font-weight:600;color:var(--ink);cursor:pointer}
+.lc-main--play .lc-play-check-item:hover{background:var(--page)}
+.lc-main--play .lc-play-check-item input{flex:none;-webkit-appearance:none;appearance:none;width:28px;height:28px;margin:0;border:3px solid var(--charcoal);border-radius:0;background:#fff;cursor:pointer}
+.lc-main--play .lc-play-check-item input:checked{background:var(--purple) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M6 1h2v1H6zM5 2h2v1H5zM4 3h2v1H4zM0 3h1v1H0zM0 4h2v1H0zM3 4h2v1H3zM1 5h3v1H1zM2 6h1v1H2z'/%3E%3C/svg%3E") center/16px 16px no-repeat;border-color:var(--purple-deep)}
+.lc-main--play .lc-play-check-item input:focus-visible{outline:3px solid var(--purple);outline-offset:3px}
+.lc-main--play .lc-play-check-item code{font-size:.9em;font-weight:600;color:var(--purple-deep);white-space:nowrap}
+.lc-main--play .lc-play-check-item input:checked+span{color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--mid)}
+.lc-main--play .lc-play-check-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px 20px;padding:16px 22px;border-top:3px solid var(--charcoal)}
+.lc-main--play .lc-play-check-saved{font-size:15px;color:var(--muted)}
+.lc-main--play .lc-play-check :focus-visible{outline-color:var(--purple)}
+@media (forced-colors:active){
+  .lc-main--play .lc-play-check-item input{-webkit-appearance:auto;appearance:auto;width:22px;height:22px}
+  .lc-main--play .lc-play-check-bar i.is-on{forced-color-adjust:none;background:Highlight}
+}
 
 /* ---------- Resource pack and mods ---------- */
-.lc-main--play .lc-play-more{gap:40px}
+.lc-main--play .lc-play-more{gap:48px}
 .lc-main--play .lc-play-col{display:flex;flex-direction:column;gap:18px;min-width:0}
-.lc-main--play .lc-play-col>h2{line-height:1.55}
 .lc-main--play .lc-play-col .lc-actions{align-self:flex-start}
 .lc-main--play .lc-play-soon{gap:8px;padding:22px}
-.lc-main--play .lc-play-mods{display:flex;flex-direction:column;gap:10px}
-.lc-main--play .lc-play-mods>.wp-block-group{display:flex;flex-direction:column;gap:2px;padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
+/* The mods: one bordered list, a row per mod (a group each, so Jeff can add one) */
+.lc-main--play .lc-play-mods{display:flex;flex-direction:column;background:#fff;border:3px solid var(--charcoal)}
+.lc-main--play .lc-play-mods>.wp-block-group{display:flex;flex-direction:column;gap:2px;padding:16px 20px;color:var(--ink)}
+.lc-main--play .lc-play-mods>.wp-block-group+.wp-block-group{border-top:1px solid var(--line)}
 .lc-main--play .lc-play-soon h3,
-.lc-main--play .lc-play-mods h3{font-family:var(--body);font-size:17px;font-weight:700;line-height:1.55;letter-spacing:0}
+.lc-main--play .lc-play-mods h3{font-family:var(--body);font-size:17px;font-weight:800;line-height:1.45;letter-spacing:0}
 .lc-main--play .lc-play-soon p,
 .lc-main--play .lc-play-mods p{font-size:16px;color:var(--text)}
 
-/* ---------- Page content (Pages > Play), e.g. the House rules pattern ----------
-   Empty page: the Post Content block renders nothing. The House rules pattern brings its
-   own wrapper; anything else Jeff adds gets the page width and gutter. */
-.lc-main--play .lc-rules>h2{line-height:1.55}
-.lc-main--play .lc-play-extra>:not(.lc-rules-wrap){width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
-.lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:72px}
+/* ---------- For parents: six plain facts, a card each ---------- */
+.lc-main--play .lc-play-parents-head .lc-lede{max-width:800px}
+.lc-main--play .lc-play-facts{gap:20px}
+.lc-main--play .lc-play-facts>.wp-block-group{display:flex;flex-direction:column;gap:8px;padding:22px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+.lc-main--play .lc-play-facts h3{font-family:var(--display);font-size:19px;font-weight:800;line-height:1.25;letter-spacing:-.01em}
+.lc-main--play .lc-play-facts h3::before{content:"";display:block;width:14px;height:14px;margin-bottom:12px;background:var(--orange)}
+.lc-main--play .lc-play-facts>:nth-child(3n+2) h3::before{background:var(--pink)}
+.lc-main--play .lc-play-facts>:nth-child(3n) h3::before{background:var(--purple)}
+.lc-main--play .lc-play-facts p{font-size:16px;color:var(--text)}
 
-/* The two-column headings wrap below about 1095px of content width, 1112px with a classic scrollbar, before the grid stacks at 920. */
-@media (max-width:1120px){
-  .lc-main--play .lc-play-col>h2{line-height:1.2}
+/* ---------- Page content (Pages > Play), e.g. the House rules pattern ----------
+   Empty page: the Post Content block renders nothing. It follows the gray For parents band, so it
+   brings its own space above. The House rules pattern has its own wrapper (and hides itself until a
+   rule is typed); anything else Jeff adds gets the page width and gutter. */
+.lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:64px}
+.lc-main--play .lc-play-extra>:not(.lc-rules-wrap){width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
+.lc-main--play .lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:64px}
+.lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:64px}
+
+@media (max-width:1100px){
+  .lc-main--play .lc-play-act{grid-template-columns:minmax(0,1fr)}
+  .lc-main--play .lc-play-fd{grid-template-columns:minmax(0,1fr)}
+  .lc-main--play .lc-play-fd-intro{padding-top:0;max-width:720px}
+  .lc-main--play .lc-play-check{max-width:760px}
+  .lc-main--play .lc-play-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:920px){
-  .lc-main--play .lc-play-path h2,
-  .lc-main--play .lc-play-worlds h3,
-  .lc-main--play .lc-rules>h2{line-height:1.2}
+  .lc-main--play .lc-play-paths{gap:28px}
+  .lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:52px}
+  .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:52px}
+  .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:52px}
+}
+@media (max-width:640px){
+  .lc-main--play .lc-play-facts{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:520px){
-  .lc-main--play .lc-play-path{padding:22px}
-  .lc-main--play .lc-play-path h2{font-size:26px}
-  .lc-main--play .lc-play-worlds>.wp-block-group{padding:22px}
-  .lc-main--play .lc-play-addrbox .lc-addr{font-size:17px}
-  .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:48px}
+  .lc-main--play .lc-play-path{padding:22px 20px}
+  .lc-main--play .lc-play-addr-box{padding-inline:14px}
+  .lc-main--play .lc-play-addr-val{font-size:17px}
+  .lc-main--play .lc-play-addr .lc-btn{min-width:0}
+  .lc-main--play .lc-play-act{padding:22px 20px}
+  .lc-main--play .lc-play-act-bars{gap:2px;height:120px}
+  .lc-main--play .lc-play-act-axis{gap:2px}
+  .lc-main--play .lc-play-act-axis .is-minor{display:none}
+  .lc-main--play .lc-play-act-busy{font-size:18px}
+  .lc-main--play .lc-play-worlds>.wp-block-group{padding:20px}
+  .lc-main--play .lc-play-worlds .lc-strip{margin:-20px -20px 6px}
+  .lc-main--play .lc-play-worlds h3{font-size:21px}
+  .lc-main--play .lc-play-check-head,
+  .lc-main--play .lc-play-check-foot{padding-inline:18px}
+  .lc-main--play .lc-play-check-item{padding-inline:18px;font-size:16px}
+  .lc-main--play .lc-play-mods>.wp-block-group{padding:14px 16px}
+  .lc-main--play .lc-play-facts>.wp-block-group{padding:20px}
+  .lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:44px}
+  .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:44px}
+  .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:44px}
 }

@@ -35,6 +35,7 @@ This works because `style.css` has `Update URI: https://github.com/Dierks27/Lila
 | Minecraft version | The version the server is on, shown on Downloads. Blank hides that line. |
 | CraftBridge Client version | Shown on Downloads and used in the download links (default `0.4.0`). |
 | CraftBridge download URL pattern | `{version}`, `{mc}` and `{loader}` are filled in for each pick. If a file is missing, the button links to the release page instead. |
+| Hero style | Charcoal (default) or Light: the top band of every page and the header. |
 
 Under each feed URL the settings page says when the last fetch worked or why it failed.
 
@@ -47,6 +48,12 @@ Browsers never talk to the game server. WordPress fetches, caches and serves sam
 - `GET /wp-json/lilahcraft/v1/status`: a Java server list ping from PHP (3 second timeout, cached 60 seconds): `{ online, players, max, version }`.
 
 Only the fields the site uses are passed through; anything else in a feed is dropped.
+
+- `GET /wp-json/lilahcraft/v1/activity`: "When are people on?" on the Play page. WordPress keeps the highest player count of each hour from its own pings (plus a 15-minute background check) for 14 days, and serves the average day once it has at least three days of data. Counts only, never names.
+
+### Fonts and share cards
+
+The fonts (Unbounded, Figtree, JetBrains Mono, Silkscreen; SIL Open Font License, see `assets/fonts/OFL.txt`) are served from the theme, so pages make no requests to Google. Each page has a description and a 1200×630 share card (`assets/img/og/`) for Discord, iMessage and search results; a news post uses its own excerpt and featured image. If an SEO plugin is installed, the theme leaves those tags to it.
 
 ## Editing content
 
@@ -76,7 +83,9 @@ lilahcraft/
   templates/  front-page (Home), page-play, page-downloads, page-market, page-minis, page-arcade,
               page-guide, home (News), single, archive, page, index, 404
   patterns/   house-rules
-  assets/css  site.css (shared) + page-<name>.css
-  assets/js   site.js (shared), lc-data.js (feeds, sample data), page-<name>.js
-tools/check-theme.php   the checks the release runs (PHP lint, JSON, no bracket placeholders)
+  assets/css  fonts.css, site.css (shared) + page-<name>.css, editor.css (block editor only)
+  assets/js   site.js (shared), lc-data.js (feeds, sample data, symbols), page-<name>.js
+  assets/img  block textures (tex-*, strip-*), the Play QR code, share cards (og/)
+  assets/fonts  the four font families (woff2) and their licence
+tools/check-theme.php   the checks the release runs (PHP lint, JSON, no bracket placeholders, no old colours)
 ```

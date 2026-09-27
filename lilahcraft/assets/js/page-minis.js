@@ -1,4 +1,4 @@
-/* LilahCraft Minis page: the stat cards, the filters and the card grid, from LCData ('minis').
+/* LilahCraft Minis page: the hero's stat tiles, the filters and the card grid, from LCData ('minis').
    Cards are built once per Mini (and again only if that Mini changes) and only when first shown;
    a long list shows PAGE cards at a time with a "Show more Minis" button.
    Feed text goes in with textContent only. The feed has no owners and none are shown. */
@@ -134,13 +134,24 @@
     return e;
   }
 
+  /* Scarcity: a capped Mini that isn't sold out, with cap - printed <= max(3, ceil(cap / 10)) left.
+     Returns how many are left, or 0 when there's nothing to say. */
+  function leftOf(m) {
+    var s = m.src;
+    if (m.sold || !D.isNum(s.cap) || s.cap <= 0 || !D.isNum(s.printed)) { return 0; }
+    var left = Math.floor(s.cap - s.printed);
+    return left > 0 && left <= Math.max(3, Math.ceil(s.cap * 0.1)) ? left : 0;
+  }
+
   function buildCard(m) {
     var li = el('li', 'lc-mn-card lc-r--' + m.rkey);
     li.appendChild(M.head(m.src));
     li.appendChild(el('p', 'lc-mn-name', m.name));
     var pills = el('p', 'lc-mn-pills');
     pills.appendChild(el('span', 'lc-rarity', M.RARITIES[m.rkey].name));
-    if (m.sold) { pills.appendChild(el('span', 'lc-pill lc-pill--night', 'Sold out')); }
+    if (m.sold) { pills.appendChild(el('span', 'lc-pill lc-pill--dark', 'Sold out')); }
+    var left = leftOf(m);
+    if (left) { pills.appendChild(el('span', 'lc-pill lc-mn-left', 'Only ' + D.count(left) + ' left')); }
     li.appendChild(pills);
     var frac = M.printedFraction(m.src);
     var text = M.printedText(m.src);

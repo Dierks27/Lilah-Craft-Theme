@@ -1,9 +1,9 @@
 <!-- wp:template-part {"slug":"header","tagName":"div"} /-->
 
 <!-- wp:group {"tagName":"main","className":"lc-main lc-main--minis"} -->
-<main class="wp-block-group lc-main lc-main--minis"><!-- wp:group {"tagName":"section","className":"lc-wrap lc-mn-head"} -->
-<section class="wp-block-group lc-wrap lc-mn-head"><!-- wp:group {"className":"lc-mn-intro"} -->
-<div class="wp-block-group lc-mn-intro"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<main class="wp-block-group lc-main lc-main--minis"><!-- wp:group {"tagName":"section","className":"lc-hero lc-mat--amethyst"} -->
+<section class="wp-block-group lc-hero lc-mat--amethyst"><!-- wp:group {"className":"lc-wrap lc-hero-in"} -->
+<div class="wp-block-group lc-wrap lc-hero-in"><!-- wp:paragraph {"className":"lc-kicker"} -->
 <p class="lc-kicker">Collectibles</p>
 <!-- /wp:paragraph -->
 
@@ -13,8 +13,7 @@
 
 <!-- wp:paragraph {"className":"lc-lede"} -->
 <p class="lc-lede">Tiny collectible blocks. Every one is numbered, and each Mini has a cap. Once they're all printed, that's it. This is every Mini there is, straight from the Museum.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- /wp:paragraph -->
 
 <!-- wp:html -->
 <div class="lc-mn-statbox">
@@ -25,7 +24,8 @@
   </dl>
   <p class="lc-sample lc-mn-statnote" data-mn-statnote hidden></p>
 </div>
-<!-- /wp:html --></section>
+<!-- /wp:html --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group -->
 
 <!-- wp:group {"tagName":"section","className":"lc-wrap lc-mn-ladder"} -->
@@ -34,8 +34,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:group {"className":"lc-grid lc-cols-5 lc-gap-sm"} -->
-<div class="wp-block-group lc-grid lc-cols-5 lc-gap-sm"><!-- wp:group {"className":"lc-mn-rung lc-r--common"} -->
-<div class="wp-block-group lc-mn-rung lc-r--common"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<div class="wp-block-group lc-grid lc-cols-5 lc-gap-sm"><!-- wp:group {"className":"lc-card lc-card--sm lc-mn-rung lc-r--common"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-rung lc-r--common"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
 <h3 class="wp-block-heading lc-mn-rung-name">Common</h3>
 <!-- /wp:heading -->
 
@@ -44,8 +44,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-rung lc-r--uncommon"} -->
-<div class="wp-block-group lc-mn-rung lc-r--uncommon"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-rung lc-r--uncommon"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-rung lc-r--uncommon"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
 <h3 class="wp-block-heading lc-mn-rung-name">Uncommon</h3>
 <!-- /wp:heading -->
 
@@ -54,8 +54,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-rung lc-r--rare"} -->
-<div class="wp-block-group lc-mn-rung lc-r--rare"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-rung lc-r--rare"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-rung lc-r--rare"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
 <h3 class="wp-block-heading lc-mn-rung-name">Rare</h3>
 <!-- /wp:heading -->
 
@@ -64,8 +64,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-rung lc-r--epic"} -->
-<div class="wp-block-group lc-mn-rung lc-r--epic"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-rung lc-r--epic"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-rung lc-r--epic"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
 <h3 class="wp-block-heading lc-mn-rung-name">Epic</h3>
 <!-- /wp:heading -->
 
@@ -74,8 +74,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-rung lc-r--legendary"} -->
-<div class="wp-block-group lc-mn-rung lc-r--legendary"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-rung lc-r--legendary"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-rung lc-r--legendary"><!-- wp:heading {"level":3,"className":"lc-mn-rung-name"} -->
 <h3 class="wp-block-heading lc-mn-rung-name">Legendary</h3>
 <!-- /wp:heading -->
 
@@ -114,13 +114,13 @@
     </div>
     <label class="lc-check lc-mn-hide"><input type="checkbox" data-mn-hide> Hide sold out</label>
   </div>
-  <div class="lc-chips" role="group" aria-label="Rarity">
+  <div class="lc-chips lc-mn-chips" role="group" aria-label="Rarity">
     <button class="lc-chip" type="button" aria-pressed="true" data-mn-rarity="all">All rarities</button>
-    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="common">Common</button>
-    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="uncommon">Uncommon</button>
-    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="rare">Rare</button>
-    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="epic">Epic</button>
-    <button class="lc-chip" type="button" aria-pressed="false" data-mn-rarity="legendary">Legendary</button>
+    <button class="lc-chip lc-r--common" type="button" aria-pressed="false" data-mn-rarity="common"><span class="lc-mn-sw" aria-hidden="true"></span>Common</button>
+    <button class="lc-chip lc-r--uncommon" type="button" aria-pressed="false" data-mn-rarity="uncommon"><span class="lc-mn-sw" aria-hidden="true"></span>Uncommon</button>
+    <button class="lc-chip lc-r--rare" type="button" aria-pressed="false" data-mn-rarity="rare"><span class="lc-mn-sw" aria-hidden="true"></span>Rare</button>
+    <button class="lc-chip lc-r--epic" type="button" aria-pressed="false" data-mn-rarity="epic"><span class="lc-mn-sw" aria-hidden="true"></span>Epic</button>
+    <button class="lc-chip lc-r--legendary" type="button" aria-pressed="false" data-mn-rarity="legendary"><span class="lc-mn-sw" aria-hidden="true"></span>Legendary</button>
   </div>
   <p class="lc-sample lc-mn-note" data-mn-note>Loading the Minis…</p>
   <ul class="lc-grid lc-cols-4 lc-gap-md lc-mn-grid" role="list" aria-busy="true" data-mn-grid></ul>
@@ -134,8 +134,8 @@
 <!-- /wp:html --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--night"} -->
-<section class="wp-block-group lc-sec lc-sec--night"><!-- wp:group {"className":"lc-wrap lc-stack lc-mn-how"} -->
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--dark"} -->
+<section class="wp-block-group lc-sec lc-sec--dark"><!-- wp:group {"className":"lc-wrap lc-stack lc-mn-how"} -->
 <div class="wp-block-group lc-wrap lc-stack lc-mn-how"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">How to get one</h2>
 <!-- /wp:heading -->
@@ -202,7 +202,11 @@
 
 <!-- wp:group {"tagName":"section","className":"lc-wrap lc-sec lc-grid lc-cols-2 lc-mn-lore"} -->
 <section class="wp-block-group lc-wrap lc-sec lc-grid lc-cols-2 lc-mn-lore"><!-- wp:group {"className":"lc-card lc-mn-info"} -->
-<div class="wp-block-group lc-card lc-mn-info"><!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
+<div class="wp-block-group lc-card lc-mn-info"><!-- wp:html -->
+<div class="lc-strip lc-strip--amethyst" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
 <h2 class="wp-block-heading lc-h2 lc-h2--sm">Wild Minis</h2>
 <!-- /wp:heading -->
 
@@ -230,7 +234,11 @@
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"lc-card lc-mn-info"} -->
-<div class="wp-block-group lc-card lc-mn-info"><!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
+<div class="wp-block-group lc-card lc-mn-info"><!-- wp:html -->
+<div class="lc-strip lc-strip--amethyst" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
 <h2 class="wp-block-heading lc-h2 lc-h2--sm">Grades and Shiny</h2>
 <!-- /wp:heading -->
 
@@ -258,8 +266,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:group {"className":"lc-grid lc-cols-5 lc-mn-homegrid"} -->
-<div class="wp-block-group lc-grid lc-cols-5 lc-mn-homegrid"><!-- wp:group {"className":"lc-mn-home"} -->
-<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<div class="wp-block-group lc-grid lc-cols-5 lc-mn-homegrid"><!-- wp:group {"className":"lc-card lc-card--sm lc-mn-home"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
 <h3 class="wp-block-heading lc-mn-home-name">The Museum</h3>
 <!-- /wp:heading -->
 
@@ -268,8 +276,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-home"} -->
-<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-home"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
 <h3 class="wp-block-heading lc-mn-home-name">Display Case</h3>
 <!-- /wp:heading -->
 
@@ -278,8 +286,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-home"} -->
-<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-home"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
 <h3 class="wp-block-heading lc-mn-home-name">Vending Machine</h3>
 <!-- /wp:heading -->
 
@@ -288,8 +296,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-home"} -->
-<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-home"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
 <h3 class="wp-block-heading lc-mn-home-name">Auction House</h3>
 <!-- /wp:heading -->
 
@@ -298,8 +306,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-mn-home"} -->
-<div class="wp-block-group lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-mn-home"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-mn-home"><!-- wp:heading {"level":3,"className":"lc-mn-home-name"} -->
 <h3 class="wp-block-heading lc-mn-home-name">Card Binder</h3>
 <!-- /wp:heading -->
 

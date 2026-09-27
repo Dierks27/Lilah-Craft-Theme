@@ -1,9 +1,9 @@
 <!-- wp:template-part {"slug":"header","tagName":"div"} /-->
 
-<!-- wp:group {"tagName":"main","className":"lc-main lc-main--market"} -->
-<main class="wp-block-group lc-main lc-main--market"><!-- wp:group {"tagName":"section","className":"lc-wrap mk-head"} -->
-<section class="wp-block-group lc-wrap mk-head"><!-- wp:group {"className":"mk-intro"} -->
-<div class="wp-block-group mk-intro"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<!-- wp:group {"tagName":"main","className":"lc-main lc-main--market lc-dark"} -->
+<main class="wp-block-group lc-main lc-main--market lc-dark"><!-- wp:group {"tagName":"section","className":"lc-hero lc-mat--copper"} -->
+<section class="wp-block-group lc-hero lc-mat--copper"><!-- wp:group {"className":"lc-wrap lc-hero-in"} -->
+<div class="wp-block-group lc-wrap lc-hero-in"><!-- wp:paragraph {"className":"lc-kicker"} -->
 <p class="lc-kicker">Market</p>
 <!-- /wp:paragraph -->
 
@@ -13,95 +13,198 @@
 
 <!-- wp:paragraph {"className":"lc-lede"} -->
 <p class="lc-lede">Every raw item has real stock. Sell some in and the price drops. Buy it out and the price climbs. Sold out means nobody can buy it until somebody mines more.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- /wp:paragraph -->
 
 <!-- wp:html -->
 <p class="mk-status" data-mk-status data-mode="loading"><span class="mk-dot" aria-hidden="true"></span><span data-mk-status-text>Loading prices…</span></p>
-<!-- /wp:html --></section>
+<!-- /wp:html --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group -->
 
 <!-- wp:html -->
-<div class="lc-wrap mk-board" data-mk>
-  <dl class="lc-grid lc-cols-4 lc-gap-md mk-stats">
-    <div class="mk-stat"><dt>Biggest gain today</dt><dd class="mk-stat-value" data-mk-stat="gain"></dd><dd class="mk-stat-sub" data-mk-sub="gain"></dd></div>
-    <div class="mk-stat"><dt>Biggest drop today</dt><dd class="mk-stat-value" data-mk-stat="drop"></dd><dd class="mk-stat-sub" data-mk-sub="drop"></dd></div>
-    <div class="mk-stat"><dt>Sold out</dt><dd class="mk-stat-value" data-mk-stat="out"></dd><dd class="mk-stat-sub" data-mk-sub="out"></dd></div>
-    <div class="mk-stat"><dt>Items on the board</dt><dd class="mk-stat-value" data-mk-stat="count"></dd><dd class="mk-stat-sub" data-mk-sub="count"></dd></div>
-  </dl>
-  <div class="mk-layout">
-    <div class="mk-main">
-      <div class="mk-controls">
-        <div class="lc-field mk-find">
-          <label class="lc-label" for="mkFind">Find an item</label>
-          <input class="lc-input" id="mkFind" type="search" placeholder="Try diamond, oak, redstone…" autocomplete="off" spellcheck="false">
-        </div>
-        <div class="lc-field mk-sort">
-          <label class="lc-label" for="mkSort">Sort by</label>
-          <select class="lc-select" id="mkSort">
-            <option value="change">Biggest change today</option>
-            <option value="price">Price, high to low</option>
-            <option value="stock">Lowest stock</option>
-            <option value="name">Name</option>
-          </select>
-        </div>
-      </div>
-      <div class="lc-chips mk-chips" role="group" aria-label="Category" data-mk-chips></div>
-      <div class="mk-card">
-        <table class="mk-table" role="table" data-mk-table>
-          <caption class="lc-sr">Market prices</caption>
-          <thead role="rowgroup">
-            <tr role="row"><th role="columnheader" scope="col" class="mk-c-item">Item</th><th role="columnheader" scope="col" class="mk-c-price">Price</th><th role="columnheader" scope="col" class="mk-c-chg">24h</th><th role="columnheader" scope="col" class="mk-c-spread">Sell · Buy</th><th role="columnheader" scope="col" class="mk-c-stock">Stock</th><th role="columnheader" scope="col" class="mk-c-spark">48 hours</th></tr>
-          </thead>
-          <tbody role="rowgroup" data-mk-rows></tbody>
-        </table>
-        <p class="mk-empty" data-mk-empty hidden></p>
-        <p class="mk-foot" data-mk-foot>Loading prices…</p>
-        <noscript><p class="mk-foot">The price board needs JavaScript to load.</p></noscript>
+<div class="mk-app" data-mk data-state="loading">
+  <div class="mk-tape" data-mk-tape>
+    <button class="mk-tape-btn" type="button" aria-pressed="false" data-mk-tape-btn><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path class="mk-i-pause" d="M3 2h4v12H3zM9 2h4v12H9z"/><path class="mk-i-play" d="M4 2l10 6-10 6z"/></svg><span class="lc-sr">Pause the ticker</span></button>
+    <div class="mk-tape-view">
+      <div class="mk-tape-track" data-mk-track>
+        <ul class="mk-tape-run" aria-label="Price ticker" data-mk-run></ul>
+        <ul class="mk-tape-run" aria-hidden="true" data-mk-run2></ul>
       </div>
     </div>
-    <div class="mk-side" data-mk-side>
-      <aside id="mkDetail" class="lc-board mk-detail" aria-label="Item detail" hidden>
-        <div class="mk-d-top">
-          <h2 class="mk-d-name" data-mk-d="name"></h2>
-          <p class="mk-d-badge" data-mk-d="badge"></p>
+  </div>
+
+  <div class="lc-wrap mk-body">
+    <p class="mk-loading" data-mk-loading>Loading prices…</p>
+    <noscript><p class="mk-loading">The price board needs JavaScript to load.</p></noscript>
+
+    <section class="mk-index" aria-label="Market summary" data-mk-index>
+      <div class="mk-lcx">
+        <div class="mk-lcx-head">
+          <span class="mk-cap">LCX · LilahCraft market index</span>
+          <button class="mk-info" type="button" aria-expanded="false" aria-controls="mkLcxHow" data-mk-info><span aria-hidden="true">?</span><span class="lc-sr">How the LCX is worked out</span></button>
+          <div class="mk-pop" id="mkLcxHow" hidden data-mk-pop>
+            <p>The LCX starts from 1,000 and moves with the whole market: 1,000 × (1 + the average 24-hour change of every item in stock ÷ 100). Sold-out items are left out, so 1,012.0 means prices are up 1.2% on average today.</p>
+          </div>
         </div>
-        <p class="mk-d-price"><span class="mk-d-big" data-mk-d="price"></span> <span class="mk-d-unit">market price</span></p>
-        <figure class="mk-d-chart" data-mk-d="chart">
-          <svg width="346" height="170" viewBox="0 0 346 170" role="img" aria-label="Price over the last 48 hours" data-mk-d="svg">
-            <line x1="0" y1="42" x2="346" y2="42" stroke="#23285e" stroke-width="1"></line>
-            <line x1="0" y1="85" x2="346" y2="85" stroke="#23285e" stroke-width="1"></line>
-            <line x1="0" y1="128" x2="346" y2="128" stroke="#23285e" stroke-width="1"></line>
-            <polygon fill="#1f3a63" data-mk-d="area"></polygon>
-            <polyline fill="none" stroke="#63e3ea" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" data-mk-d="line"></polyline>
-          </svg>
-          <figcaption class="mk-d-axis"><span data-mk-d="ago">48 hours ago</span><span class="mk-d-range" data-mk-d="range"></span><span>now</span></figcaption>
-        </figure>
-        <div class="mk-d-stock" data-mk-d="stockWrap">
-          <p class="mk-d-row"><span>Stock</span><span class="mk-d-strong" data-mk-d="stock"></span></p>
-          <span class="mk-d-bar" aria-hidden="true" data-mk-d="barWrap"><span data-mk-d="bar"></span></span>
+        <p class="mk-lcx-val"><span class="mk-lcx-num" data-mk-lcx></span> <span class="mk-lcx-ch" data-mk-lcx-ch></span></p>
+      </div>
+      <svg class="mk-lcx-spark" width="160" height="40" viewBox="0 0 160 40" aria-hidden="true" focusable="false"><polyline fill="none" stroke-width="2" stroke-linejoin="round" data-mk-lcx-line points=""/></svg>
+      <div class="mk-breadth">
+        <p class="mk-breadth-text"><span class="lc-up" data-mk-b="up"></span><span class="lc-flat" data-mk-b="flat"></span><span class="lc-down" data-mk-b="down"></span></p>
+        <p class="mk-breadth-bar" aria-hidden="true"><span class="mk-bw-up" data-mk-bw="up"></span><span class="mk-bw-flat" data-mk-bw="flat"></span><span class="mk-bw-down" data-mk-bw="down"></span></p>
+      </div>
+      <p class="mk-out"><span class="mk-cap">Sold out</span> <span class="mk-out-n" data-mk-out></span></p>
+      <p class="lc-sample mk-index-sample" data-mk-sample hidden>Sample data</p>
+    </section>
+
+    <div class="mk-grid" data-mk-grid>
+      <section class="mk-panel mk-listp" aria-label="Market list">
+        <div class="mk-find">
+          <label class="mk-cap" for="mkFind">Find an item</label>
+          <input class="mk-input" id="mkFind" type="search" placeholder="Symbol or name" autocomplete="off" spellcheck="false">
+          <div class="lc-chips mk-tabs" role="group" aria-label="Sector" data-mk-tabs></div>
+          <div class="mk-pickf">
+            <label class="mk-cap" for="mkPick">Item</label>
+            <select class="mk-input" id="mkPick" data-mk-pick></select>
+          </div>
         </div>
-        <div class="mk-d-trade" data-mk-d="trade">
-          <p class="mk-d-box" data-mk-d="sellBox"><span class="mk-d-lbl">You sell for</span> <span class="mk-d-val" data-mk-d="sell"></span></p>
-          <p class="mk-d-box" data-mk-d="buyBox"><span class="mk-d-lbl">You buy for</span> <span class="mk-d-val" data-mk-d="buy"></span></p>
+        <p class="mk-list-head" aria-hidden="true"><span>Symbol</span><span>Price</span><span>24h</span></p>
+        <ul class="mk-list" aria-label="Items" data-mk-list></ul>
+        <p class="mk-list-empty" data-mk-list-empty hidden></p>
+        <p class="mk-list-foot" data-mk-list-foot></p>
+      </section>
+
+      <section class="mk-center" aria-labelledby="mkName" data-mk-center>
+        <div class="mk-panel mk-quote">
+          <div class="mk-q-top">
+            <div class="mk-q-id">
+              <div class="mk-q-title">
+                <span class="mk-sym" data-mk-q="sym"></span>
+                <h2 class="mk-q-name" id="mkName" data-mk-q="name"></h2>
+                <span class="mk-q-sector" data-mk-q="sector"></span>
+              </div>
+              <p class="mk-q-price"><span class="mk-q-big" data-mk-q="price"></span> <span class="mk-q-ch" data-mk-q="change"></span></p>
+            </div>
+            <div class="mk-q-acts">
+              <button class="mk-act mk-watch" type="button" aria-pressed="false" data-mk-watch><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Watch</button>
+              <button class="mk-act mk-link" type="button" data-lc-copy="" data-lc-copied="Link copied!" data-mk-link>Copy link</button>
+            </div>
+          </div>
+          <div class="mk-range" role="group" aria-label="Chart range">
+            <button class="mk-tf" type="button" aria-pressed="false" data-tf="12H">12H<span class="lc-sr">, 12 hours</span></button>
+            <button class="mk-tf" type="button" aria-pressed="false" data-tf="24H">24H<span class="lc-sr">, 24 hours</span></button>
+            <button class="mk-tf" type="button" aria-pressed="true" data-tf="48H">48H<span class="lc-sr">, 48 hours</span></button>
+            <button class="mk-tf" type="button" aria-disabled="true" aria-describedby="mkTfNote">7D<span class="lc-sr">, 7 days</span></button>
+            <button class="mk-tf" type="button" aria-disabled="true" aria-describedby="mkTfNote">30D<span class="lc-sr">, 30 days</span></button>
+            <span class="mk-tf-note" id="mkTfNote">7D and 30D need longer history from HomeCraftMgmt</span>
+          </div>
+          <div class="mk-chart" data-mk-chart>
+            <svg class="mk-chart-svg" role="img" aria-label="Price chart" focusable="false" data-mk-svg></svg>
+            <div class="mk-chart-labels" aria-hidden="true" data-mk-glabels></div>
+          </div>
+          <p class="mk-axis" aria-hidden="true" data-mk-axis><span data-mk-ax="start"></span><span data-mk-ax="mid"></span><span>now</span></p>
+          <p class="mk-nohist" data-mk-nohist hidden>No price history for this item yet.</p>
+          <div class="mk-sb" data-mk-sb>
+            <p class="mk-sb-head"><span class="mk-cap">Stock on the shelf</span><span class="mk-sb-now" data-mk-sb-now></span></p>
+            <svg class="mk-sb-svg" role="img" aria-label="Stock on the shelf" focusable="false" data-mk-sb-svg></svg>
+          </div>
         </div>
-        <p class="mk-d-note" data-mk-d="note"></p>
-        <p class="lc-sample" data-mk-d="sample" hidden>Sample data</p>
+        <dl class="mk-stats" data-mk-stats>
+          <div data-st="open"><dt data-mk-open-label>Open (48H)</dt><dd></dd></div>
+          <div data-st="high"><dt>High</dt><dd class="lc-up"></dd></div>
+          <div data-st="low"><dt>Low</dt><dd class="lc-down"></dd></div>
+          <div data-st="spread"><dt>Spread</dt><dd></dd></div>
+          <div data-st="buy"><dt>You buy</dt><dd></dd></div>
+          <div data-st="sell"><dt>You sell</dt><dd></dd></div>
+          <div data-st="stock"><dt>In stock</dt><dd></dd></div>
+          <div data-st="shelf"><dt>Shelf</dt><dd></dd></div>
+        </dl>
+        <div class="mk-trade">
+          <div class="mk-trade-box mk-trade-box--buy" data-mk-buybox>
+            <h3 class="mk-trade-title">Buy <span data-mk-q="buyName"></span></h3>
+            <p data-mk-q="buyNote"></p>
+          </div>
+          <div class="mk-trade-box mk-trade-box--sell" data-mk-sellbox>
+            <h3 class="mk-trade-title">Sell <span data-mk-q="sellName"></span></h3>
+            <p data-mk-q="sellNote"></p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="mk-side" aria-label="Movers and sectors" data-mk-side>
+        <section class="mk-panel mk-movers" aria-labelledby="mkGainT">
+          <h2 class="mk-panel-title lc-up" id="mkGainT">Top gainers</h2>
+          <ul class="mk-mlist" data-mk-gainers></ul>
+          <p class="mk-mnone" data-mk-gainers-none hidden>Nothing is up today.</p>
+        </section>
+        <section class="mk-panel mk-movers" aria-labelledby="mkLoseT">
+          <h2 class="mk-panel-title lc-down" id="mkLoseT">Top losers</h2>
+          <ul class="mk-mlist" data-mk-losers></ul>
+          <p class="mk-mnone" data-mk-losers-none hidden>Nothing is down today.</p>
+        </section>
+        <section class="mk-panel mk-sectors" aria-labelledby="mkSecT">
+          <h2 class="mk-panel-title" id="mkSecT">Sectors today</h2>
+          <ul class="mk-seclist" data-mk-sectors></ul>
+        </section>
       </aside>
+
+      <section class="mk-calc" aria-labelledby="mkCalcT" data-mk-calc>
+        <div class="mk-calc-head">
+          <h2 class="mk-calc-title" id="mkCalcT">What’s my stuff worth?</h2>
+          <p class="lc-sample" data-mk-sample hidden>Sample data</p>
+        </div>
+        <p class="mk-calc-intro">Add up what’s in your chests and see what the game would pay you for it today.</p>
+        <form class="mk-calc-form" novalidate data-mk-calc-form>
+          <div class="lc-field mk-cf-item">
+            <label class="lc-label" for="mkCalcItem">Item</label>
+            <select class="lc-select" id="mkCalcItem" data-mk-calc-item></select>
+          </div>
+          <div class="lc-field mk-cf-qty">
+            <label class="lc-label" for="mkCalcQty">Amount</label>
+            <input class="lc-input" id="mkCalcQty" type="number" inputmode="numeric" min="1" max="999999" step="1" value="1" aria-describedby="mkCalcErr" data-mk-calc-qty>
+          </div>
+          <div class="lc-field mk-cf-unit">
+            <label class="lc-label" for="mkCalcUnit">Counted in</label>
+            <select class="lc-select" id="mkCalcUnit" data-mk-calc-unit><option value="1">items</option><option value="64">stacks of 64</option></select>
+          </div>
+          <button class="lc-btn lc-btn--orange mk-cf-add" type="submit">Add</button>
+          <p class="mk-calc-err" id="mkCalcErr" data-mk-calc-err></p>
+        </form>
+        <table class="mk-calc-table" role="table" data-mk-calc-table hidden>
+          <caption class="lc-sr">Your items at today’s sell price</caption>
+          <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Item</th><th role="columnheader" scope="col" class="mk-cn">Amount</th><th role="columnheader" scope="col" class="mk-cn">Each</th><th role="columnheader" scope="col" class="mk-cn">Worth</th><th role="columnheader" scope="col" class="mk-cx"><span class="lc-sr">Remove</span></th></tr></thead>
+          <tbody role="rowgroup" data-mk-calc-rows></tbody>
+          <tfoot role="rowgroup"><tr role="row"><th role="rowheader" scope="row" colspan="3">Total</th><td role="cell" class="mk-cn mk-calc-total" data-mk-calc-total></td><td role="cell" class="mk-cx"></td></tr></tfoot>
+        </table>
+        <p class="mk-calc-empty" data-mk-calc-empty>Nothing added yet. Pick an item and an amount, then press Add.</p>
+        <p class="mk-calc-note">Worked out at today’s <strong>sell</strong> price: what the game pays you when you Sell to Crate at a PC. Prices move, so the total changes with them.</p>
+      </section>
     </div>
+
+    <section class="mk-heat" aria-labelledby="mkHeatT" data-mk-heatsec>
+      <div class="mk-heat-head">
+        <h2 class="lc-h2 lc-h2--sm" id="mkHeatT">Heatmap</h2>
+        <p class="mk-heat-note">Every item, coloured by today’s move. Click one to chart it. <span class="lc-sample" data-mk-sample hidden>Sample data</span></p>
+      </div>
+      <ul class="mk-heat-grid" data-mk-heat></ul>
+    </section>
   </div>
 </div>
 <!-- /wp:html -->
 
-<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--lilac"} -->
-<section class="wp-block-group lc-sec lc-sec--lilac"><!-- wp:group {"className":"lc-wrap lc-stack lc-stack--lg"} -->
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--dark mk-how"} -->
+<section class="wp-block-group lc-sec lc-sec--dark mk-how"><!-- wp:group {"className":"lc-wrap lc-stack lc-stack--lg"} -->
 <div class="wp-block-group lc-wrap lc-stack lc-stack--lg"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">How the market works</h2>
 <!-- /wp:heading -->
 
 <!-- wp:group {"className":"lc-grid lc-cols-3"} -->
-<div class="wp-block-group lc-grid lc-cols-3"><!-- wp:group {"className":"lc-card"} -->
-<div class="wp-block-group lc-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
+<div class="wp-block-group lc-grid lc-cols-3"><!-- wp:group {"className":"lc-card lc-card--dark"} -->
+<div class="wp-block-group lc-card lc-card--dark"><!-- wp:html -->
+<div class="lc-strip lc-strip--copper" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3,"className":"lc-h3"} -->
 <h3 class="wp-block-heading lc-h3">Stock sets the price</h3>
 <!-- /wp:heading -->
 
@@ -110,8 +213,12 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card"} -->
-<div class="wp-block-group lc-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
+<!-- wp:group {"className":"lc-card lc-card--dark"} -->
+<div class="wp-block-group lc-card lc-card--dark"><!-- wp:html -->
+<div class="lc-strip lc-strip--copper" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3,"className":"lc-h3"} -->
 <h3 class="wp-block-heading lc-h3">A little gap</h3>
 <!-- /wp:heading -->
 
@@ -120,8 +227,12 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card"} -->
-<div class="wp-block-group lc-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
+<!-- wp:group {"className":"lc-card lc-card--dark"} -->
+<div class="wp-block-group lc-card lc-card--dark"><!-- wp:html -->
+<div class="lc-strip lc-strip--copper" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3,"className":"lc-h3"} -->
 <h3 class="wp-block-heading lc-h3">Selling is instant, buying ships</h3>
 <!-- /wp:heading -->
 
@@ -133,22 +244,26 @@
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-wrap mk-shops"} -->
-<section class="wp-block-group lc-wrap mk-shops"><!-- wp:group {"className":"mk-shops-text"} -->
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--dark lc-sec--flush mk-shops-sec"} -->
+<section class="wp-block-group lc-sec lc-sec--dark lc-sec--flush mk-shops-sec"><!-- wp:group {"className":"lc-wrap"} -->
+<div class="wp-block-group lc-wrap"><!-- wp:group {"className":"lc-board mk-shops"} -->
+<div class="wp-block-group lc-board mk-shops"><!-- wp:group {"className":"mk-shops-text"} -->
 <div class="wp-block-group mk-shops-text"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
 <h2 class="wp-block-heading lc-h2 lc-h2--md">Player shops: the Marketplace</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"className":"mk-shops-p"} -->
-<p class="mk-shops-p">For everything the market doesn't carry. Place a Pallet, stock it, set your price and get paid while you're offline. Shoppers find it by department on any PC.</p>
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">For everything the market doesn't carry. Place a Pallet, stock it, set your price and get paid while you're offline. Shoppers find it by department on any PC.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:buttons {"className":"lc-actions mk-shops-cta"} -->
-<div class="wp-block-buttons lc-actions mk-shops-cta"><!-- wp:button {"className":"lc-btn lc-btn--night"} -->
-<div class="wp-block-button lc-btn lc-btn--night"><a class="wp-block-button__link wp-element-button" href="/guide/#marketplace">How Pallets work</a></div>
+<div class="wp-block-buttons lc-actions mk-shops-cta"><!-- wp:button {"className":"lc-btn lc-btn--purple"} -->
+<div class="wp-block-button lc-btn lc-btn--purple"><a class="wp-block-button__link wp-element-button" href="/guide/#marketplace">How Pallets work</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></section>
+<!-- /wp:buttons --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group --></main>
 <!-- /wp:group -->
 

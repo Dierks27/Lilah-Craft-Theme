@@ -1,5 +1,5 @@
 /* LilahCraft: shared behaviour on every page.
-   - [data-lc-copy="text"] buttons copy text (data-lc-copied="Copied!" is the done label)
+   - [data-lc-copy="text"] buttons copy text (data-lc-copied="Copied!" is the done label; data-lc-copy-what="link" names it if copying fails)
    - header Menu button below 1150 px
    - header player count from /wp-json/lilahcraft/v1/status, hidden when the ping fails
    - [data-lc-filter="tableId"] search boxes filter [data-lc-row] rows, grouped by [data-lc-group]
@@ -54,7 +54,7 @@
       }, 1800);
     }).catch(function () {
       btn.textContent = 'Select it and copy';
-      LC.announce('Copy did not work. The address is ' + text);
+      LC.announce('Copy did not work. The ' + (btn.getAttribute('data-lc-copy-what') || 'address') + ' is ' + text);
       btn._lcTimer = setTimeout(function () { btn.textContent = label; }, 2600);
     });
   });

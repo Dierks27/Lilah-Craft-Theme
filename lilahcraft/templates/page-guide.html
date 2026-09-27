@@ -1,9 +1,9 @@
 <!-- wp:template-part {"slug":"header","tagName":"div"} /-->
 
 <!-- wp:group {"tagName":"main","className":"lc-main lc-main--guide"} -->
-<main class="wp-block-group lc-main lc-main--guide"><!-- wp:group {"className":"lc-wrap"} -->
-<div class="wp-block-group lc-wrap"><!-- wp:group {"className":"lc-pagehead"} -->
-<div class="wp-block-group lc-pagehead"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<main class="wp-block-group lc-main lc-main--guide"><!-- wp:group {"tagName":"section","className":"lc-hero lc-mat--stone"} -->
+<section class="wp-block-group lc-hero lc-mat--stone"><!-- wp:group {"className":"lc-wrap lc-hero-in"} -->
+<div class="wp-block-group lc-wrap lc-hero-in"><!-- wp:paragraph {"className":"lc-kicker"} -->
 <p class="lc-kicker">Guide</p>
 <!-- /wp:paragraph -->
 
@@ -14,12 +14,13 @@
 <!-- wp:paragraph {"className":"lc-lede"} -->
 <p class="lc-lede">Everything on the server, in plain words. In game, open the same guide with <code>/hcm guide</code> or from the Guide site on any PC.</p>
 <!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"lc-wrap lc-guide"} -->
 <div class="wp-block-group lc-wrap lc-guide"><!-- wp:html -->
 <nav class="lc-toc" aria-labelledby="lcTocTitle" data-lc-toc>
+  <div class="lc-strip lc-strip--stone" aria-hidden="true"></div>
   <p class="lc-toc-title" id="lcTocTitle">Guide sections</p>
   <ul class="lc-toc-list">
     <li><a href="#pc">The PC</a></li>
@@ -168,7 +169,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Double-click outside an open chest and it sorts itself. Pick a different trigger with /sort settings.</p>
+<p>Double-click outside an open chest and it sorts itself. Pick a different trigger with <code>/sort settings</code>.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -182,8 +183,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card lc-card--sm"} -->
-<div class="wp-block-group lc-card lc-card--sm"><!-- wp:group {"className":"lc-guide-cardhead"} -->
+<!-- wp:group {"className":"lc-card lc-card--sm lc-card--dashed"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-card--dashed"><!-- wp:group {"className":"lc-guide-cardhead"} -->
 <div class="wp-block-group lc-guide-cardhead"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
 <h3 class="wp-block-heading lc-h3">Golem Chests</h3>
 <!-- /wp:heading -->
@@ -242,7 +243,7 @@
   <label class="lc-label" for="cmdFind">Search commands</label>
   <input class="lc-input" id="cmdFind" type="search" placeholder="Try home, town, sort…" autocomplete="off" spellcheck="false" data-lc-filter="lcCmds" data-lc-filter-none="lcNone">
 </div>
-<div class="lc-cmds-box">
+<div class="lc-cmds-box lc-board">
   <table class="lc-cmds" id="lcCmds" role="table">
     <caption class="lc-sr">Commands and what they do</caption>
     <tbody role="rowgroup" data-lc-group>

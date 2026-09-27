@@ -1,9 +1,9 @@
 <!-- wp:template-part {"slug":"header","tagName":"div"} /-->
 
 <!-- wp:group {"tagName":"main","className":"lc-main lc-main--play"} -->
-<main class="wp-block-group lc-main lc-main--play"><!-- wp:group {"className":"lc-wrap"} -->
-<div class="wp-block-group lc-wrap"><!-- wp:group {"className":"lc-pagehead"} -->
-<div class="wp-block-group lc-pagehead"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<main class="wp-block-group lc-main lc-main--play"><!-- wp:group {"tagName":"section","className":"lc-hero lc-mat--stone"} -->
+<section class="wp-block-group lc-hero lc-mat--stone"><!-- wp:group {"className":"lc-wrap lc-hero-in"} -->
+<div class="wp-block-group lc-wrap lc-hero-in"><!-- wp:paragraph {"className":"lc-kicker"} -->
 <p class="lc-kicker">Play</p>
 <!-- /wp:paragraph -->
 
@@ -14,14 +14,14 @@
 <!-- wp:paragraph {"className":"lc-lede"} -->
 <p class="lc-lede">Pick your kind of Minecraft and you're in within a minute. Everyone lands in the same hub.</p>
 <!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--flush"} -->
-<section class="wp-block-group lc-sec lc-sec--flush"><!-- wp:group {"className":"lc-wrap lc-grid lc-cols-2 lc-play-paths"} -->
-<div class="wp-block-group lc-wrap lc-grid lc-cols-2 lc-play-paths"><!-- wp:group {"className":"lc-card lc-play-path lc-play-path--java"} -->
-<div class="wp-block-group lc-card lc-play-path lc-play-path--java"><!-- wp:heading -->
-<h2 class="wp-block-heading">Java Edition</h2>
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-play-join"} -->
+<section class="wp-block-group lc-sec lc-play-join"><!-- wp:group {"className":"lc-wrap lc-grid lc-cols-2 lc-play-paths"} -->
+<div class="wp-block-group lc-wrap lc-grid lc-cols-2 lc-play-paths"><!-- wp:group {"anchor":"java","className":"lc-board lc-play-path lc-play-path--java"} -->
+<div id="java" class="wp-block-group lc-board lc-play-path lc-play-path--java"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--md">Java Edition</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-play-who"} -->
@@ -42,24 +42,21 @@
 <!-- /wp:list-item --></ol>
 <!-- /wp:list -->
 
-<!-- wp:group {"className":"lc-play-addrbox"} -->
-<div class="wp-block-group lc-play-addrbox"><!-- wp:paragraph {"className":"lc-play-addr-label"} -->
-<p class="lc-play-addr-label">Server address</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"lc-addr"} -->
-<p class="lc-addr">mc.lilahcraft.com</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- wp:html -->
+<div class="lc-play-addr">
+  <p class="lc-play-addr-box"><span class="lc-play-addr-label">Server address</span> <span class="lc-play-addr-val">mc.lilahcraft.com</span></p>
+  <button class="lc-btn lc-btn--purple" type="button" data-lc-copy="mc.lilahcraft.com" data-lc-copied="Copied!">Copy address</button>
+</div>
+<!-- /wp:html -->
 
 <!-- wp:paragraph {"className":"lc-play-pathnote"} -->
 <p class="lc-play-pathnote">Use the newest release of Minecraft. The server keeps up with updates.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card lc-play-path lc-play-path--bedrock"} -->
-<div class="wp-block-group lc-card lc-play-path lc-play-path--bedrock"><!-- wp:heading -->
-<h2 class="wp-block-heading">Bedrock</h2>
+<!-- wp:group {"anchor":"bedrock","className":"lc-board lc-board--pink lc-play-path lc-play-path--bedrock"} -->
+<div id="bedrock" class="wp-block-group lc-board lc-board--pink lc-play-path lc-play-path--bedrock"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--md">Bedrock</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-play-who"} -->
@@ -80,15 +77,19 @@
 <!-- /wp:list-item --></ol>
 <!-- /wp:list -->
 
-<!-- wp:group {"className":"lc-play-addrbox"} -->
-<div class="wp-block-group lc-play-addrbox"><!-- wp:paragraph {"className":"lc-play-addr-label"} -->
-<p class="lc-play-addr-label">Address · port</p>
-<!-- /wp:paragraph -->
+<!-- wp:html -->
+<div class="lc-play-addr">
+  <p class="lc-play-addr-box"><span class="lc-play-addr-label">Address · port</span> <span class="lc-play-addr-val"><span class="lc-nowrap">mc.lilahcraft.com</span> · <span class="lc-nowrap">19132</span></span></p>
+  <button class="lc-btn lc-btn--purple" type="button" data-lc-copy="mc.lilahcraft.com" data-lc-copied="Copied!">Copy address</button>
+</div>
+<!-- /wp:html -->
 
-<!-- wp:paragraph {"className":"lc-addr"} -->
-<p class="lc-addr">mc.lilahcraft.com · 19132</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
+<!-- wp:html -->
+<div class="lc-play-tap">
+  <a class="lc-btn lc-btn--orange" href="minecraft://?addExternalServer=LilahCraft|mc.lilahcraft.com:19132">Add to Minecraft</a>
+  <p class="lc-play-tap-note">Works on phones, tablets and Windows. On a console, type it in.</p>
+</div>
+<!-- /wp:html -->
 
 <!-- wp:paragraph {"className":"lc-play-pathnote"} -->
 <p class="lc-play-pathnote">A few Java-only extras (like JEI) won’t show up for you. Everything else works.</p>
@@ -97,15 +98,37 @@
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","anchor":"worlds","className":"lc-sec lc-sec--lilac"} -->
-<section id="worlds" class="wp-block-group lc-sec lc-sec--lilac"><!-- wp:group {"className":"lc-wrap lc-stack lc-stack--lg"} -->
+<!-- wp:html -->
+<section id="activity" class="lc-sec lc-sec--flush lc-play-activity" aria-labelledby="lc-act-title" data-lc-activity hidden>
+  <div class="lc-wrap">
+    <div class="lc-card lc-play-act">
+      <div class="lc-play-act-text">
+        <h2 class="lc-h2 lc-h2--sm" id="lc-act-title">When are people on?</h2>
+        <p class="lc-play-act-busy" data-lc-act-busy></p>
+        <p class="lc-small" data-lc-act-note></p>
+      </div>
+      <div class="lc-play-act-chart">
+        <div class="lc-play-act-bars" role="img" data-lc-act-bars></div>
+        <div class="lc-play-act-axis" aria-hidden="true" data-lc-act-axis></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /wp:html -->
+
+<!-- wp:group {"tagName":"section","anchor":"worlds","className":"lc-sec lc-sec--gray"} -->
+<section id="worlds" class="wp-block-group lc-sec lc-sec--gray"><!-- wp:group {"className":"lc-wrap lc-stack lc-stack--lg"} -->
 <div class="wp-block-group lc-wrap lc-stack lc-stack--lg"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">The worlds</h2>
 <!-- /wp:heading -->
 
 <!-- wp:group {"className":"lc-grid lc-cols-2 lc-play-worlds"} -->
 <div class="wp-block-group lc-grid lc-cols-2 lc-play-worlds"><!-- wp:group {"className":"lc-card lc-play-world"} -->
-<div class="wp-block-group lc-card lc-play-world"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group lc-card lc-play-world"><!-- wp:html -->
+<div class="lc-strip lc-strip--stone" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">The Hub</h3>
 <!-- /wp:heading -->
 
@@ -115,7 +138,11 @@
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"lc-card lc-play-world"} -->
-<div class="wp-block-group lc-card lc-play-world"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group lc-card lc-play-world"><!-- wp:html -->
+<div class="lc-strip lc-strip--stone" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Lilah’s World</h3>
 <!-- /wp:heading -->
 
@@ -124,6 +151,50 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"first-day","className":"lc-sec lc-sec--dark lc-play-firstday"} -->
+<section id="first-day" class="wp-block-group lc-sec lc-sec--dark lc-play-firstday"><!-- wp:group {"className":"lc-wrap lc-grid lc-cols-2 lc-play-fd"} -->
+<div class="wp-block-group lc-wrap lc-grid lc-cols-2 lc-play-fd"><!-- wp:group {"className":"lc-stack lc-play-fd-intro"} -->
+<div class="wp-block-group lc-stack lc-play-fd-intro"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<p class="lc-kicker">New here?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">Your first day</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">Six things to do on your first day, from landing in the hub to starting a town. Tick them off as you go.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-note"} -->
+<p class="lc-note">Stuck on one? <a href="/guide/">The Guide</a> has the details.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:html -->
+<div class="lc-board lc-board--pink lc-play-check" role="group" aria-labelledby="lc-check-title" data-lc-checklist>
+  <div class="lc-play-check-head">
+    <h3 class="lc-play-check-title" id="lc-check-title">First-day checklist</h3>
+    <p class="lc-play-check-count" aria-atomic="true" data-lc-check-count hidden></p>
+  </div>
+  <div class="lc-play-check-bar" aria-hidden="true" data-lc-check-bar hidden><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <ul class="lc-play-check-list">
+    <li><label class="lc-play-check-item"><input type="checkbox" name="lc-first-day" value="join"><span>Join the server and land in the hub</span></label></li>
+    <li><label class="lc-play-check-item"><input type="checkbox" name="lc-first-day" value="sethome"><span>Set a home with <code>/sethome</code></span></label></li>
+    <li><label class="lc-play-check-item"><input type="checkbox" name="lc-first-day" value="pc"><span>Craft a PC and place it</span></label></li>
+    <li><label class="lc-play-check-item"><input type="checkbox" name="lc-first-day" value="sell"><span>Sell your first stack at the PC (Sell to Crate)</span></label></li>
+    <li><label class="lc-play-check-item"><input type="checkbox" name="lc-first-day" value="arcade"><span>Visit the Arcade in the hub</span></label></li>
+    <li><label class="lc-play-check-item"><input type="checkbox" name="lc-first-day" value="town"><span>Start a town with <code>/t new</code> or join a friend’s</span></label></li>
+  </ul>
+  <div class="lc-play-check-foot" data-lc-check-foot hidden>
+    <p class="lc-play-check-saved" data-lc-check-saved>Your ticks are saved in this browser.</p>
+    <button class="lc-btn lc-btn--outline" type="button" data-lc-check-reset>Reset checklist</button>
+  </div>
+</div>
+<!-- /wp:html --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
@@ -159,14 +230,14 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"className":"lc-actions"} -->
-<div class="wp-block-buttons lc-actions"><!-- wp:button {"className":"lc-btn lc-btn--night"} -->
-<div class="wp-block-button lc-btn lc-btn--night"><a class="wp-block-button__link wp-element-button" href="/downloads/">Get them on the Downloads page</a></div>
+<div class="wp-block-buttons lc-actions"><!-- wp:button {"className":"lc-btn lc-btn--charcoal"} -->
+<div class="wp-block-button lc-btn lc-btn--charcoal"><a class="wp-block-button__link wp-element-button" href="/downloads/">Get them on the Downloads page</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons -->
 
 <!-- wp:group {"className":"lc-play-mods"} -->
-<div class="wp-block-group lc-play-mods"><!-- wp:group {"className":"lc-card lc-play-mod"} -->
-<div class="wp-block-group lc-card lc-play-mod"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group lc-play-mods"><!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">JEI</h3>
 <!-- /wp:heading -->
 
@@ -175,8 +246,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card lc-play-mod"} -->
-<div class="wp-block-group lc-card lc-play-mod"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">JourneyMap</h3>
 <!-- /wp:heading -->
 
@@ -185,8 +256,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card lc-play-mod"} -->
-<div class="wp-block-group lc-card lc-play-mod"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Plasmo Voice</h3>
 <!-- /wp:heading -->
 
@@ -195,8 +266,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"lc-card lc-play-mod"} -->
-<div class="wp-block-group lc-card lc-play-mod"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">CraftBridge Client</h3>
 <!-- /wp:heading -->
 
@@ -204,6 +275,82 @@
 <p>Lets the Combo Chest and Linked Workbench show every item in range, not just the first few dozen.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"parents","className":"lc-sec lc-sec--gray lc-play-parents"} -->
+<section id="parents" class="wp-block-group lc-sec lc-sec--gray lc-play-parents"><!-- wp:group {"className":"lc-wrap lc-stack lc-stack--lg"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-stack--lg"><!-- wp:group {"className":"lc-stack lc-play-parents-head"} -->
+<div class="wp-block-group lc-stack lc-play-parents-head"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">For parents</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">LilahCraft is a family server, run out of a house in Minnesota. Here’s what’s good to know.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-3 lc-play-facts"} -->
+<div class="wp-block-group lc-grid lc-cols-3 lc-play-facts"><!-- wp:group {"className":"lc-card lc-play-fact"} -->
+<div class="wp-block-group lc-card lc-play-fact"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Everyone plays together</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Java and Bedrock players join the same server and play in the same worlds, on a computer, a phone, a tablet, a Switch or an Xbox.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-play-fact"} -->
+<div class="wp-block-group lc-card lc-play-fact"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Builds are protected</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Land a town has claimed is protected, so nobody can grief it (Minecraft for wrecking someone else’s build).</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-play-fact"} -->
+<div class="wp-block-group lc-card lc-play-fact"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Gentle on younger players</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>A craftable SafeLamp keeps hostile mobs away. And if you die, your things wait in a grave for three hours.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-play-fact"} -->
+<div class="wp-block-group lc-card lc-play-fact"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Tokens aren’t for sale</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Arcade tokens can’t be bought with money and never turn into money, and prizes can’t be sold for money.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-play-fact"} -->
+<div class="wp-block-group lc-card lc-play-fact"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Voice chat is optional</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>It only exists through an optional Java mod, Plasmo Voice, and you only hear people standing close by.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-play-fact"} -->
+<div class="wp-block-group lc-card lc-play-fact"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Nothing to install</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Mods are optional, and Bedrock players need nothing installed.</p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></section>

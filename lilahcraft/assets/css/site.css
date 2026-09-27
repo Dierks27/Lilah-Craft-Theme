@@ -26,7 +26,7 @@
   --cell:46px;
 }
 .lc-hero-light{
-  --hero-bg:#ecebef; --hero-line:#d8d6de; --hero-text:#26242b; --hero-muted:#5f5c66; --addr-bg:#fff; --hero-kicker:#c93a7c;
+  --hero-bg:#ecebef; --hero-line:#d8d6de; --hero-text:#26242b; --hero-muted:#5f5c66; --addr-bg:#fff; --hero-kicker:#b02d69;
   --bg-mine:rgba(255,138,43,.38); --bg-sell:rgba(255,95,168,.36); --bg-dot:rgba(108,70,224,.35);
 }
 @media (max-width:920px){:root{--gutter:28px;--cell:30px}}
@@ -152,16 +152,17 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 /* The huge background word (Home: MINE · SELL). Solid tinted letters, decorative only. */
 .lc-bgword{position:absolute;z-index:0;left:40px;bottom:-22px;margin:0;font-family:var(--pixel);font-weight:700;font-size:128px;line-height:1;letter-spacing:.02em;white-space:nowrap;pointer-events:none;user-select:none}
 .lc-bgword-a{color:var(--bg-mine)} .lc-bgword-dot{color:var(--bg-dot)} .lc-bgword-b{color:var(--bg-sell)}
+/* Tablets and phones: the texture turns into a two-block ground layer along the hero's foot,
+   so text never sits on it; the hero leaves room for it. */
 @media (max-width:920px){
-  .lc-hero[class*="lc-mat--"]::after{right:calc(var(--cell) * -2);top:0;opacity:.55}
-  .lc-hero-in{padding-block:44px 52px}
+  .lc-hero[class*="lc-mat--"]::after{left:0;right:0;top:auto;bottom:0;width:auto;height:calc(var(--cell) * 2);background-size:calc(var(--cell) * 9) calc(var(--cell) * 9);background-repeat:repeat-x;background-position:0 100%}
+  .lc-hero-in{padding-block:44px calc(52px + var(--cell) * 2)}
   .lc-hero-in>*{max-width:none}
-  .lc-bgword{font-size:72px;left:20px;bottom:-12px}
+  .lc-bgword{font-size:72px;left:20px;bottom:calc(var(--cell) * 2 - 10px)}
 }
 @media (max-width:520px){
-  .lc-hero[class*="lc-mat--"]::after{opacity:.4}
-  .lc-hero-in{padding-block:36px 44px}
-  .lc-bgword{font-size:44px;bottom:-8px}
+  .lc-hero-in{padding-block:36px calc(40px + var(--cell) * 2)}
+  .lc-bgword{font-size:44px;bottom:calc(var(--cell) * 2 - 6px)}
 }
 
 /* ---------- cards and boxes ---------- */
@@ -171,7 +172,7 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-card--dark{background:var(--charcoal);border-color:var(--charcoal);color:var(--muted-dark)}
 .lc-card--dark .lc-h3,.lc-card--dark h2,.lc-card--dark h3{color:#fff}
 .lc-card .lc-text,.lc-card p{color:var(--text)}
-.lc-card--dark p{color:var(--muted-dark)}
+.lc-card--dark p,.lc-card--dark .lc-text{color:var(--muted-dark)}
 @media (max-width:520px){.lc-card{padding:20px}}
 /* A 12×2 material strip across the top of a card: <div class="lc-strip lc-strip--copper" aria-hidden="true"></div> as the card's first child */
 .lc-strip{height:60px;margin:-24px -24px 6px;border-bottom:3px solid var(--charcoal);background:no-repeat 0 0/100% 100%;image-rendering:pixelated}
@@ -190,6 +191,7 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 /* "Sample data" and other quiet labels */
 .lc-sample{font-size:13px;font-weight:700;color:var(--mid)}
 :is(.lc-dark,.lc-sec--dark,.lc-hero) .lc-sample{color:var(--muted-dark)}
+.lc-hero .lc-sample{color:var(--hero-muted)}
 
 /* The join bar: purple band, pink offset shadow, the address big, an orange copy button */
 .lc-join{display:flex;justify-content:space-between;align-items:center;gap:20px 32px;flex-wrap:wrap;padding:28px 32px;background:var(--purple);color:#fff;box-shadow:10px 10px 0 var(--pink)}
@@ -225,6 +227,8 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 .lc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;font-weight:800;font-size:13px;line-height:1.4;white-space:nowrap}
 .lc-pill.lc-pill--soon{background:#ffe3cc;color:#8a3c06}
 .lc-pill.lc-pill--dark{background:var(--charcoal);color:#fff}
+/* Minis scarcity: "Only 3 left" (Home and Minis) */
+.lc-pill.lc-pill--left{background:var(--orange);color:var(--charcoal)}
 .lc-pill--code{background:var(--charcoal);color:#fff;font-family:var(--mono);font-weight:700;font-size:14px}
 
 /* ---------- forms ---------- */

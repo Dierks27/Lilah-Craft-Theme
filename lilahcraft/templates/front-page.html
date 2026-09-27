@@ -1,37 +1,31 @@
 <!-- wp:template-part {"slug":"header","tagName":"div"} /-->
 
 <!-- wp:group {"tagName":"main","className":"lc-main lc-main--home"} -->
-<main class="wp-block-group lc-main lc-main--home"><!-- wp:group {"tagName":"section","className":"lc-home-hero"} -->
-<section class="wp-block-group lc-home-hero"><!-- wp:group {"className":"lc-wrap lc-home-hero-grid"} -->
-<div class="wp-block-group lc-wrap lc-home-hero-grid"><!-- wp:group {"className":"lc-home-hero-copy"} -->
-<div class="wp-block-group lc-home-hero-copy"><!-- wp:heading {"level":1,"className":"lc-h1 lc-home-title"} -->
-<h1 class="wp-block-heading lc-h1 lc-home-title">A family server where every block is worth something.</h1>
+<main class="wp-block-group lc-main lc-main--home"><!-- wp:group {"tagName":"section","className":"lc-hero lc-mat--amethyst lc-home-hero"} -->
+<section class="wp-block-group lc-hero lc-mat--amethyst lc-home-hero"><!-- wp:html -->
+<div class="lc-bgword" aria-hidden="true"><span class="lc-bgword-a">MINE</span><span class="lc-bgword-dot"> · </span><span class="lc-bgword-b">SELL</span></div>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"lc-wrap lc-hero-in lc-home-hero-in"} -->
+<div class="wp-block-group lc-wrap lc-hero-in lc-home-hero-in"><!-- wp:group {"className":"lc-home-hero-copy"} -->
+<div class="wp-block-group lc-home-hero-copy"><!-- wp:paragraph {"className":"lc-kicker"} -->
+<p class="lc-kicker">Java + Bedrock · Survival</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1,"className":"lc-h1 lc-home-title"} -->
+<h1 class="wp-block-heading lc-h1 lc-home-title">A family server where <span class="lc-hl">every block</span> is worth something.</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-home-lede"} -->
-<p class="lc-home-lede">Mine it, sell it, watch the price move. Found a town, run deliveries, collect numbered Minis. Java and Bedrock play in the same world.</p>
+<p class="lc-home-lede">Mine it, sell it, watch the price move. Found a town, run deliveries, collect numbered Minis.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:html -->
 <div class="lc-home-addr">
-  <span class="lc-addr">mc.lilahcraft.com</span>
-  <button class="lc-btn lc-btn--pink" type="button" data-lc-copy="mc.lilahcraft.com" data-lc-copied="Copied!">Copy address</button>
+  <span class="lc-home-addr-box">mc.lilahcraft.com</span>
+  <button class="lc-btn lc-btn--purple" type="button" data-lc-copy="mc.lilahcraft.com" data-lc-copied="Copied!">Copy address</button>
 </div>
-<!-- /wp:html -->
-
-<!-- wp:paragraph {"className":"lc-home-note"} -->
-<p class="lc-home-note">Bedrock and console: same address, port 19132.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons {"className":"lc-actions lc-home-ctas"} -->
-<div class="wp-block-buttons lc-actions lc-home-ctas"><!-- wp:button {"className":"lc-btn lc-btn--cyan"} -->
-<div class="wp-block-button lc-btn lc-btn--cyan"><a class="wp-block-button__link wp-element-button" href="/play/">How to join</a></div>
-<!-- /wp:button -->
-
-<!-- wp:button {"className":"lc-btn lc-btn--ghost"} -->
-<div class="wp-block-button lc-btn lc-btn--ghost"><a class="wp-block-button__link wp-element-button" href="/market/">See the market</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
+<!-- /wp:html --></div>
 <!-- /wp:group -->
 
 <!-- wp:html -->
@@ -55,11 +49,43 @@
       </tr>
     </tbody>
   </table>
+  <div class="lc-home-bd-news" data-lc-home-headlines hidden>
+    <p class="lc-home-bd-news-label" id="lc-home-headlines-label">Headlines</p>
+    <ul aria-labelledby="lc-home-headlines-label" data-lc-home-headlines-list></ul>
+  </div>
   <div class="lc-home-bd-foot">
-    <p>Sell more of something and its price drops for everyone.</p>
-    <a href="/market/">Open the market</a>
+    <p>Sell more of something and its price drops.</p>
+    <a href="/market/">Open the market <span aria-hidden="true">→</span></a>
   </div>
 </div>
+<!-- /wp:html --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-home-explore"} -->
+<section class="wp-block-group lc-home-explore"><!-- wp:group {"className":"lc-wrap"} -->
+<div class="wp-block-group lc-wrap"><!-- wp:html -->
+<h2 class="lc-sr">Explore</h2>
+<ul class="lc-grid lc-cols-3 lc-home-strips">
+  <li class="lc-card lc-home-strip lc-home-strip--copper">
+    <div class="lc-strip lc-strip--copper" aria-hidden="true"></div>
+    <p class="lc-home-strip-kicker">Market</p>
+    <h3 class="lc-home-strip-title"><a href="/market/">Trade like it’s Wall Street</a></h3>
+    <p class="lc-home-strip-text">Every raw item has real stock. Sell high, buy the dip.</p>
+  </li>
+  <li class="lc-card lc-home-strip lc-home-strip--amethyst">
+    <div class="lc-strip lc-strip--amethyst" aria-hidden="true"></div>
+    <p class="lc-home-strip-kicker">Minis</p>
+    <h3 class="lc-home-strip-title"><a href="/minis/">Collect every Mini</a></h3>
+    <p class="lc-home-strip-text">Numbered collectible blocks with a cap, hunted in the wild.</p>
+  </li>
+  <li class="lc-card lc-home-strip lc-home-strip--wool">
+    <div class="lc-strip lc-strip--wool" aria-hidden="true"></div>
+    <p class="lc-home-strip-kicker">Arcade</p>
+    <h3 class="lc-home-strip-title"><a href="/arcade/">Tokens buy fun</a></h3>
+    <p class="lc-home-strip-text">Earn tokens by playing. Spend them on crates and prizes.</p>
+  </li>
+</ul>
 <!-- /wp:html --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
@@ -78,50 +104,50 @@
 <ul class="lc-grid lc-cols-3 lc-home-door-grid">
   <li>
     <a class="lc-home-door" href="/market/">
-      <span class="lc-home-door-icon" style="--tint:#d9f7f8"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17l5-5 4 3 7-8M14 7h5v5"/></svg></span>
+      <span class="lc-home-door-icon lc-home-door-icon--orange"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17l5-5 4 3 7-8M14 7h5v5"/></svg></span>
       <h3 class="lc-home-door-title">Trade the market</h3>
       <span class="lc-home-door-text">Every raw item has real stock. Sell when the price is high, buy when it drops.</span>
-      <span class="lc-home-door-cta">Open the market</span>
+      <span class="lc-home-door-cta">Open the market <span aria-hidden="true">→</span></span>
     </a>
   </li>
   <li>
     <a class="lc-home-door" href="/minis/">
-      <span class="lc-home-door-icon" style="--tint:#ffe3f1"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h12l3 6-9 12L3 9zM3 9h18M9 3l3 6 3-6"/></svg></span>
+      <span class="lc-home-door-icon lc-home-door-icon--purple"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h12l3 6-9 12L3 9zM3 9h18M9 3l3 6 3-6"/></svg></span>
       <h3 class="lc-home-door-title">Collect Minis</h3>
       <span class="lc-home-door-text">Numbered collectible blocks with a cap. Open packs, print Cards, hunt wild ones.</span>
-      <span class="lc-home-door-cta">Browse Minis</span>
+      <span class="lc-home-door-cta">Browse Minis <span aria-hidden="true">→</span></span>
     </a>
   </li>
   <li>
     <a class="lc-home-door" href="/arcade/">
-      <span class="lc-home-door-icon" style="--tint:#fff1d1"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4zM13 7v10"/></svg></span>
+      <span class="lc-home-door-icon lc-home-door-icon--pink"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4zM13 7v10"/></svg></span>
       <h3 class="lc-home-door-title">Play the Arcade</h3>
       <span class="lc-home-door-text">Earn tokens just by playing. Spend them on crates, scratch tickets and prizes.</span>
-      <span class="lc-home-door-cta">Visit the Arcade</span>
+      <span class="lc-home-door-cta">Visit the Arcade <span aria-hidden="true">→</span></span>
     </a>
   </li>
   <li>
     <a class="lc-home-door" href="/guide/#deliveries">
-      <span class="lc-home-door-icon" style="--tint:#e3ecff"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8"/></svg></span>
+      <span class="lc-home-door-icon lc-home-door-icon--stone"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8"/></svg></span>
       <h3 class="lc-home-door-title">Run deliveries</h3>
       <span class="lc-home-door-text">Grab a job on your PC, carry the parcel to a village house, get paid by distance.</span>
-      <span class="lc-home-door-cta">How deliveries work</span>
+      <span class="lc-home-door-cta">How deliveries work <span aria-hidden="true">→</span></span>
     </a>
   </li>
   <li>
     <a class="lc-home-door" href="/guide/#towns">
-      <span class="lc-home-door-icon" style="--tint:#e2f5e8"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20V10l8-6 8 6v10zM10 20v-6h4v6"/></svg></span>
+      <span class="lc-home-door-icon lc-home-door-icon--charcoal"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20V10l8-6 8 6v10zM10 20v-6h4v6"/></svg></span>
       <h3 class="lc-home-door-title">Found a town</h3>
       <span class="lc-home-door-text">Claim land, invite friends, set a daily tax and keep the town bank topped up.</span>
-      <span class="lc-home-door-cta">Towns and costs</span>
+      <span class="lc-home-door-cta">Towns and costs <span aria-hidden="true">→</span></span>
     </a>
   </li>
   <li>
     <a class="lc-home-door" href="/guide/#crafting">
-      <span class="lc-home-door-icon" style="--tint:#efe5fb"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4h16v16H4zM4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16"/></svg></span>
+      <span class="lc-home-door-icon lc-home-door-icon--violet"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4h16v16H4zM4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16"/></svg></span>
       <h3 class="lc-home-door-title">Build smarter</h3>
       <span class="lc-home-door-text">A crafting table that reaches your chests, a storage terminal, and one-click sorting.</span>
-      <span class="lc-home-door-cta">Crafting and storage</span>
+      <span class="lc-home-door-cta">Crafting and storage <span aria-hidden="true">→</span></span>
     </a>
   </li>
 </ul>
@@ -129,8 +155,8 @@
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-home-minis lc-sec--lilac"} -->
-<section class="wp-block-group lc-home-minis lc-sec--lilac"><!-- wp:group {"className":"lc-wrap lc-home-minis-grid"} -->
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--gray lc-home-minis"} -->
+<section class="wp-block-group lc-sec lc-sec--gray lc-home-minis"><!-- wp:group {"className":"lc-wrap lc-home-minis-grid"} -->
 <div class="wp-block-group lc-wrap lc-home-minis-grid"><!-- wp:group {"className":"lc-home-minis-copy"} -->
 <div class="wp-block-group lc-home-minis-copy"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">Minis</h2>
@@ -151,8 +177,8 @@
 <!-- /wp:html -->
 
 <!-- wp:buttons {"className":"lc-actions lc-home-minis-cta"} -->
-<div class="wp-block-buttons lc-actions lc-home-minis-cta"><!-- wp:button {"className":"lc-btn lc-btn--night"} -->
-<div class="wp-block-button lc-btn lc-btn--night"><a class="wp-block-button__link wp-element-button" href="/minis/">Browse the collection</a></div>
+<div class="wp-block-buttons lc-actions lc-home-minis-cta"><!-- wp:button {"className":"lc-btn lc-btn--purple"} -->
+<div class="wp-block-button lc-btn lc-btn--purple"><a class="wp-block-button__link wp-element-button" href="/minis/">Browse the collection</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
@@ -203,12 +229,17 @@
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--night lc-home-ready"} -->
-<section class="wp-block-group lc-sec lc-sec--night lc-home-ready"><!-- wp:group {"className":"lc-wrap lc-home-ready-in"} -->
-<div class="wp-block-group lc-wrap lc-home-ready-in"><!-- wp:group {"className":"lc-home-ready-copy"} -->
-<div class="wp-block-group lc-home-ready-copy"><!-- wp:heading {"className":"lc-h2"} -->
+<!-- wp:group {"tagName":"section","className":"lc-home-join"} -->
+<section class="wp-block-group lc-home-join"><!-- wp:group {"className":"lc-wrap lc-home-join-in"} -->
+<div class="wp-block-group lc-wrap lc-home-join-in"><!-- wp:group {"className":"lc-home-join-head"} -->
+<div class="wp-block-group lc-home-join-head"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">Ready to play?</h2>
 <!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-home-join-more"} -->
+<p class="lc-home-join-more"><a href="/play/">Step-by-step for every device</a></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
 
 <!-- wp:list {"ordered":true,"className":"lc-home-steps"} -->
 <ol class="wp-block-list lc-home-steps"><!-- wp:list-item -->
@@ -222,20 +253,26 @@
 <!-- wp:list-item -->
 <li>Join. You land in the hub, where portals lead to each world.</li>
 <!-- /wp:list-item --></ol>
-<!-- /wp:list --></div>
-<!-- /wp:group -->
+<!-- /wp:list -->
 
-<!-- wp:group {"className":"lc-home-ready-go"} -->
-<div class="wp-block-group lc-home-ready-go"><!-- wp:paragraph {"className":"lc-addr lc-home-ready-addr"} -->
-<p class="lc-addr lc-home-ready-addr">mc.lilahcraft.com</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons {"className":"lc-actions"} -->
-<div class="wp-block-buttons lc-actions"><!-- wp:button {"className":"lc-btn lc-btn--pink"} -->
-<div class="wp-block-button lc-btn lc-btn--pink"><a class="wp-block-button__link wp-element-button" href="/play/">Step-by-step for every device</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group --></div>
+<!-- wp:html -->
+<div class="lc-join lc-home-joinbar">
+  <div class="lc-home-join-addr">
+    <span class="lc-join-label">Server address</span>
+    <span class="lc-join-addr">mc.lilahcraft.com</span>
+    <span class="lc-home-join-port">Bedrock and console: same address, port 19132.</span>
+  </div>
+  <button class="lc-btn lc-btn--orange lc-home-join-copy" type="button" data-lc-copy="mc.lilahcraft.com" data-lc-copied="Copied!">Copy and play</button>
+  <div class="lc-home-join-bedrock">
+    <a class="lc-btn lc-btn--charcoal" href="minecraft://?addExternalServer=LilahCraft|mc.lilahcraft.com:19132">Add to Minecraft</a>
+    <p>Works on phones, tablets and Windows. On a console, type it in.</p>
+  </div>
+  <figure class="lc-home-join-qr">
+    <img src="/wp-content/themes/lilahcraft/assets/img/qr-play.svg" alt="QR code that opens the Play page on a phone" width="128" height="128">
+    <figcaption>Scan with a phone or tablet</figcaption>
+  </figure>
+</div>
+<!-- /wp:html --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group --></main>
 <!-- /wp:group -->

@@ -2,7 +2,7 @@
 /**
  * lilahcraft/craftbridge: the CraftBridge Client download card on the Downloads page.
  *
- * The dark two-column board: what the mod does on the left, the picker on the right
+ * The loud white two-column board: what the mod does on the left, the picker on the right
  * (Minecraft 26.2 or 26.3, Fabric or NeoForge), the Download link for the pick, the file name
  * and what else the pick needs. The default pick is rendered here, so the link works without
  * JavaScript; assets/js/page-downloads.js switches picks from the data in data-lc-cb.
@@ -270,7 +270,7 @@ function lilahcraft_render_craftbridge() {
 				<span class="lc-cb-label" id="<?php echo esc_attr( $id ); ?>-mc"><?php esc_html_e( 'Minecraft version', 'lilahcraft' ); ?></span>
 				<div class="lc-cb-opts" role="group" aria-labelledby="<?php echo esc_attr( $id ); ?>-mc">
 					<?php foreach ( $mcs as $value ) : ?>
-					<button class="lc-cb-opt lc-cb-opt--mono" type="button" aria-pressed="<?php echo $value === $mc ? 'true' : 'false'; ?>" data-lc-cb-mc="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $value ); ?></button>
+					<button class="lc-chip lc-cb-opt lc-cb-opt--mono" type="button" aria-pressed="<?php echo $value === $mc ? 'true' : 'false'; ?>" data-lc-cb-mc="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $value ); ?></button>
 					<?php endforeach; ?>
 				</div>
 			</div>
@@ -278,11 +278,11 @@ function lilahcraft_render_craftbridge() {
 				<span class="lc-cb-label" id="<?php echo esc_attr( $id ); ?>-loader"><?php esc_html_e( 'Mod loader', 'lilahcraft' ); ?></span>
 				<div class="lc-cb-opts" role="group" aria-labelledby="<?php echo esc_attr( $id ); ?>-loader">
 					<?php foreach ( $loaders as $value => $label ) : ?>
-					<button class="lc-cb-opt" type="button" aria-pressed="<?php echo $value === $loader ? 'true' : 'false'; ?>" data-lc-cb-loader="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></button>
+					<button class="lc-chip lc-cb-opt" type="button" aria-pressed="<?php echo $value === $loader ? 'true' : 'false'; ?>" data-lc-cb-loader="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></button>
 					<?php endforeach; ?>
 				</div>
 			</div>
-			<a class="lc-btn lc-btn--pink lc-cb-dl" href="<?php echo esc_url( $pick['href'] ); ?>" aria-describedby="<?php echo esc_attr( $id ); ?>-file" data-lc-cb-link><?php echo lilahcraft_cb_icons( $pick['fallback'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static markup. ?><span data-lc-cb-label><?php echo esc_html( $pick['label'] ); ?></span><span class="lc-sr"> <?php esc_html_e( 'CraftBridge Client', 'lilahcraft' ); ?></span></a>
+			<a class="lc-btn lc-btn--orange lc-cb-dl" href="<?php echo esc_url( $pick['href'] ); ?>" aria-describedby="<?php echo esc_attr( $id ); ?>-file" data-lc-cb-link><?php echo lilahcraft_cb_icons( $pick['fallback'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static markup. ?><span data-lc-cb-label><?php echo esc_html( $pick['label'] ); ?></span><span class="lc-sr"> <?php esc_html_e( 'CraftBridge Client', 'lilahcraft' ); ?></span></a>
 			<p class="lc-cb-file<?php echo $pick['fallback'] ? ' is-note' : ''; ?>" id="<?php echo esc_attr( $id ); ?>-file" data-lc-cb-file><?php echo esc_html( $pick['line'] ); ?></p>
 			<div class="lc-cb-needs">
 				<p class="lc-cb-label" id="<?php echo esc_attr( $id ); ?>-needs"><?php esc_html_e( 'You also need', 'lilahcraft' ); ?></p>

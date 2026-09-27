@@ -1,161 +1,373 @@
-/* LilahCraft 2.0: the Market page (templates/page-market.html, assets/js/page-market.js).
-   Every rule is scoped to .lc-main--market (the editor loads every page file).
-   Breakpoints: 1180 and 1060 px (narrower detail column, the table drops its sparkline and then
-   its Sell · Buy column), 920 px (one column; the detail panel moves under the chosen row),
-   800 px (no sparkline), 680 px (rows stack) and 520 px (phones). */
+/* LilahCraft 2.1 "Pixel pop": the Market page, a trader's view of the live feed
+   (templates/page-market.html, assets/js/page-market.js). Every rule is scoped to .lc-main--market
+   (the editor loads every page file).
+   The whole page is charcoal (the main also carries .lc-dark: light price colours, orange focus rings);
+   panels are --panel-dark with --charcoal-2 lines. Orange highlights, purple marks pressed tabs.
+   Breakpoints: 1100 px (the movers and sectors column moves under the chart), 920 px (narrower gutters),
+   760 px (one column; the list becomes a searchable select), 520 px and 420 px (phones). */
 
-/* ---------- page head ---------- */
-.lc-main--market .mk-head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;padding-top:64px;padding-bottom:36px}
-.lc-main--market .mk-intro{display:flex;flex-direction:column;gap:12px;min-width:0}
-.lc-main--market .mk-status{display:flex;align-items:center;gap:10px;flex:none;padding:10px 16px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:15px;color:var(--text);white-space:nowrap}
-.lc-main--market .mk-dot{flex:none;width:10px;height:10px;border-radius:5px;background:#9a9cbd}
-.lc-main--market .mk-status[data-mode="live"] .mk-dot{background:#2f9a63}
-.lc-main--market .mk-status[data-mode="stale"] .mk-dot{background:#e0a83a}
+.lc-main--market{
+  --mk-panel:var(--panel-dark); --mk-line:var(--charcoal-2); --mk-row-line:#35323b; --mk-hover:#35323c;
+  --mk-edge:#58545f; --mk-field:#1c1b20; --mk-tape:#1f1d24;
+  background:var(--charcoal); color:var(--page);
+}
+.lc-main--market .mk-app{color-scheme:dark}
 
-/* ---------- stat cards ---------- */
-.lc-main--market .mk-board{padding-bottom:72px}
-.lc-main--market .mk-stats{margin-bottom:36px}
-.lc-main--market .mk-stat{display:flex;flex-direction:column;gap:6px;min-width:0;padding:20px 22px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
-.lc-main--market .mk-stat dt{font-size:15px;color:var(--soft)}
-.lc-main--market .mk-stat-value{min-height:1.15em;font-family:var(--display);font-weight:800;font-size:26px;line-height:1.15}
-.lc-main--market .mk-stat-sub{min-height:1.55em;font-weight:700;font-size:16px;color:var(--soft)}
-.lc-main--market .mk-stat-sub.lc-up{color:var(--up)}
-.lc-main--market .mk-stat-sub.lc-down{color:var(--down)}
+/* ---------- hero: the feed status under the lede ---------- */
+.lc-main--market .mk-status{display:inline-flex;align-self:flex-start;align-items:center;gap:10px;margin-top:4px;padding:8px 14px;border:2px solid var(--hero-line);font-size:15px;font-weight:600;line-height:1.35;color:var(--hero-muted)}
+.lc-main--market .mk-dot{flex:none;width:10px;height:10px;background:var(--mid)}
+.lc-main--market .mk-status[data-mode="live"] .mk-dot{background:#5fd38d}
+.lc-main--market .mk-status[data-mode="stale"] .mk-dot{background:var(--orange)}
+.lc-main--market .mk-status[data-mode="sample"] .mk-dot{background:var(--orange)}
+.lc-main--market .mk-status[data-mode="sample"] [data-mk-status-text]{color:var(--hero-text);font-weight:800}
 
-/* ---------- board: table column + detail column ---------- */
-.lc-main--market .mk-layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
-.lc-main--market .mk-main{display:flex;flex-direction:column;gap:16px;min-width:0}
-.lc-main--market .mk-side{position:sticky;top:var(--sticky-top);min-width:0}
-.lc-main--market .mk-controls{display:flex;align-items:flex-end;gap:16px}
-.lc-main--market .mk-find{flex:1 1 auto}
-.lc-main--market .mk-sort{flex:none;width:210px}
-.lc-main--market .mk-chips{min-height:44px}
-
-/* The price table. Real table elements with their roles spelled out, so screen readers keep
-   the table when the rows become grids (and later stack) in CSS. */
-.lc-main--market .mk-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;overflow-anchor:none}
-.lc-main--market .mk-table{display:block;width:100%;border-collapse:collapse}
-.lc-main--market .mk-table>thead,.lc-main--market .mk-table>tbody{display:block}
-.lc-main--market .mk-table tr{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,.85fr) minmax(0,1.45fr) minmax(0,1.2fr) 104px;gap:12px;align-items:center;padding:6px 18px;border-top:1px solid var(--line-soft);background:#fff}
-.lc-main--market .mk-table thead tr{padding:12px 18px;border-top:0;background:var(--lilac);font-size:14px;font-weight:700;color:var(--head-ink)}
-.lc-main--market .mk-table th,.lc-main--market .mk-table td{display:block;min-width:0;padding:0;font-weight:inherit;text-align:left}
-.lc-main--market .mk-table .mk-c-price,.lc-main--market .mk-table .mk-c-chg,.lc-main--market .mk-table .mk-c-spread{text-align:right}
-.lc-main--market .mk-table tr.is-sel{background:#f6f4ff}
-.lc-main--market td.mk-c-price{font-family:var(--mono);font-size:16px}
-.lc-main--market td.mk-c-chg{font-weight:700;font-size:15px}
-.lc-main--market td.mk-c-spread{font-family:var(--mono);font-size:14px;color:var(--soft)}
-.lc-main--market td.mk-c-stock{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--soft)}
-.lc-main--market td.mk-c-spark svg{display:block}
-
-.lc-main--market .mk-pick{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0;border:0;background:transparent;font-family:var(--body);font-weight:700;font-size:17px;line-height:1.3;color:var(--ink);text-align:left;cursor:pointer}
-.lc-main--market .mk-pick:hover .mk-name{text-decoration:underline;text-underline-offset:3px}
-.lc-main--market .mk-sw{flex:none;width:22px;height:22px;border-radius:4px}
-.lc-main--market .mk-bar{flex:none;display:block;width:64px;height:8px;background:var(--line-soft);border-radius:4px;overflow:hidden}
-.lc-main--market .mk-bar>span{display:block;height:8px}
-/* Cell labels: read by screen readers, shown when the rows stack */
+/* ---------- small caps labels (mono, like the kicker); .mk-k is read by screen readers and shown only where a layout needs it ---------- */
 .lc-main--market .mk-k{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.lc-main--market .mk-cap{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
 
-.lc-main--market .mk-empty{padding:28px 18px;font-size:17px;color:var(--soft);text-align:center}
-.lc-main--market .mk-foot{padding:14px 18px;border-top:1px solid var(--line-soft);font-size:15px;color:var(--soft)}
-.lc-main--market .mk-table[hidden]+.mk-empty{border-top:0}
-/* Without JavaScript the board is just the noscript line (it sits in .mk-card, so the card stays) */
-html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-stats,.mk-controls,.mk-chips,.mk-table,[data-mk-foot]){display:none}
-.lc-main--market noscript .mk-foot{border-top:0}
+/* ---------- ticker tape: two identical runs scroll left forever; hover, focus or the button pause it ---------- */
+.lc-main--market .mk-tape{display:flex;align-items:stretch;background:var(--mk-tape);border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:14px}
+.lc-main--market .mk-tape-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:48px;min-height:44px;padding:0;border:0;border-right:1px solid var(--mk-line);background:transparent;color:var(--muted-dark);cursor:pointer}
+.lc-main--market .mk-tape-btn:hover{color:#fff;background:var(--mk-hover)}
+.lc-main--market .mk-tape-btn:focus-visible{outline-offset:-3px}
+.lc-main--market .mk-tape-btn svg{fill:currentColor}
+.lc-main--market .mk-tape-btn .mk-i-play,.lc-main--market .mk-tape-btn[aria-pressed="true"] .mk-i-pause{display:none}
+.lc-main--market .mk-tape-btn[aria-pressed="true"] .mk-i-play{display:inline}
+.lc-main--market .mk-tape-view{flex:1 1 auto;min-width:0;display:flex;align-items:center;overflow:hidden}
+/* The runs are identical boxes, so moving the track by half its width lands run 2 exactly where run 1 started */
+.lc-main--market .mk-tape-track{display:flex;width:max-content;margin-left:24px;animation:mk-tape var(--mk-tape-s,90s) linear infinite}
+.lc-main--market .mk-tape:hover .mk-tape-track,
+.lc-main--market .mk-tape:focus-within .mk-tape-track,
+.lc-main--market .mk-tape.is-paused .mk-tape-track{animation-play-state:paused}
+.lc-main--market .mk-tape.is-still .mk-tape-track{animation:none}
+.lc-main--market .mk-tape.is-still .mk-tape-run[aria-hidden],.lc-main--market .mk-tape.is-still .mk-tape-btn{display:none}
+.lc-main--market .mk-tape-run{flex:none;display:flex;gap:30px;margin:0;padding:11px 30px 11px 0;list-style:none;white-space:nowrap;color:var(--muted-dark)}
+.lc-main--market .mk-t-sym{font-weight:700;color:var(--muted-dark)}
+.lc-main--market .mk-t-p{color:#fff}
+.lc-main--market .mk-t-out{color:var(--orange);font-weight:700}
+@keyframes mk-tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){
+  .lc-main--market .mk-tape-track{animation:none}
+  .lc-main--market .mk-tape-run[aria-hidden],.lc-main--market .mk-tape-btn{display:none}
+}
 
-/* The detail panel's row, used at 920 px and below */
-.lc-main--market .mk-table tr.mk-detail-row{display:block;padding:6px 14px 22px;border-top:0;background:#f6f4ff}
+/* ---------- loading, empty and no-JavaScript states ---------- */
+.lc-main--market .mk-loading{padding:40px 0 64px;font-size:17px;color:var(--muted-dark)}
+.lc-main--market .mk-app:not([data-state="loading"]) [data-mk-loading]{display:none}
+.lc-main--market .mk-app[data-state="loading"] :is(.mk-tape,.mk-index,.mk-grid,.mk-heat),
+.lc-main--market .mk-app[data-state="empty"] :is(.mk-tape,.mk-index,.mk-center,.mk-side,.mk-calc,.mk-heat){display:none}
+.lc-main--market .mk-app[data-state="empty"] .mk-grid{display:block;padding-bottom:64px}
+.lc-main--market .mk-app[data-state="empty"] .mk-listp{position:static;max-height:none}
+html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk-heat,[data-mk-loading]){display:none}
+/* In the Site Editor the board has no script: say what goes here, so the block can be found and selected */
+.block-editor-iframe__html .lc-main--market .mk-body::before{content:"The live market board goes here on the site: ticker, market list, chart, movers, “What’s my stuff worth?” and the heatmap.";display:block;margin:32px 0;padding:28px 24px;border:3px dashed var(--mk-edge);font-size:17px;color:var(--muted-dark)}
 
-/* ---------- detail panel ---------- */
-.lc-main--market .mk-detail{display:flex;flex-direction:column;gap:18px;padding:24px}
-.lc-main--market .mk-d-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.lc-main--market .mk-d-name{min-width:0;font-family:var(--display);font-weight:800;font-size:28px;line-height:1.55;letter-spacing:normal;color:#fff}
-.lc-main--market .mk-d-badge{flex:none;padding:4px 10px;border-radius:999px;background:var(--row-dark);font-weight:700;font-size:15px;white-space:nowrap}
-.lc-main--market .mk-d-badge--out{color:var(--pink)}
-.lc-main--market .mk-d-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 10px}
-.lc-main--market .mk-d-big{font-family:var(--mono);font-weight:600;font-size:40px;color:#fff}
-.lc-main--market .mk-d-unit{font-size:15px;color:var(--on-night-soft)}
-.lc-main--market .mk-d-chart{display:flex;flex-direction:column;gap:6px;margin:0}
-.lc-main--market .mk-d-chart svg{display:block;width:100%;height:auto}
-.lc-main--market .mk-d-axis{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:13px;color:var(--on-night-soft)}
-.lc-main--market .mk-d-axis>span{flex:none}
-.lc-main--market .mk-d-axis>.mk-d-range{flex:0 1 auto;min-width:0;text-align:center}
-.lc-main--market .mk-d-stock{display:flex;flex-direction:column;gap:8px}
-.lc-main--market .mk-d-row{display:flex;justify-content:space-between;gap:12px;font-size:15px;color:var(--on-night-soft)}
-.lc-main--market .mk-d-strong{font-weight:700;color:#fff;text-align:right}
-.lc-main--market .mk-d-bar{display:block;height:10px;background:var(--row-dark);border-radius:5px;overflow:hidden}
-.lc-main--market .mk-d-bar>span{display:block;height:10px;background:var(--cyan)}
-.lc-main--market .mk-d-trade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.lc-main--market .mk-d-box{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;background:var(--panel);border-radius:6px}
-.lc-main--market .mk-d-lbl{font-size:14px;color:var(--on-night-soft)}
-.lc-main--market .mk-d-val{font-family:var(--mono);font-weight:600;font-size:20px;color:#fff}
-.lc-main--market .mk-d-note{font-size:15px;color:var(--on-night)}
+/* ---------- the index strip: LCX, breadth, sold out ---------- */
+.lc-main--market .mk-index{display:flex;align-items:center;flex-wrap:wrap;gap:16px 48px;padding:18px 0;border-bottom:1px solid var(--mk-line)}
+.lc-main--market .mk-lcx{display:flex;flex-direction:column;min-width:0}
+.lc-main--market .mk-lcx-head{position:relative;display:flex;align-items:center;gap:2px;min-height:44px;margin:-6px 0 -8px}
+.lc-main--market .mk-info{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;background:transparent;color:var(--muted-dark);cursor:pointer}
+.lc-main--market .mk-info>span[aria-hidden]{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid currentColor;font-family:var(--mono);font-weight:700;font-size:13px;line-height:1}
+.lc-main--market .mk-info:hover,.lc-main--market .mk-info[aria-expanded="true"]{color:var(--orange)}
+.lc-main--market .mk-pop{position:absolute;z-index:20;top:calc(100% + 4px);left:0;width:340px;max-width:calc(100vw - 2 * var(--gutter));padding:14px 16px;background:var(--page);border:3px solid var(--charcoal);box-shadow:6px 6px 0 var(--orange);color:var(--ink);font-size:15px;line-height:1.5}
+.lc-main--market .mk-lcx-val{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 12px}
+.lc-main--market .mk-lcx-num{font-family:var(--mono);font-weight:700;font-size:28px;line-height:1.2;color:#fff}
+.lc-main--market .mk-lcx-ch{font-family:var(--mono);font-weight:600;font-size:16px}
+.lc-main--market .mk-lcx-spark{flex:none;display:block;overflow:visible}
+.lc-main--market .mk-lcx-spark polyline{stroke:var(--flat)}
+.lc-main--market .mk-lcx-spark.is-up polyline{stroke:var(--up)}
+.lc-main--market .mk-lcx-spark.is-down polyline{stroke:var(--down)}
+.lc-main--market .mk-breadth{display:flex;flex-direction:column;gap:6px;width:260px;max-width:100%}
+.lc-main--market .mk-breadth-text{display:flex;justify-content:space-between;gap:12px;font-size:14px;font-weight:700}
+.lc-main--market .mk-breadth-bar{display:flex;height:8px;margin:0;background:var(--mk-line)}
+.lc-main--market .mk-breadth-bar>span{display:block;height:8px}
+.lc-main--market .mk-bw-up{background:var(--up)}
+.lc-main--market .mk-bw-flat{background:#6a6672}
+.lc-main--market .mk-bw-down{background:var(--down)}
+.lc-main--market .mk-out{display:flex;flex-direction:column}
+.lc-main--market .mk-out-n{font-family:var(--mono);font-weight:700;font-size:20px;line-height:1.3;color:var(--orange)}
+.lc-main--market .mk-index-sample{margin-left:auto}
+.lc-main--market .mk-heat-note .lc-sample{margin-left:8px;white-space:nowrap}
 
-/* ---------- how the market works: card titles keep the body line height, as designed ---------- */
-.lc-main--market .lc-sec--lilac .lc-card .lc-h3{line-height:1.55;letter-spacing:normal}
+/* ---------- the trader grid ---------- */
+.lc-main--market .mk-grid{display:grid;grid-template-columns:280px minmax(0,1fr) 290px;grid-template-rows:auto 1fr;grid-template-areas:"list center side" "list calc side";gap:16px;align-items:start;padding-top:20px}
+.lc-main--market .mk-panel{background:var(--mk-panel);border:1px solid var(--mk-line)}
 
-/* ---------- player shops ---------- */
-.lc-main--market .mk-shops{display:flex;justify-content:space-between;align-items:center;gap:40px;padding-top:64px;padding-bottom:64px}
+/* list: sticky beside the chart, scrolling inside itself */
+.lc-main--market .mk-listp{grid-area:list;position:sticky;top:var(--sticky-top);max-height:calc(100vh - var(--sticky-top) - 16px);min-height:420px;display:flex;flex-direction:column;min-width:0}
+.lc-main--market .mk-find{display:flex;flex-direction:column;gap:10px;padding:14px;border-bottom:1px solid var(--mk-line)}
+.lc-main--market .mk-input{width:100%;min-height:44px;padding:0 12px;border:2px solid var(--mid);border-radius:0;background:var(--mk-field);color:var(--page);font-family:var(--body);font-size:16px}
+.lc-main--market .mk-input::placeholder{color:#a8a4b1;opacity:1}
+.lc-main--market .mk-tabs{gap:6px}
+.lc-main--market .mk-app .lc-chip{padding:0 10px;border-color:var(--mk-edge);background:transparent;color:var(--page);font-size:14px}
+.lc-main--market .mk-app .lc-chip:hover{background:var(--mk-hover)}
+.lc-main--market .mk-app .lc-chip[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff}
+.lc-main--market .mk-star{color:var(--orange)}
+.lc-main--market .mk-app .lc-chip[aria-pressed="true"] .mk-star{color:#fff}
+.lc-main--market .mk-pickf{display:none}
+.lc-main--market .mk-list-head{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;padding:8px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+.lc-main--market .mk-list-head>span+span{text-align:right}
+.lc-main--market .mk-list{flex:1 1 auto;min-height:0;margin:0;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-color:var(--mk-edge) transparent}
+.lc-main--market .mk-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;align-items:center;width:100%;min-height:48px;padding:5px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--page);font-family:var(--body);text-align:left;cursor:pointer}
+.lc-main--market .mk-row:hover{background:var(--mk-hover)}
+.lc-main--market .mk-row[aria-pressed="true"]{background:var(--mk-line);box-shadow:inset 4px 0 0 var(--purple-light)}
+.lc-main--market .mk-row:focus-visible{outline-offset:-3px}
+.lc-main--market .mk-row-id{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.lc-main--market .mk-row-sym{font-family:var(--mono);font-weight:700;font-size:14px;color:#fff}
+.lc-main--market .mk-row-name{overflow:hidden;font-size:13px;color:var(--muted-dark);text-overflow:ellipsis;white-space:nowrap}
+.lc-main--market .mk-row-price{font-family:var(--mono);font-size:14px;text-align:right;white-space:nowrap}
+.lc-main--market .mk-pill{justify-self:end;padding:2px 6px;font-family:var(--mono);font-weight:700;font-size:12px;line-height:1.4;white-space:nowrap}
+.lc-main--market .mk-pill--up{background:rgba(95,211,141,.14);color:var(--up)}
+.lc-main--market .mk-pill--down{background:rgba(255,122,126,.14);color:var(--down)}
+.lc-main--market .mk-pill--flat{background:var(--mk-line);color:var(--muted-dark)}
+.lc-main--market .mk-pill--out{background:rgba(255,138,43,.16);color:var(--orange)}
+.lc-main--market .mk-list-empty{padding:18px 14px;font-size:15px;color:var(--muted-dark)}
+.lc-main--market .mk-list-foot{margin-top:auto;padding:10px 14px;border-top:1px solid var(--mk-line);font-size:13px;line-height:1.45;color:var(--muted-dark)}
+
+/* the selected item */
+.lc-main--market .mk-center{grid-area:center;display:flex;flex-direction:column;gap:16px;min-width:0}
+.lc-main--market .mk-quote{display:flex;flex-direction:column;gap:14px;padding:18px 20px;scroll-margin-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 16px)}
+.lc-main--market .mk-q-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 16px}
+.lc-main--market .mk-q-id{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lc-main--market .mk-q-title{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px}
+.lc-main--market .mk-sym{padding:2px 8px;background:var(--orange);color:var(--charcoal);font-family:var(--mono);font-weight:700;font-size:14px;line-height:1.5}
+.lc-main--market .mk-q-name{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.2;color:#fff}
+.lc-main--market .mk-q-sector{font-size:14px;color:var(--muted-dark)}
+.lc-main--market .mk-q-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
+.lc-main--market .mk-q-big{font-family:var(--mono);font-weight:700;font-size:40px;line-height:1.15;color:#fff}
+.lc-main--market .mk-q-ch{font-family:var(--mono);font-weight:600;font-size:17px}
+.lc-main--market .mk-q-ch.is-out{color:var(--orange);font-family:var(--body);font-weight:800}
+.lc-main--market .mk-q-today{margin-left:2px;font-family:var(--body);font-weight:400;font-size:14px;color:var(--muted-dark)}
+.lc-main--market .mk-q-acts{flex:none;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.lc-main--market .mk-act{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:2px solid var(--mk-edge);border-radius:0;background:transparent;color:var(--page);font-family:var(--body);font-weight:800;font-size:15px;line-height:1.2;white-space:nowrap;cursor:pointer}
+.lc-main--market .mk-act:hover{background:var(--mk-hover)}
+.lc-main--market .mk-watch svg{flex:none;fill:none;stroke:var(--orange);stroke-width:2;stroke-linejoin:round}
+.lc-main--market .mk-watch[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+.lc-main--market .mk-watch[aria-pressed="true"] svg{fill:var(--orange)}
+.lc-main--market .mk-link[data-done="1"]{background:var(--up-dark);border-color:var(--up-dark);color:var(--charcoal)}
+
+/* chart range */
+.lc-main--market .mk-range{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.lc-main--market .mk-tf{min-width:54px;min-height:44px;padding:0 12px;border:2px solid var(--mk-edge);border-radius:0;background:transparent;color:var(--page);font-family:var(--mono);font-weight:700;font-size:14px;cursor:pointer}
+.lc-main--market .mk-tf:hover{background:var(--mk-hover)}
+.lc-main--market .mk-tf[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+.lc-main--market .mk-tf[aria-disabled="true"]{border-style:dashed;background:transparent;color:#8d8a94;cursor:not-allowed}
+.lc-main--market .mk-tf-note{margin-left:6px;font-size:13px;line-height:1.35;color:var(--muted-dark)}
+
+/* price chart: gridline prices in the gutter on the right */
+.lc-main--market .mk-chart{position:relative;height:280px;padding-right:64px}
+.lc-main--market .mk-chart-svg{display:block;width:100%;height:100%;overflow:visible}
+.lc-main--market .mk-c-grid{fill:none;stroke:var(--mk-line);stroke-width:1}
+.lc-main--market .mk-c-line{fill:none;stroke:var(--flat);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.lc-main--market .mk-c-area{fill:rgba(189,185,198,.08)}
+.lc-main--market .mk-c-dot{fill:var(--flat)}
+.lc-main--market .is-up .mk-c-line{stroke:var(--up)}
+.lc-main--market .is-up .mk-c-area{fill:rgba(95,211,141,.12)}
+.lc-main--market .is-up .mk-c-dot{fill:var(--up)}
+.lc-main--market .is-down .mk-c-line{stroke:var(--down)}
+.lc-main--market .is-down .mk-c-area{fill:rgba(255,122,126,.12)}
+.lc-main--market .is-down .mk-c-dot{fill:var(--down)}
+.lc-main--market .mk-chart-labels>span{position:absolute;right:0;font-family:var(--mono);font-size:12px;line-height:16px;color:var(--muted-dark);white-space:nowrap}
+.lc-main--market .mk-axis{display:flex;justify-content:space-between;gap:8px;margin:-6px 64px 0 0;font-size:12px;color:var(--muted-dark)}
+.lc-main--market .mk-nohist{padding:40px 0;font-size:16px;color:var(--muted-dark);text-align:center}
+
+/* stock on the shelf, under the chart (no volume: HomeCraftMgmt doesn't publish trades) */
+.lc-main--market .mk-sb{display:flex;flex-direction:column;gap:6px;padding-right:64px}
+.lc-main--market .mk-sb-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:0 12px}
+.lc-main--market .mk-sb-head .mk-cap{white-space:nowrap}
+.lc-main--market .mk-sb-now{font-family:var(--mono);font-size:12px;color:var(--muted-dark);white-space:nowrap}
+.lc-main--market .mk-sb-svg{display:block;width:100%;height:60px}
+.lc-main--market .mk-sb-bars{fill:var(--purple-light);opacity:.6}
+.lc-main--market .mk-sb-last{fill:var(--orange)}
+.lc-main--market .mk-sb-base{fill:var(--mk-line)}
+
+/* stats */
+.lc-main--market .mk-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;border-top:1px solid var(--mk-line);border-left:1px solid var(--mk-line);background:var(--mk-panel)}
+.lc-main--market .mk-stats>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border-right:1px solid var(--mk-line);border-bottom:1px solid var(--mk-line)}
+.lc-main--market .mk-stats dt{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+.lc-main--market .mk-stats dd{margin:0;font-family:var(--mono);font-weight:700;font-size:17px;line-height:1.35;color:var(--page);overflow-wrap:anywhere}
+.lc-main--market .mk-stats dd.mk-warn{color:var(--orange)}
+
+/* where to trade in game */
+.lc-main--market .mk-trade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lc-main--market .mk-trade-box{display:flex;flex-direction:column;gap:4px;min-width:0;padding:14px 16px;border:2px solid}
+.lc-main--market .mk-trade-box--buy{background:rgba(95,211,141,.08);border-color:rgba(95,211,141,.5)}
+.lc-main--market .mk-trade-box--sell{background:rgba(255,122,126,.08);border-color:rgba(255,122,126,.5)}
+.lc-main--market .mk-trade-title{font-family:var(--body);font-weight:800;font-size:16px;line-height:1.3;letter-spacing:0}
+.lc-main--market .mk-trade-box--buy .mk-trade-title{color:var(--up)}
+.lc-main--market .mk-trade-box--sell .mk-trade-title{color:var(--down)}
+.lc-main--market .mk-trade-box p{font-size:15px;line-height:1.45;color:var(--muted-dark)}
+
+/* movers and sectors */
+.lc-main--market .mk-side{grid-area:side;display:flex;flex-direction:column;gap:16px;min-width:0}
+.lc-main--market .mk-panel-title{padding:10px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:12px;font-weight:700;line-height:1.5;letter-spacing:.1em;text-transform:uppercase;color:var(--page)}
+.lc-main--market .mk-panel-title.lc-up{color:var(--up)}
+.lc-main--market .mk-panel-title.lc-down{color:var(--down)}
+.lc-main--market .mk-mlist{margin:0;padding:0;list-style:none}
+.lc-main--market .mk-mrow{display:grid;grid-template-columns:minmax(0,1fr) auto 64px;gap:10px;align-items:center;width:100%;min-height:44px;padding:0 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--page);font-family:var(--mono);font-size:13px;text-align:left;cursor:pointer}
+.lc-main--market .mk-mlist li:last-child .mk-mrow{border-bottom:0}
+.lc-main--market .mk-mrow:hover{background:var(--mk-hover)}
+.lc-main--market .mk-mrow:focus-visible{outline-offset:-3px}
+.lc-main--market .mk-m-sym{font-weight:700}
+.lc-main--market .mk-m-ch{text-align:right}
+.lc-main--market .mk-mnone{padding:12px 14px;font-size:14px;color:var(--muted-dark)}
+.lc-main--market .mk-seclist{margin:0;padding:6px 0 8px;list-style:none}
+.lc-main--market .mk-seclist li{display:grid;grid-template-columns:112px minmax(0,1fr) 60px;gap:10px;align-items:center;padding:7px 14px}
+.lc-main--market .mk-sec-name{font-size:13px;line-height:1.3;color:var(--muted-dark)}
+.lc-main--market .mk-sec-bar{display:flex;height:8px;background:var(--mk-line)}
+.lc-main--market .mk-sec-bar>span{display:block;height:8px;background:var(--flat)}
+.lc-main--market .mk-sec-bar>.lc-up{background:var(--up)}
+.lc-main--market .mk-sec-bar>.lc-down{background:var(--down)}
+.lc-main--market .mk-sec-ch{font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
+
+/* ---------- What's my stuff worth? A loud white box (light price colours, purple focus inside) ---------- */
+.lc-main--market .mk-calc{grid-area:calc;display:flex;flex-direction:column;gap:14px;min-width:0;margin:8px 10px 10px 0;padding:22px 24px 24px;background:#fff;border:3px solid var(--charcoal);box-shadow:10px 10px 0 var(--orange);color:var(--ink);
+  --up:#1f9d55;--down:#e5484d;--flat:#5f5c66}
+.lc-main--market .mk-calc :focus-visible{outline-color:var(--purple)}
+.lc-main--market .mk-calc-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.lc-main--market .mk-calc-title{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.2;color:var(--ink)}
+.lc-main--market .mk-calc-intro{font-size:16px;color:var(--text)}
+.lc-main--market .mk-calc-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:12px;align-items:end}
+.lc-main--market .mk-cf-item{grid-column:1/-1}
+.lc-main--market .mk-calc .lc-select{padding-right:6px}
+.lc-main--market .mk-calc .lc-input[aria-invalid="true"]{border-color:#b42a30;box-shadow:inset 0 0 0 1px #b42a30}
+.lc-main--market .mk-cf-add{min-height:46px}
+.lc-main--market .mk-calc-err{grid-column:1/-1;font-size:15px;font-weight:700;color:#b42a30}
+.lc-main--market .mk-calc-err:empty{display:none}
+.lc-main--market .mk-calc-table{width:100%;border-collapse:collapse;font-size:15px}
+.lc-main--market .mk-calc-table th,.lc-main--market .mk-calc-table td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.lc-main--market .mk-calc-table :is(th,td):first-child{padding-left:0}
+.lc-main--market .mk-calc-table :is(th,td):last-child{padding-right:0}
+.lc-main--market .mk-calc-table thead th{padding-top:0;border-bottom:3px solid var(--charcoal);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lc-main--market .mk-calc-table .mk-cn{text-align:right;font-family:var(--mono);white-space:nowrap}
+.lc-main--market .mk-calc-table thead .mk-cn{font-family:var(--mono)}
+.lc-main--market .mk-calc-table .mk-cx{width:1%;text-align:right}
+.lc-main--market .mk-ci-name{display:block;font-weight:800;line-height:1.3}
+.lc-main--market .mk-ci-sub{display:block;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.lc-main--market .mk-ci-gone{display:block;font-size:13px;color:var(--muted)}
+.lc-main--market .mk-calc-table tfoot th,.lc-main--market .mk-calc-table tfoot td{padding-top:12px;border-bottom:0;font-weight:800;font-size:17px}
+.lc-main--market .mk-calc-total{font-size:20px!important;color:var(--ink)}
+.lc-main--market .mk-rm{min-height:44px;padding:0 12px;border:2px solid var(--charcoal);border-radius:0;background:#fff;color:var(--charcoal);font-family:var(--body);font-weight:800;font-size:14px;cursor:pointer}
+.lc-main--market .mk-rm:hover{background:var(--light)}
+.lc-main--market .mk-calc-empty{padding:16px;border:3px dashed var(--mid);font-size:15px;color:var(--muted);text-align:center}
+.lc-main--market .mk-calc-note{font-size:14px;line-height:1.5;color:var(--muted)}
+.lc-main--market .mk-calc .lc-sample{color:var(--muted)}
+
+/* ---------- heatmap ---------- */
+.lc-main--market .mk-heat{padding:44px 0 64px}
+.lc-main--market .mk-heat-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 24px;margin-bottom:16px}
+.lc-main--market .mk-heat-head .lc-h2{color:#fff}
+.lc-main--market .mk-heat-note{font-size:15px;color:var(--muted-dark)}
+.lc-main--market .mk-heat-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none}
+.lc-main--market .mk-heat-grid>li{display:flex;min-width:0}
+.lc-main--market .mk-tile{display:flex;flex-direction:column;justify-content:space-between;gap:8px;width:100%;min-height:84px;padding:10px 12px;border:0;border-radius:0;background:var(--hm,#3f3c46);color:#fff;font-family:var(--mono);text-align:left;cursor:pointer}
+.lc-main--market .mk-tile:hover{filter:brightness(1.15)}
+.lc-main--market .mk-tile[aria-pressed="true"]{box-shadow:inset 0 0 0 3px var(--orange)}
+.lc-main--market .mk-tile-top{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.lc-main--market .mk-tile-sym{font-weight:700;font-size:15px}
+.lc-main--market .mk-tile-name{overflow:hidden;font-family:var(--body);font-size:12px;color:rgba(255,255,255,.86);text-overflow:ellipsis;white-space:nowrap}
+.lc-main--market .mk-tile-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px;font-size:13px}
+.lc-main--market .mk-tile-p{color:rgba(255,255,255,.88)}
+/* the design's thresholds: 5 %, 2 %, above 0, 0, above −2 %, above −4 %, below; sold out copper */
+.lc-main--market .mk-h-up3{--hm:#1c7a45}
+.lc-main--market .mk-h-up2{--hm:#1a5c37}
+.lc-main--market .mk-h-up1{--hm:#24463a}
+.lc-main--market .mk-h-flat{--hm:#403d48}
+.lc-main--market .mk-h-dn1{--hm:#562e35}
+.lc-main--market .mk-h-dn2{--hm:#7d3137}
+.lc-main--market .mk-h-dn3{--hm:#a3363b}
+.lc-main--market .mk-h-out{--hm:#7a4312}
+
+/* ---------- how the market works, and the Marketplace ---------- */
+.lc-main--market .mk-how{border-top:1px solid var(--mk-line)}
+.lc-main--market .lc-card--dark{background:var(--mk-panel);border-color:var(--mk-line)}
+.lc-main--market .lc-card--dark .lc-text{color:var(--muted-dark)}
+.lc-main--market .mk-shops{display:flex;justify-content:space-between;align-items:center;gap:24px 40px;margin-right:10px;padding:32px 36px}
 .lc-main--market .mk-shops-text{display:flex;flex-direction:column;gap:10px;max-width:760px}
-.lc-main--market .mk-shops-p{font-size:18px;color:var(--text)}
+.lc-main--market .mk-shops .lc-h2{color:var(--ink)}
+.lc-main--market .mk-shops :focus-visible{outline-color:var(--purple)}
 .lc-main--market .mk-shops-cta{flex:none}
 .lc-main--market .mk-shops-cta .wp-block-button__link{white-space:nowrap}
 
-/* ---------- narrower desktops: slimmer detail column, fewer table columns ---------- */
-@media (max-width:1180px) and (min-width:921px){
-  .lc-main--market .mk-layout{grid-template-columns:minmax(0,1fr) 340px}
-  .lc-main--market .mk-table tr{grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,.85fr) minmax(0,1.45fr) minmax(0,1.2fr)}
-  .lc-main--market .mk-table .mk-c-spark{display:none}
-  .lc-main--market .mk-d-name{line-height:1.25}
+/* ---------- ≤1100: the movers and sectors column moves under the chart ---------- */
+@media (max-width:1100px){
+  .lc-main--market .mk-grid{grid-template-columns:260px minmax(0,1fr);grid-template-rows:auto auto 1fr;grid-template-areas:"list center" "list side" "list calc"}
+  .lc-main--market .mk-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .lc-main--market .mk-sectors{grid-column:1/-1}
+  .lc-main--market .mk-seclist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media (max-width:1060px) and (min-width:921px){
-  .lc-main--market .mk-layout{grid-template-columns:minmax(0,1fr) 320px}
-  .lc-main--market .mk-table tr{grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,.85fr) minmax(0,1.2fr)}
-  .lc-main--market .mk-table .mk-c-spread{display:none}
-}
-
-/* ---------- one column; the detail panel sits under the chosen row ---------- */
 @media (max-width:920px){
-  .lc-main--market .mk-head{flex-direction:column;align-items:flex-start;gap:20px;padding-top:48px;padding-bottom:32px}
-  .lc-main--market .mk-status{white-space:normal}
-  .lc-main--market .mk-board{padding-bottom:56px}
-  .lc-main--market .mk-stats{margin-bottom:28px}
-  .lc-main--market .mk-layout{grid-template-columns:minmax(0,1fr)}
-  .lc-main--market .mk-side{position:static}
-  .lc-main--market .mk-d-name{line-height:1.25}
-  .lc-main--market .lc-sec--lilac .lc-card .lc-h3{line-height:1.3}
-  .lc-main--market .mk-shops{flex-direction:column;align-items:flex-start;gap:24px;padding-top:56px;padding-bottom:56px}
+  .lc-main--market .mk-seclist{grid-template-columns:minmax(0,1fr)}
+  .lc-main--market .mk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-shops{flex-direction:column;align-items:flex-start;margin-right:6px;padding:26px 24px}
+  .lc-main--market .mk-calc{box-shadow:6px 6px 0 var(--orange);margin-right:6px}
 }
-@media (max-width:800px){
-  .lc-main--market .mk-table tr{grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,.85fr) minmax(0,1.45fr) minmax(0,1.2fr)}
-  .lc-main--market .mk-table .mk-c-spark{display:none}
+@media (max-width:920px) and (min-width:761px){
+  .lc-main--market .mk-q-top{flex-direction:column}
+  .lc-main--market .mk-q-acts{justify-content:flex-start}
 }
 
-/* ---------- rows stack: name and price, then change, trend and stock ---------- */
-@media (max-width:680px){
-  .lc-main--market .mk-table>thead{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-  .lc-main--market .mk-table tr.mk-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"item item price" "chg spark stock";gap:2px 12px;padding:8px 14px 12px}
-  .lc-main--market .mk-table .mk-c-item{grid-area:item}
-  .lc-main--market .mk-table .mk-c-price{grid-area:price;font-size:17px;font-weight:600}
-  .lc-main--market .mk-table .mk-c-chg{grid-area:chg;text-align:left}
-  .lc-main--market .mk-table .mk-c-spread{display:none}
-  .lc-main--market .mk-table .mk-c-stock{grid-area:stock;justify-content:flex-end}
-  .lc-main--market .mk-table .mk-c-spark{grid-area:spark;display:block;justify-self:center}
-  .lc-main--market .mk-c-stock .mk-k{position:static;width:auto;height:auto;margin:0;overflow:visible;clip:auto;white-space:normal}
-  .lc-main--market .mk-foot{padding:14px}
+/* ---------- ≤760: one column; the list becomes a searchable select above the chart ---------- */
+@media (max-width:760px){
+  .lc-main--market .mk-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"list" "center" "side" "calc"}
+  .lc-main--market .mk-listp{position:static;max-height:none;min-height:0}
+  .lc-main--market .mk-list,.lc-main--market .mk-list-head{display:none}
+  .lc-main--market .mk-pickf{display:flex;flex-direction:column;gap:6px}
+  .lc-main--market .mk-list-foot{border-top:0;padding-top:0}
+  .lc-main--market .mk-list-empty{padding-bottom:6px}
+  .lc-main--market .mk-heat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .lc-main--market .mk-seclist{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
-
+@media (max-width:600px){
+  .lc-main--market .mk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-side{grid-template-columns:minmax(0,1fr)}
+  .lc-main--market .mk-seclist{grid-template-columns:minmax(0,1fr)}
+  .lc-main--market .mk-trade{grid-template-columns:minmax(0,1fr)}
+  .lc-main--market .mk-q-top{flex-direction:column}
+  .lc-main--market .mk-q-acts{justify-content:flex-start}
+}
 @media (max-width:520px){
-  .lc-main--market .mk-board{padding-bottom:48px}
-  .lc-main--market .mk-controls{flex-direction:column;align-items:stretch}
-  .lc-main--market .mk-sort{width:auto}
-  .lc-main--market .mk-table .mk-c-spark{display:none}
-  /* no sparkline: stock takes its slot, so the name gets the room price doesn't need */
-  .lc-main--market .mk-table tr.mk-row{grid-template-areas:"item item price" "chg stock stock"}
-  .lc-main--market .mk-detail{gap:16px;padding:18px}
-  .lc-main--market .mk-d-top{flex-wrap:wrap;gap:6px 12px}
-  .lc-main--market .mk-d-name{font-size:25px}
-  .lc-main--market .mk-d-big{font-size:34px}
-  .lc-main--market .mk-d-box{padding:10px 12px}
-  .lc-main--market .mk-d-val{font-size:18px}
-  .lc-main--market .mk-shops{padding-top:48px;padding-bottom:48px}
+  .lc-main--market .mk-index{gap:14px 24px}
+  .lc-main--market .mk-breadth{width:100%}
+  .lc-main--market .mk-quote{padding:16px 14px}
+  .lc-main--market .mk-q-name{font-size:21px}
+  .lc-main--market .mk-q-big{font-size:32px}
+  .lc-main--market .mk-chart{height:220px;padding-right:56px}
+  .lc-main--market .mk-axis{margin-right:56px}
+  .lc-main--market .mk-sb{padding-right:56px}
+  .lc-main--market .mk-tf-note{flex-basis:100%;margin-left:0}
+  .lc-main--market .mk-calc{padding:18px 16px 20px}
+  .lc-main--market .mk-calc-form{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+  .lc-main--market .mk-cf-add{grid-column:1/-1;justify-self:start}
+  /* rows stack: name and worth, then amount and price with the Remove button (table roles are in the markup) */
+  .lc-main--market .mk-calc-table,.lc-main--market .mk-calc-table>tbody,.lc-main--market .mk-calc-table>tfoot{display:block}
+  .lc-main--market .mk-calc-table thead{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+  .lc-main--market .mk-calc-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"item worth" "amt rm" "each rm";gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .lc-main--market .mk-calc-table tbody tr:first-child{border-top:3px solid var(--charcoal)}
+  .lc-main--market .mk-calc-table tbody td{display:block;padding:0;border:0}
+  .lc-main--market .mk-calc-table tbody td:nth-child(1){grid-area:item}
+  .lc-main--market .mk-calc-table tbody td:nth-child(2){grid-area:amt;text-align:left;white-space:normal}
+  .lc-main--market .mk-calc-table tbody td:nth-child(3){grid-area:each;text-align:left;font-size:14px;color:var(--muted)}
+  .lc-main--market .mk-calc-table tbody td:nth-child(4){grid-area:worth;justify-self:end;font-weight:800}
+  .lc-main--market .mk-calc-table tbody td:nth-child(5){grid-area:rm;justify-self:end;align-self:center;width:auto}
+  .lc-main--market .mk-calc-table .mk-ci-sub{display:inline-block;white-space:nowrap}
+  .lc-main--market .mk-calc-table .mk-ca .mk-ci-sub::before{content:" · "}
+  .lc-main--market .mk-calc-table .mk-ci .mk-ci-sub{display:block}
+  .lc-main--market .mk-calc-table .mk-k{position:static;width:auto;height:auto;margin:0;overflow:visible;clip:auto;white-space:normal}
+  .lc-main--market .mk-calc-table tfoot tr{display:flex;justify-content:space-between;align-items:baseline}
+  .lc-main--market .mk-calc-table tfoot th{padding-left:0}
+  .lc-main--market .mk-calc-table tfoot td{padding-right:0}
+  .lc-main--market .mk-calc-table tfoot .mk-cx{display:none}
+  .lc-main--market .mk-shops{padding:22px 20px}
+}
+@media (max-width:420px){
+  .lc-main--market .mk-heat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-lcx-spark{display:none}
+}
+
+/* Forced colours drop backgrounds, which mark the pressed and selected states */
+@media (forced-colors:active){
+  .lc-main--market :is(.mk-row,.mk-tile,.mk-tf,.mk-watch)[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}
+  .lc-main--market .mk-tf[aria-disabled="true"]{color:GrayText;border-color:GrayText}
 }

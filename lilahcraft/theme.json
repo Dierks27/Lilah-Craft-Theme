@@ -14,44 +14,49 @@
       "defaultDuotone": false,
       "palette": [
         {
-          "slug": "night",
-          "name": "Night",
-          "color": "#1d2150"
+          "slug": "charcoal",
+          "name": "Charcoal",
+          "color": "#26242b"
         },
         {
-          "slug": "deep",
-          "name": "Deep night",
-          "color": "#12153a"
+          "slug": "charcoal-2",
+          "name": "Charcoal line",
+          "color": "#3a3740"
+        },
+        {
+          "slug": "purple",
+          "name": "Purple",
+          "color": "#6c46e0"
+        },
+        {
+          "slug": "purple-deep",
+          "name": "Deep purple",
+          "color": "#4b2fa8"
         },
         {
           "slug": "pink",
           "name": "Pink",
-          "color": "#ff7ac0"
+          "color": "#ff5fa8"
         },
         {
-          "slug": "cyan",
-          "name": "Cyan",
-          "color": "#63e3ea"
+          "slug": "orange",
+          "name": "Orange",
+          "color": "#ff8a2b"
         },
         {
           "slug": "page",
           "name": "Page",
-          "color": "#f4f2fb"
+          "color": "#f5f4f7"
         },
         {
-          "slug": "lilac",
-          "name": "Lilac",
-          "color": "#eae6f8"
+          "slug": "light",
+          "name": "Light gray",
+          "color": "#ecebef"
         },
         {
-          "slug": "ink",
-          "name": "Ink",
-          "color": "#23244a"
-        },
-        {
-          "slug": "soft",
-          "name": "Soft ink",
-          "color": "#55577a"
+          "slug": "muted",
+          "name": "Muted",
+          "color": "#5f5c66"
         },
         {
           "slug": "white",
@@ -65,26 +70,31 @@
       "fontFamilies": [
         {
           "slug": "body",
-          "name": "Atkinson Hyperlegible",
-          "fontFamily": "\"Atkinson Hyperlegible\", system-ui, sans-serif"
+          "name": "Figtree",
+          "fontFamily": "\"Figtree\", system-ui, sans-serif"
         },
         {
           "slug": "display",
-          "name": "Bricolage Grotesque",
-          "fontFamily": "\"Bricolage Grotesque\", system-ui, sans-serif"
+          "name": "Unbounded",
+          "fontFamily": "\"Unbounded\", system-ui, sans-serif"
         },
         {
           "slug": "mono",
           "name": "JetBrains Mono",
           "fontFamily": "\"JetBrains Mono\", ui-monospace, monospace"
+        },
+        {
+          "slug": "pixel",
+          "name": "Silkscreen",
+          "fontFamily": "\"Silkscreen\", \"Courier New\", monospace"
         }
       ]
     }
   },
   "styles": {
     "color": {
-      "background": "#f4f2fb",
-      "text": "#23244a"
+      "background": "#f5f4f7",
+      "text": "#26242b"
     },
     "typography": {
       "fontFamily": "var(--wp--preset--font-family--body)"

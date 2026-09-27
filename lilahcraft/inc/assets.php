@@ -46,13 +46,14 @@ function lilahcraft_version() {
 }
 
 /**
- * Google Fonts for the Pixel pop look: Unbounded (headings), Figtree (body), JetBrains Mono (prices,
- * addresses, kickers) and Silkscreen (the big background word only).
+ * The Pixel pop fonts, served from the theme (assets/fonts, OFL): Unbounded (headings), Figtree (body),
+ * JetBrains Mono (prices, addresses, kickers) and Silkscreen (the big background word only).
+ * No request goes to Google.
  *
  * @return string
  */
 function lilahcraft_fonts_url() {
-	return 'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400..800;1,400&family=JetBrains+Mono:wght@500..700&family=Silkscreen:wght@700&family=Unbounded:wght@600;800;900&display=swap';
+	return get_theme_file_uri( 'assets/css/fonts.css' );
 }
 
 add_action(
@@ -61,7 +62,7 @@ add_action(
 		$v   = lilahcraft_version();
 		$key = lilahcraft_page_key();
 
-		wp_enqueue_style( 'lilahcraft-fonts', lilahcraft_fonts_url(), array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_enqueue_style( 'lilahcraft-fonts', lilahcraft_fonts_url(), array(), $v );
 		wp_enqueue_style( 'lilahcraft', get_theme_file_uri( 'assets/css/site.css' ), array( 'lilahcraft-fonts' ), $v );
 
 		wp_enqueue_script( 'lilahcraft', get_theme_file_uri( 'assets/js/site.js' ), array(), $v, true );
@@ -101,18 +102,14 @@ add_action(
 	1
 );
 
-add_filter(
-	'wp_resource_hints',
-	function ( $urls, $type ) {
-		if ( 'preconnect' === $type ) {
-			$urls[] = array(
-				'href'        => 'https://fonts.gstatic.com',
-				'crossorigin' => 'anonymous',
-			);
+// The two fonts every page needs first, fetched before the stylesheet asks for them.
+add_action(
+	'wp_head',
+	function () {
+		foreach ( array( 'figtree-400-800-latin.woff2', 'unbounded-var-latin.woff2' ) as $font ) {
+			printf( '<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url( get_theme_file_uri( 'assets/fonts/' . $font ) ) );
 		}
-		return $urls;
 	},
-	10,
 	2
 );
 
@@ -120,23 +117,11 @@ add_filter(
 add_action(
 	'after_setup_theme',
 	function () {
-		$files = array( 'assets/css/site.css' );
+		$files = array( 'assets/css/fonts.css', 'assets/css/site.css' );
 		foreach ( glob( get_theme_file_path( 'assets/css/page-*.css' ) ) as $file ) {
 			$files[] = 'assets/css/' . basename( $file );
 		}
 		$files[] = 'assets/css/editor.css';
 		add_editor_style( $files );
-	}
-);
-
-// The fonts go in as a link, not an editor style: WordPress fetches remote editor styles on the server,
-// Google answers that with static fonts that lack the optical-size axis, and display type came out
-// wider in the editor than on the site. A link is fetched by the browser, as on the site.
-add_action(
-	'enqueue_block_assets',
-	function () {
-		if ( is_admin() ) {
-			wp_enqueue_style( 'lilahcraft-fonts', lilahcraft_fonts_url(), array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		}
 	}
 );

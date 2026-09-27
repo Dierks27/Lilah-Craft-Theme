@@ -1,106 +1,156 @@
-/* LilahCraft 2.0: News. The posts page (templates/home.html), single posts (single.html), topic
-   archives (category.html) and other archives (archive.html). The Topics card is lilahcraft/topics
-   (inc/blocks/topics.php). Everything is scoped under .lc-main--news; the sidebar rules also match
-   .editor-styles-wrapper, so the News sidebar part looks right when edited on its own. */
+/* LilahCraft 2.1 "Pixel pop": News. The posts page (templates/home.html), single posts (single.html),
+   topic archives (category.html) and other archives (archive.html). Every page starts with the charcoal
+   hero band in pink wool (site.css). The Topics card is lilahcraft/topics (inc/blocks/topics.php); the
+   sidebar is parts/news-sidebar.html. Everything is scoped under .lc-main--news; the sidebar rules also
+   match .editor-styles-wrapper, so the News sidebar part looks right when edited on its own. */
 
-/* ---------- page head ---------- */
-.lc-main--news .lc-pagehead{padding-bottom:40px}
-.lc-main--news .lc-pagehead .lc-lede{max-width:640px}
-.lc-main--news .lc-pagehead .lc-lede p{margin:0}
+/* ---------- hero ---------- */
+.lc-main--news .lc-hero .lc-lede p{margin:0}
+/* single post: "SEP 25, 2026 · UPDATES" is the hero's kicker */
+.lc-main--news .lc-hero .lc-news-meta{color:var(--hero-kicker);font-size:14px;letter-spacing:.14em}
 
 /* ---------- main column + 320 px sidebar ---------- */
-.lc-main--news .lc-news-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:40px;align-items:start;padding-bottom:80px}
-.lc-main--news .lc-news-feed{display:flex;flex-direction:column;gap:24px;min-width:0}
-.lc-main--news .lc-news-rest{display:flex;flex-direction:column;gap:24px}
+.lc-main--news .lc-news-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:48px;align-items:start}
+.lc-main--news .lc-news-feed{display:flex;flex-direction:column;gap:28px;min-width:0}
+.lc-main--news .lc-news-rest{display:flex;flex-direction:column;gap:28px}
 /* the list after the featured post has nothing to show (one post or none): no empty gap */
 .lc-main--news .lc-news-rest:not(:has(li,nav,.wp-block-query-no-results)){display:none}
-.lc-main--news .lc-news-list{display:flex;flex-direction:column;gap:24px;margin:0;padding:0;list-style:none}
+.lc-main--news .lc-news-list{display:flex;flex-direction:column;gap:28px;margin:0;padding:0;list-style:none}
 .lc-main--news .lc-news-list>li{margin:0}
-.lc-main--news .lc-empty a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px}
+.lc-main--news .lc-empty a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700}
 
 /* ---------- post meta: "SEP 25, 2026 · UPDATES" ---------- */
-.lc-main--news .lc-news-meta{display:flex;flex-wrap:wrap;column-gap:1ch;font-family:var(--mono);font-size:14px;font-weight:600;color:var(--kicker);text-transform:uppercase}
+.lc-main--news .lc-news-meta{display:flex;flex-wrap:wrap;column-gap:1ch;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.1em;line-height:1.5;color:var(--pink-deep);text-transform:uppercase}
 .lc-main--news .lc-news-meta>*{margin:0}
 /* only the first category (the site prints it as text; the editor preview lists them all) */
 .lc-main--news .lc-news-topic a{color:inherit;text-decoration:none}
 .lc-main--news .lc-news-topic a~a,.lc-main--news .lc-news-topic .wp-block-post-terms__separator{display:none}
 
-/* ---------- featured card: the newest post ---------- */
-.lc-main--news .lc-news-feature{position:relative;display:flex;flex-direction:column;gap:14px;padding:36px;background:var(--night);border-radius:var(--radius);color:var(--on-night-bright)}
+/* ---------- featured card: the newest post, charcoal with a pink wool strip ---------- */
+.lc-main--news .lc-news-feature{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:32px 36px 36px;background:var(--charcoal);border:3px solid var(--charcoal);color:var(--muted-dark)}
+.lc-main--news .lc-news-feature>*{max-width:100%}
+/* The pink wool strip (site.css .lc-strip, drawn here so every featured post gets it, in the editor too).
+   It bleeds to the card's edges and its cells stay square: the 12×2 pattern repeats across. */
+.lc-main--news .lc-news-feature::before{content:"";align-self:stretch;height:60px;margin:-32px -36px 10px;border-bottom:3px solid var(--charcoal);background:url(../img/strip-wool.svg) repeat-x 0 0/auto 100%;image-rendering:pixelated}
 .lc-main--news .lc-news-feature .lc-news-meta{color:var(--pink)}
-.lc-main--news .lc-news-feature-title{font-family:var(--display);font-weight:800;font-size:40px;line-height:1.1;letter-spacing:-.02em;color:#fff}
-.lc-main--news .lc-news-feature-text{max-width:660px;font-size:18px;color:var(--on-night)}
+.lc-main--news .lc-news-feature-title{font-family:var(--display);font-weight:800;font-size:38px;line-height:1.12;letter-spacing:-.02em;color:#fff}
+.lc-main--news .lc-news-feature-text{max-width:660px;font-size:18px;color:var(--muted-dark)}
 .lc-main--news .lc-news-feature-text p{margin:0}
-.lc-main--news .lc-news-more{display:block;width:fit-content;font-weight:700;font-size:17px;color:var(--cyan);text-decoration:none}
-.lc-main--news .lc-news-more:hover,.lc-main--news .lc-news-feature:hover .lc-news-more{color:var(--cyan);text-decoration:underline}
-/* the whole card is the one link */
-.lc-main--news .lc-news-more::after{content:"";position:absolute;inset:0;border-radius:var(--radius)}
+.lc-main--news .lc-news-feature .lc-news-more{margin-top:8px}
+/* The whole card is the one link. Its hover keeps the button's box (a filter would make the button the
+   stretched area's containing block and shrink it), so hovering lightens the orange instead. */
+.lc-main--news .lc-news-more::after{content:"";position:absolute;inset:-3px}
+.lc-main--news a.lc-news-more:hover{filter:none}
+.lc-main--news .lc-news-feature:hover .lc-news-more{--b-bg:#ffa75e}
 
-/* ---------- the other posts ---------- */
-.lc-main--news .lc-news-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:28px 32px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink)}
-.lc-main--news .lc-news-card-title{font-family:var(--display);font-weight:700;font-size:27px;line-height:1.2;letter-spacing:0}
+/* ---------- the other posts: white cards, 3 px charcoal border ---------- */
+.lc-main--news .lc-news-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:26px 30px 28px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+.lc-main--news .lc-news-card-title{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.2;letter-spacing:-.02em}
 .lc-main--news .lc-news-card-title a{color:inherit;text-decoration:none}
-.lc-main--news .lc-news-card:hover .lc-news-card-title a{color:var(--link-hover)}
-/* the whole card is the title's link */
-.lc-main--news .lc-news-card-title a::after{content:"";position:absolute;inset:0;border-radius:var(--radius)}
+/* the whole card is the title's link; hover and keyboard focus give it the pink offset shadow
+   (two rules, so a browser without :has() still gets the hover) */
+.lc-main--news .lc-news-card-title a::after{content:"";position:absolute;inset:-3px}
+.lc-main--news .lc-news-card:hover{box-shadow:8px 8px 0 var(--pink)}
+.lc-main--news .lc-news-card:has(a:focus-visible){box-shadow:8px 8px 0 var(--pink)}
+.lc-main--news .lc-news-card:hover .lc-news-card-title a{color:var(--purple)}
 .lc-main--news .lc-news-card-text{font-size:17px;color:var(--text)}
 .lc-main--news .lc-news-card-text p{margin:0}
 
-/* ---------- pagination ---------- */
+/* ---------- pagination: square chips, current page purple ---------- */
 .lc-main--news .lc-news-pager{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
 .lc-main--news .lc-news-pager .wp-block-query-pagination-numbers{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.lc-main--news .lc-news-pager a,.lc-main--news .lc-news-pager .page-numbers{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:0;padding:0 14px;border:2px solid var(--chip-line);border-radius:6px;background:#fff;color:var(--ink);font-weight:700;font-size:16px;line-height:1.2;text-decoration:none}
-.lc-main--news .lc-news-pager a:hover{border-color:var(--night);color:var(--ink)}
-.lc-main--news .lc-news-pager .current{background:var(--night);border-color:var(--night);color:#fff}
-.lc-main--news .lc-news-pager .dots{min-width:0;padding:0 4px;border-color:transparent;background:transparent;color:var(--soft)}
+.lc-main--news .lc-news-pager a,.lc-main--news .lc-news-pager .page-numbers{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:0;padding:0 14px;border:2px solid var(--charcoal);border-radius:0;background:#fff;color:var(--charcoal);font-weight:700;font-size:16px;line-height:1.2;text-decoration:none}
+.lc-main--news .lc-news-pager a:hover{background:var(--light);color:var(--charcoal)}
+.lc-main--news .lc-news-pager .current{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+.lc-main--news .lc-news-pager .dots{min-width:0;padding:0 4px;border-color:transparent;background:transparent;color:var(--muted)}
 .lc-main--news .lc-news-pager .wp-block-query-pagination-next{margin-left:auto}
 
 /* ---------- sidebar ---------- */
-.lc-main--news .lc-news-side{display:flex;flex-direction:column;gap:20px;min-width:0}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-title,:is(.lc-main--news,.editor-styles-wrapper) .lc-news-side-title{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.55;letter-spacing:0}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topics{gap:12px}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-list{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topic{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:0 4px;border-bottom:1px solid var(--line-soft);font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topic:hover{color:var(--link-hover)}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topic-n{flex:none;font-weight:400;color:var(--soft)}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{padding-left:10px;box-shadow:inset 3px 0 0 var(--pink);color:var(--kicker)}
+.lc-main--news .lc-news-side{display:flex;flex-direction:column;gap:28px;min-width:0}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-title,:is(.lc-main--news,.editor-styles-wrapper) .lc-news-side-title{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.3;letter-spacing:-.01em}
 
-:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play{display:flex;flex-direction:column;gap:10px;padding:22px}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play .lc-addr{font-size:18px}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-note{font-size:15px;color:var(--on-night)}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700;font-size:16px;color:var(--pink)}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a:hover{color:var(--cyan)}
-@media (min-width:921px){:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play{box-shadow:6px 6px 0 var(--pink)}}
-/* Forced colours (Windows contrast themes) drop the pink bar and the colour, so the current topic uses the
-   system's selected colours. The number sets its own colour, so it inherits; the focus ring keeps a system colour. */
+/* Topics: one row per topic with its post count; the current topic is purple, like a pressed chip */
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics{gap:8px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-list{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:0 10px;border-bottom:1px solid var(--line);font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topics-list>li:last-child .lc-topic{border-bottom-color:transparent}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic:hover{background:var(--light);color:var(--ink)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic-n{flex:none;font-family:var(--mono);font-weight:600;font-size:14px;color:var(--muted)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{background:var(--purple);border-bottom-color:transparent;color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current] .lc-topic-n{color:#fff}
+
+/* Come play: a small join bar (site.css .lc-join: purple band, pink offset shadow, white focus ring),
+   stacked. The copy button and "How to join" share the last row. */
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:10px 18px;padding:24px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play>*{flex:1 0 100%;margin:0}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play>:is(.lc-news-play-copy,.lc-news-play-link,.wp-block-html){flex:0 0 auto}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play .lc-news-side-title{color:#fff}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play .lc-addr{font-size:21px;line-height:1.25;color:#fff}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-note{margin-top:-4px;font-size:15px;color:#fff}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-copy{margin-top:6px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link{margin-top:6px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a{display:inline-flex;align-items:center;min-height:44px;font-weight:800;font-size:16px;color:#fff;text-decoration:underline;text-decoration-thickness:2px}
+:is(.lc-main--news,.editor-styles-wrapper) .lc-news-play-link a:hover{color:#fff;text-decoration-color:var(--orange)}
+/* without scripts the copy button can't copy: leave just the address */
+html:not(.lc-js) .lc-main--news .lc-news-play-copy{display:none}
+
+/* Forced colours (Windows contrast themes) drop backgrounds, which is all that marks the current topic,
+   so it uses the system's selected colours. The number sets its own colour, so it inherits. */
 @media (forced-colors:active){
   :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;outline-color:Highlight}
   :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current] .lc-topic-n{color:inherit}
 }
 
 /* ---------- single post ---------- */
-.lc-main--news .lc-news-posthead .lc-news-meta{letter-spacing:.06em}
-.lc-main--news .lc-news-article{padding:40px 44px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
-.lc-main--news .lc-news-article .lc-entry{max-width:none}
+.lc-main--news .lc-news-article{padding:40px 44px;background:#fff;border:3px solid var(--charcoal)}
+.lc-main--news .lc-news-article .lc-entry{max-width:none;font-size:18px;color:var(--text)}
 .lc-main--news .lc-entry>:first-child{margin-top:0}
-.lc-main--news .lc-entry h2{font-size:30px}
-.lc-main--news .lc-entry h3{font-size:23px}
+.lc-main--news .lc-entry :is(h2,h3,h4){color:var(--ink)}
+.lc-main--news .lc-entry h2{font-size:28px}
+.lc-main--news .lc-entry h3{font-size:21px}
+.lc-main--news .lc-entry h4{font-size:18px;margin-top:1.4em}
+.lc-main--news .lc-entry strong{color:var(--ink)}
+.lc-main--news .lc-entry blockquote{padding:4px 0 4px 18px;border-left:4px solid var(--pink)}
+.lc-main--news .lc-entry blockquote cite{display:block;margin-top:8px;font-size:15px;font-style:normal;font-weight:700;color:var(--muted)}
+.lc-main--news .lc-entry pre{overflow-x:auto;padding:18px 20px;background:var(--charcoal);color:var(--page);font-family:var(--mono);font-size:15px;line-height:1.6}
+.lc-main--news .lc-entry pre code{padding:0;background:transparent;color:inherit}
+.lc-main--news .lc-entry hr{height:0;margin-block:2em;border:0;border-top:3px solid var(--charcoal)}
+.lc-main--news .lc-entry img{border-radius:0}
+.lc-main--news .lc-entry figcaption{margin-top:8px;font-size:15px;color:var(--muted)}
+.lc-main--news .lc-entry table{width:100%;border-collapse:collapse;font-size:16px}
+.lc-main--news .lc-entry :is(th,td){padding:10px 12px;border:1px solid var(--light);text-align:left;vertical-align:top}
+.lc-main--news .lc-entry th{background:var(--page);color:var(--ink)}
+.lc-main--news .lc-entry .wp-block-table{overflow-x:auto}
+.lc-main--news .lc-entry .wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:0;background:var(--purple);color:#fff;font-family:var(--body);font-weight:800;font-size:17px;line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--purple-deep)}
+.lc-main--news .lc-entry .wp-block-button__link:hover{color:#fff;filter:brightness(1.07)}
 .lc-main--news .lc-news-back{margin:0}
-.lc-main--news .lc-news-back a{position:relative;display:inline-flex;align-items:center;min-height:44px;padding-left:26px;font-weight:700;font-size:17px}
+.lc-main--news .lc-news-back a{position:relative;display:inline-flex;align-items:center;min-height:44px;padding-left:28px;font-weight:800;font-size:17px}
 .lc-main--news .lc-news-back a::before{content:"\2190" / "";position:absolute;left:0;top:50%;transform:translateY(-52%);font-weight:400}
 
 /* ---------- smaller screens ---------- */
-@media (max-width:920px){
-  .lc-main--news .lc-news-layout{grid-template-columns:minmax(0,1fr);gap:32px;padding-bottom:56px}
+@media (max-width:1100px){
+  .lc-main--news .lc-news-layout{gap:36px}
   .lc-main--news .lc-news-feature-title{font-size:34px}
+}
+@media (max-width:920px){
+  .lc-main--news .lc-news-layout{grid-template-columns:minmax(0,1fr);gap:44px}
+  .lc-main--news .lc-news-feature-title{font-size:32px}
   .lc-main--news .lc-news-article{padding:32px}
+  .lc-main--news .lc-news-card:hover{box-shadow:6px 6px 0 var(--pink)}
+  .lc-main--news .lc-news-card:has(a:focus-visible){box-shadow:6px 6px 0 var(--pink)}
+  /* under the posts, Topics and Come play sit side by side while there's room (one alone fills the row) */
+  .lc-main--news .lc-news-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));align-items:start}
 }
 @media (max-width:520px){
-  .lc-main--news .lc-news-layout{padding-bottom:48px}
-  .lc-main--news .lc-news-feature{padding:26px 22px}
-  .lc-main--news .lc-news-feature-title{font-size:29px}
-  .lc-main--news .lc-news-card{padding:22px}
-  .lc-main--news .lc-news-card-title{font-size:23px}
+  .lc-main--news .lc-hero .lc-news-meta{font-size:13px;letter-spacing:.1em}
+  .lc-main--news .lc-news-feed,.lc-main--news .lc-news-rest,.lc-main--news .lc-news-list{gap:22px}
+  .lc-main--news .lc-news-feature{padding:24px 20px 26px}
+  .lc-main--news .lc-news-feature::before{height:48px;margin:-24px -20px 6px}
+  .lc-main--news .lc-news-feature-title{font-size:26px}
+  .lc-main--news .lc-news-feature-text{font-size:17px}
+  .lc-main--news .lc-news-card{padding:20px 20px 22px}
+  .lc-main--news .lc-news-card-title{font-size:20px}
   .lc-main--news .lc-news-article{padding:24px 20px}
+  .lc-main--news .lc-entry h2{font-size:23px}
   .lc-main--news .lc-news-pager .wp-block-query-pagination-next{margin-left:0}
 }

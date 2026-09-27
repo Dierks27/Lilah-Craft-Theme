@@ -8,6 +8,7 @@
  * inc/feeds.php     /wp-json/lilahcraft/v1/{market,minis,status}
  * inc/setup.php     creates the pages and sets Reading on activation or update, names the page templates
  * inc/assets.php    styles and scripts, per page
+ * inc/meta.php      descriptions and share cards (og:image) per page
  * inc/blocks.php    theme blocks rendered in PHP (inc/blocks/*.php)
  * inc/updater.php   theme updates from the GitHub releases (Update URI in style.css)
  *
@@ -24,6 +25,7 @@ require get_template_directory() . '/inc/activity.php';
 require get_template_directory() . '/inc/feeds.php';
 require get_template_directory() . '/inc/setup.php';
 require get_template_directory() . '/inc/assets.php';
+require get_template_directory() . '/inc/meta.php';
 require get_template_directory() . '/inc/blocks.php';
 require get_template_directory() . '/inc/updater.php';
 

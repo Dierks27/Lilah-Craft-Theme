@@ -396,7 +396,7 @@
     grate: [['abcabcab', 'bddbddbc', 'cddcddca', 'abcabcab', 'bddbddbc', 'cddcddca', 'abcabcab', 'bcabcabc'], { a: '#a77e67', b: '#c49a7e', c: '#6fb39a', d: '#3a2a24' }],
     cobble: [['cabbcdaa', 'abebcaed', 'dbbacdba', 'cacddbea', 'abbeacdc', 'dcaabbad', 'aebcdaeb', 'bdacbadc'], { a: '#7f7f7f', b: '#9a9a9a', c: '#5e5e5e', d: '#6e6e6e', e: '#b0b0b0' }],
     lapis: [['abacbdab', 'cadabacb', 'abcaebac', 'bdabacda', 'acbadbac', 'baecabdb', 'adbacaeb', 'cabdbacd'], { a: '#1f4aa8', b: '#2a5cc8', c: '#173a86', d: '#4f82e2', e: '#8db4f5' }],
-    beacon: [['aabbbbbc', 'addeeddc', 'bdeffedc', 'befggfec', 'befggfec', 'bdeffedc', 'bhhhhhhc', 'bccccccc'], { a: '#f4fdfe', b: '#d2f1f4', c: '#9fd2da', d: '#2c3a66', e: '#2fb8c4', f: '#63e3ea', g: '#e6feff', h: '#221c3a' }]
+    beacon: [['aabbbbbc', 'addeeddc', 'bdeffedc', 'befggfec', 'befggfec', 'bdeffedc', 'bhhhhhhc', 'bccccccc'], { a: '#f4fdfe', b: '#d2f1f4', c: '#9fd2da', d: '#2c3a66', e: '#2fb8c4', f: '#5fe3e0', g: '#e6feff', h: '#221c3a' }]
   };
   var MYSTERY = ['aaaaaaaa', 'aabqqbaa', 'abqaaqba', 'aaaaqqaa', 'aaaqqaaa', 'aaaqqaaa', 'aaaaaaaa', 'aaaqqaaa'];
   var artCache = {};

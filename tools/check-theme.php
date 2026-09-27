@@ -8,6 +8,7 @@
  * - nothing mentions the private server (the word is assembled below so this file passes too)
  * - no square brackets in the visible text of any template, part or pattern
  *   (placeholders like [n] must never ship; values hide instead)
+ * - none of the old 2.0 colours (#1d2150, #ff7ac0, #63e3ea) anywhere
  *
  * Exits 1 on any failure.
  */
@@ -28,6 +29,11 @@ foreach ( $files as $file ) {
 
 	if ( false !== stripos( $body, $private ) || false !== stripos( $path, $private ) ) {
 		$failures[] = "$rel mentions the private server.";
+	}
+
+	// 2.1 replaced the navy/pink/cyan look: none of its colours may come back.
+	if ( preg_match( '/\.(css|html|js|php)$/', $path ) && preg_match( '/#(1d2150|ff7ac0|63e3ea)\b/i', $body, $old ) ) {
+		$failures[] = "$rel still uses an old 2.0 colour ($old[0]).";
 	}
 
 	if ( $can_lint && substr( $path, -4 ) === '.php' ) {

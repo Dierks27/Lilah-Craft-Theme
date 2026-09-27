@@ -1,58 +1,55 @@
-/* LilahCraft 2.0: the Arcade page (templates/page-arcade.html).
+/* LilahCraft 2.1 "Pixel pop": the Arcade page (templates/page-arcade.html).
    Every rule is scoped under .lc-main--arcade (the editor loads all page files).
-   Shared pieces come from site.css: .lc-sec, .lc-wrap, .lc-grid, .lc-card, .lc-board, .lc-pill--code. */
+   Shared pieces come from site.css: .lc-hero with the pink wool texture, .lc-hl, .lc-sec, .lc-wrap,
+   .lc-grid, .lc-card, .lc-strip, .lc-board (the loud box), .lc-pill--code. */
 
-/* ---------- hero: dark, with the star sky ---------- */
-.lc-main--arcade .lc-arcade-hero{position:relative;overflow:hidden}
-.lc-main--arcade .lc-arcade-hero::before{content:"";position:absolute;inset:0;opacity:.7;pointer-events:none;
-  background-image:radial-gradient(#fff 1.5px,transparent 1.6px),radial-gradient(#fbd3ea 1px,transparent 1.2px);
-  background-size:170px 130px,110px 90px;background-position:40px 20px,90px 60px}
-.lc-main--arcade .lc-arcade-hero-in{position:relative;display:flex;justify-content:space-between;align-items:center;gap:48px}
+/* ---------- hero: the intro beside the Wallet, which sits over the wool texture like Home's market board ---------- */
+.lc-main--arcade .lc-arcade-hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:48px;align-items:center}
+.lc-main--arcade .lc-arcade-hero-in>*{max-width:none}
 .lc-main--arcade .lc-arcade-intro{display:flex;flex-direction:column;gap:14px;max-width:660px}
-.lc-main--arcade .lc-arcade-hero .lc-kicker{color:var(--pink)}
-.lc-main--arcade .lc-arcade-hero .lc-h1{color:#fff}
-.lc-main--arcade .lc-arcade-hero .lc-lede{color:var(--on-night)}
-.lc-main--arcade .lc-arcade-hero .lc-note{color:var(--on-night-soft)}
-.lc-main--arcade .lc-arcade-hero code{padding:0;background:none;border-radius:0;font-size:1em;color:var(--cyan);white-space:nowrap}
+.lc-main--arcade .lc-arcade-hero .lc-note{font-size:16px}
+.lc-main--arcade .lc-arcade-hero code{font-size:1em;white-space:nowrap}
 
-/* Your Wallet: the values live in game (per player), so the card lists what the Wallet shows */
-.lc-main--arcade .lc-arcade-wallet{display:flex;flex-direction:column;gap:12px;min-width:330px;padding:24px}
-.lc-main--arcade .lc-arcade-wallet-title{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.55;letter-spacing:0;color:#fff}
-.lc-main--arcade .lc-arcade-wallet-rows{margin:0;padding:0;list-style:none;font-size:16px;color:var(--on-night)}
-.lc-main--arcade .lc-arcade-wallet-rows li{display:flex;align-items:center;gap:12px;padding:6px 0}
-.lc-main--arcade .lc-arcade-wallet-rows li:first-child{padding-top:0}
-.lc-main--arcade .lc-arcade-wallet-rows li:last-child{padding-bottom:0}
-.lc-main--arcade .lc-arcade-wallet-rows li+li{padding-top:5px;border-top:1px solid var(--rule-dark)}
-.lc-main--arcade .lc-arcade-wallet-rows li::before{content:"";flex:none;width:8px;height:8px;background:var(--cyan)}
-.lc-main--arcade .lc-arcade-wallet-note{font-size:14px;color:var(--on-night-soft)}
+/* Your Wallet: the loud box. The values live in game (per player), so it lists what the Wallet shows. */
+.lc-main--arcade .lc-arcade-wallet{display:flex;flex-direction:column;padding:0}
+.lc-main--arcade .lc-arcade-wallet-title{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:3px solid var(--charcoal);font-family:var(--display);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-.01em;color:var(--ink)}
+/* A pixel token in front of the title (decorative) */
+.lc-main--arcade .lc-arcade-wallet-title::before{content:"";flex:none;width:24px;height:24px;image-rendering:pixelated;
+  background:no-repeat 0 0/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23c95f14' d='M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM7 2h1v4H7zM1 6h1v1H1zM6 6h1v1H6zM2 7h4v1H2zM4 2h1v4H4z'/%3E%3Cpath fill='%23ff8a2b' d='M2 1h4v1H2zM1 2h3v4H1zM5 2h2v4H5zM2 6h4v1H2z'/%3E%3Cpath fill='%23ffc48f' d='M2 2h1v2H2z'/%3E%3C/svg%3E")}
+.lc-main--arcade .lc-arcade-wallet-rows{margin:0;padding:6px 20px;list-style:none;font-size:17px;font-weight:700;color:var(--ink)}
+.lc-main--arcade .lc-arcade-wallet-rows li{display:flex;align-items:center;gap:14px;min-height:50px;padding:8px 0}
+.lc-main--arcade .lc-arcade-wallet-rows li+li{border-top:1px solid var(--line)}
+/* Small bevelled blocks: orange, pink, purple, like the menu's current-page bars */
+.lc-main--arcade .lc-arcade-wallet-rows li::before{content:"";flex:none;width:14px;height:14px;background:var(--orange);box-shadow:inset -3px -3px 0 var(--orange-deep)}
+.lc-main--arcade .lc-arcade-wallet-rows li:nth-child(3n+2)::before{background:var(--pink);box-shadow:inset -3px -3px 0 var(--pink-deep)}
+.lc-main--arcade .lc-arcade-wallet-rows li:nth-child(3n)::before{background:var(--purple);box-shadow:inset -3px -3px 0 var(--purple-deep)}
+.lc-main--arcade .lc-arcade-wallet .lc-arcade-wallet-note{padding:12px 20px 14px;border-top:3px solid var(--charcoal);font-size:14px;line-height:1.5;color:var(--muted);text-wrap:pretty}
 
 /* ---------- sections ---------- */
 .lc-main--arcade .lc-arcade-stack{gap:24px}
-.lc-main--arcade .lc-arcade-prizes .lc-lede{max-width:680px;font-size:18px}
+.lc-main--arcade .lc-arcade-prizes .lc-lede{font-size:18px;max-width:680px}
 
 /* Earn and prize cards */
-.lc-main--arcade .lc-arcade-card{gap:8px;padding:24px}
-.lc-main--arcade .lc-arcade-card .lc-h3{font-size:21px;line-height:1.55;letter-spacing:0}
-.lc-main--arcade .lc-arcade-card p,.lc-main--arcade .lc-arcade-game p{font-size:16px}
+.lc-main--arcade .lc-arcade-card{gap:8px}
+.lc-main--arcade :is(.lc-arcade-card,.lc-arcade-game) p{font-size:16px}
 
-/* Game cards with the cost pill */
-.lc-main--arcade .lc-arcade-game{gap:10px;padding:26px}
-.lc-main--arcade .lc-arcade-game .lc-h3{font-weight:800;font-size:24px;line-height:1.55;letter-spacing:0}
-.lc-main--arcade .lc-arcade-game .lc-arcade-cost{align-self:flex-start;padding:4px 10px;background:var(--night);color:var(--cyan);font-size:14px;line-height:1.55}
+/* Game cards: a pink wool strip on top, then the cost pill */
+.lc-main--arcade .lc-arcade-game{gap:10px}
+.lc-main--arcade .lc-arcade-game .lc-arcade-cost{align-self:flex-start;padding:4px 10px;font-size:14px;line-height:1.5;color:#fff}
 
-/* Prizes can't be sold: the pink callout */
-.lc-main--arcade .lc-arcade-warn{display:flex;align-items:center;gap:14px;padding:18px 22px;background:#fff0f7;border:1px solid #f3c1dc;border-radius:var(--radius)}
+/* Prizes can't be sold: a pink wool notice */
+.lc-main--arcade .lc-arcade-warn{display:flex;align-items:center;gap:14px;padding:16px 20px;background:#ffe3f0;border:3px solid var(--charcoal)}
 .lc-main--arcade .lc-arcade-warn-icon{display:block;flex:none;width:24px;height:24px}
-.lc-main--arcade .lc-arcade-warn p{font-size:17px;color:#4a2a3d}
+.lc-main--arcade .lc-arcade-warn p{font-size:17px;font-weight:600;color:var(--ink)}
 
-@media (min-width:921px){
-  .lc-main--arcade .lc-arcade-earn{padding-bottom:56px}
-}
 @media (max-width:920px){
-  .lc-main--arcade .lc-arcade-hero-in{flex-direction:column;align-items:flex-start;gap:36px}
-  .lc-main--arcade .lc-arcade-wallet{align-self:stretch;min-width:0;max-width:480px}
+  .lc-main--arcade .lc-arcade-hero-in{grid-template-columns:minmax(0,1fr);gap:36px}
+  .lc-main--arcade .lc-arcade-wallet{max-width:480px}
 }
 @media (max-width:520px){
-  .lc-main--arcade .lc-arcade-card,.lc-main--arcade .lc-arcade-game{padding:22px}
-  .lc-main--arcade .lc-arcade-warn{align-items:flex-start;padding:16px 18px}
+  .lc-main--arcade .lc-arcade-wallet-title{padding:12px 16px;font-size:18px}
+  .lc-main--arcade .lc-arcade-wallet-rows{padding:4px 16px;font-size:16px}
+  .lc-main--arcade .lc-arcade-wallet .lc-arcade-wallet-note{padding:12px 16px}
+  .lc-main--arcade .lc-arcade-warn{align-items:flex-start;padding:14px 16px}
+  .lc-main--arcade .lc-arcade-warn p{font-size:16px}
 }
