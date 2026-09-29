@@ -1,17 +1,25 @@
-/* LilahCraft 2.1 "Pixel pop": the Market page, a trader's view of the live feed
+/* LilahCraft 2.2 "Pixel pop": the Market page, a trader's view of the live feed
    (templates/page-market.html, assets/js/page-market.js). Every rule is scoped to .lc-main--market
    (the editor loads every page file).
    The whole page is charcoal (the main also carries .lc-dark: light price colours, orange focus rings);
-   panels are --panel-dark with --charcoal-2 lines. Orange highlights, purple marks pressed tabs.
-   Breakpoints: 1200 px (the movers and sectors column moves under the chart), 920 px (narrower gutters),
+   panels are --panel-dark with --charcoal-2 lines, text --on-dark. Orange highlights, purple marks pressed tabs.
+   The live market's tags (.lc-tag, site.css) carry their own fills, so they read on the dark panels too.
+   Breakpoints: 1200 px (the news, movers and sectors column moves under the chart), 920 px (narrower gutters),
    760 px (one column; the list becomes a searchable select), 520 px and 420 px (phones). */
 
 .lc-main--market{
   --mk-panel:var(--panel-dark); --mk-line:var(--charcoal-2); --mk-row-line:#35323b; --mk-hover:#35323c;
   --mk-edge:#58545f; --mk-field:#1c1b20; --mk-tape:#1f1d24;
-  background:var(--charcoal); color:var(--page);
+  background:var(--charcoal); color:var(--on-dark);
 }
 .lc-main--market .mk-app{color-scheme:dark}
+/* The charcoal page, panels, tape and heatmap are the Market's own and the same in both looks. The three site surfaces
+   on it (the LCX explainer, "What's my stuff worth?" and the Marketplace board) follow the look, like every card and
+   board: light in the light look, the dark look's cards in the dark one. They show no price moves, so the page's
+   pale up/down colours (.lc-dark) never land on a light box. The calculator's form controls and its error red
+   (5.4:1 and 7.2:1 on --card) follow the look too. */
+.lc-main--market .mk-calc{--mk-err:#b42a30;color-scheme:light}
+:root[data-theme="dark"] .lc-main--market .mk-calc{--mk-err:#ffa3a6;color-scheme:dark}
 
 /* ---------- hero: the feed status under the lede ---------- */
 .lc-main--market .mk-status{display:inline-flex;align-self:flex-start;align-items:center;gap:10px;margin-top:4px;padding:8px 14px;border:2px solid var(--hero-line);font-size:15px;font-weight:600;line-height:1.35;color:var(--hero-muted)}
@@ -43,6 +51,8 @@
 .lc-main--market .mk-tape.is-still .mk-tape-track{animation:none}
 .lc-main--market .mk-tape.is-still .mk-tape-run[aria-hidden],.lc-main--market .mk-tape.is-still .mk-tape-btn{display:none}
 .lc-main--market .mk-tape-run{flex:none;display:flex;gap:30px;margin:0;padding:11px 30px 11px 0;list-style:none;white-space:nowrap;color:var(--muted-dark)}
+/* symbol, tag, price, move; the same height with or without a tag, so the tape never jumps */
+.lc-main--market .mk-tape-run>li{display:flex;align-items:center;gap:0 .6em;min-height:22px}
 .lc-main--market .mk-t-sym{font-weight:700;color:var(--muted-dark)}
 .lc-main--market .mk-t-p{color:#fff}
 .lc-main--market .mk-t-out{color:var(--orange);font-weight:700}
@@ -61,7 +71,7 @@
 .lc-main--market .mk-app[data-state="empty"] .mk-listp{position:static;max-height:none}
 html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk-heat,[data-mk-loading]){display:none}
 /* In the Site Editor the board has no script: say what goes here, so the block can be found and selected */
-.block-editor-iframe__html .lc-main--market .mk-body::before{content:"The live market board goes here on the site: ticker, market list, chart, movers, “What’s my stuff worth?” and the heatmap.";display:block;margin:32px 0;padding:28px 24px;border:3px dashed var(--mk-edge);font-size:17px;color:var(--muted-dark)}
+.block-editor-iframe__html .lc-main--market .mk-body::before{content:"The live market board goes here on the site: ticker, market list, chart, market news, movers, “What’s my stuff worth?” and the heatmap.";display:block;margin:32px 0;padding:28px 24px;border:3px dashed var(--mk-edge);font-size:17px;color:var(--muted-dark)}
 
 /* ---------- the index strip: LCX, breadth, sold out ---------- */
 .lc-main--market .mk-index{display:flex;align-items:center;flex-wrap:wrap;gap:16px 48px;padding:18px 0;border-bottom:1px solid var(--mk-line)}
@@ -70,7 +80,8 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-info{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;background:transparent;color:var(--muted-dark);cursor:pointer}
 .lc-main--market .mk-info>span[aria-hidden]{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid currentColor;font-family:var(--mono);font-weight:700;font-size:13px;line-height:1}
 .lc-main--market .mk-info:hover,.lc-main--market .mk-info[aria-expanded="true"]{color:var(--orange)}
-.lc-main--market .mk-pop{position:absolute;z-index:20;top:calc(100% + 4px);left:0;width:340px;max-width:calc(100vw - 2 * var(--gutter));padding:14px 16px;background:var(--page);border:3px solid var(--charcoal);box-shadow:6px 6px 0 var(--orange);color:var(--ink);font-size:15px;line-height:1.5}
+/* It lies over the list: the strong edge keeps it apart from the panels in the dark look too */
+.lc-main--market .mk-pop{position:absolute;z-index:20;top:calc(100% + 4px);left:0;width:340px;max-width:calc(100vw - 2 * var(--gutter));padding:14px 16px;background:var(--card);border:3px solid var(--edge-strong);box-shadow:6px 6px 0 var(--orange);color:var(--ink);font-size:15px;line-height:1.5}
 .lc-main--market .mk-lcx-val{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 12px}
 .lc-main--market .mk-lcx-num{font-family:var(--mono);font-weight:700;font-size:28px;line-height:1.2;color:#fff}
 .lc-main--market .mk-lcx-ch{font-family:var(--mono);font-weight:600;font-size:16px}
@@ -87,6 +98,21 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-bw-down{background:var(--down)}
 .lc-main--market .mk-out{display:flex;flex-direction:column}
 .lc-main--market .mk-out-n{font-family:var(--mono);font-weight:700;font-size:20px;line-height:1.3;color:var(--orange)}
+/* the running season: its name, and under it when it ends (narrow, so the strip still fits one row at 1280) */
+.lc-main--market .mk-index.has-season{column-gap:40px}
+.lc-main--market .mk-season{display:flex;flex-direction:column;min-width:0;max-width:260px}
+.lc-main--market .mk-season-v{display:flex;flex-direction:column;line-height:1.3}
+.lc-main--market .mk-season-name{font-weight:800;font-size:18px;color:#fff}
+.lc-main--market .mk-season-end{font-size:14px;color:var(--muted-dark)}
+/* Widths where the season would sit alone on a row (HomeCraftMgmt's season names are 90–130 px wide): at 998–1189
+   (room for a desktop scroll bar) the decorative sparkline makes way and the strip fits one row; at 546–599 the
+   breadth bar takes its own row, so Sold out and the season share the next one, as on phones */
+@media (min-width:998px) and (max-width:1189px){
+  .lc-main--market .mk-index.has-season .mk-lcx-spark{display:none}
+}
+@media (min-width:546px) and (max-width:599px){
+  .lc-main--market .mk-index.has-season .mk-breadth{width:100%}
+}
 .lc-main--market .mk-index-sample{margin-left:auto}
 .lc-main--market .mk-heat-note .lc-sample{margin-left:8px;white-space:nowrap}
 
@@ -97,10 +123,10 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 /* list: sticky beside the chart, scrolling inside itself */
 .lc-main--market .mk-listp{grid-area:list;position:sticky;top:var(--sticky-top);max-height:calc(100vh - var(--sticky-top) - 16px);min-height:420px;display:flex;flex-direction:column;min-width:0}
 .lc-main--market .mk-find{display:flex;flex-direction:column;gap:10px;padding:14px;border-bottom:1px solid var(--mk-line)}
-.lc-main--market .mk-input{width:100%;min-height:44px;padding:0 12px;border:2px solid var(--mid);border-radius:0;background:var(--mk-field);color:var(--page);font-family:var(--body);font-size:16px}
+.lc-main--market .mk-input{width:100%;min-height:44px;padding:0 12px;border:2px solid var(--mid);border-radius:0;background:var(--mk-field);color:var(--on-dark);font-family:var(--body);font-size:16px}
 .lc-main--market .mk-input::placeholder{color:#a8a4b1;opacity:1}
 .lc-main--market .mk-tabs{gap:6px}
-.lc-main--market .mk-app .lc-chip{min-width:44px;padding:0 10px;border-color:var(--mk-edge);background:transparent;color:var(--page);font-size:14px}
+.lc-main--market .mk-app .lc-chip{min-width:44px;padding:0 10px;border-color:var(--mk-edge);background:transparent;color:var(--on-dark);font-size:14px}
 .lc-main--market .mk-app .lc-chip:hover{background:var(--mk-hover)}
 /* pressed: purple, with a light edge so the state reads against the panel (the fill alone is 2.34:1) */
 .lc-main--market .mk-app .lc-chip[aria-pressed="true"]{background:var(--purple);border-color:var(--purple-light);color:#fff}
@@ -110,11 +136,16 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-list-head{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;padding:8px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
 .lc-main--market .mk-list-head>span+span{text-align:right}
 .lc-main--market .mk-list{flex:1 1 auto;min-height:0;margin:0;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-color:var(--mk-edge) transparent}
-.lc-main--market .mk-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;align-items:center;width:100%;min-height:48px;padding:5px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--page);font-family:var(--body);text-align:left;cursor:pointer}
+.lc-main--market .mk-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;align-items:center;width:100%;min-height:48px;padding:5px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--on-dark);font-family:var(--body);text-align:left;cursor:pointer}
 .lc-main--market .mk-row:hover{background:var(--mk-hover)}
 .lc-main--market .mk-row[aria-pressed="true"]{background:var(--mk-line);box-shadow:inset 4px 0 0 var(--purple-light)}
 .lc-main--market .mk-row:focus-visible{outline-offset:-3px}
 .lc-main--market .mk-row-id{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+/* the symbol and its tag share the top line; a long pair wraps the tag under the symbol */
+.lc-main--market .mk-row-top{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;min-width:0}
+.lc-main--market .mk-tagslot{display:inline-flex;flex:none}
+/* beside a symbol the tag is as tall as the symbol's line, so rows and tiles keep their 2.1 height (and DIAM WANTED fits a 1280 row) */
+.lc-main--market :is(.mk-row-top,.mk-tile-head) .lc-tag{padding:0 4px;line-height:1.2}
 .lc-main--market .mk-row-sym{font-family:var(--mono);font-weight:700;font-size:14px;color:#fff}
 .lc-main--market .mk-row-name{overflow:hidden;font-size:13px;color:var(--muted-dark);text-overflow:ellipsis;white-space:nowrap}
 .lc-main--market .mk-row-price{font-family:var(--mono);font-size:14px;text-align:right;white-space:nowrap}
@@ -142,8 +173,14 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-q-ch{font-family:var(--mono);font-weight:600;font-size:17px;white-space:nowrap}
 .lc-main--market .mk-q-ch.is-out{color:var(--orange);font-family:var(--body);font-weight:800}
 .lc-main--market .mk-q-today{margin-left:2px;font-family:var(--body);font-weight:400;font-size:14px;color:var(--muted-dark)}
+/* live market: the tag, what it means and when it ends; "Usually $X (+12.0%)" */
+.lc-main--market .mk-q-live{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font-size:15px;line-height:1.4;color:var(--muted-dark)}
+.lc-main--market .mk-q-badge{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.lc-main--market .mk-q-hint{color:var(--on-dark)}
+.lc-main--market .mk-q-usual strong{font-family:var(--mono);font-weight:700;color:var(--on-dark)}
+.lc-main--market .mk-q-usual>span{font-family:var(--mono);font-weight:600;white-space:nowrap}
 .lc-main--market .mk-q-acts{flex:none;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
-.lc-main--market .mk-act{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:2px solid var(--mk-edge);border-radius:0;background:transparent;color:var(--page);font-family:var(--body);font-weight:800;font-size:15px;line-height:1.2;white-space:nowrap;cursor:pointer}
+.lc-main--market .mk-act{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:2px solid var(--mk-edge);border-radius:0;background:transparent;color:var(--on-dark);font-family:var(--body);font-weight:800;font-size:15px;line-height:1.2;white-space:nowrap;cursor:pointer}
 .lc-main--market .mk-act:hover{background:var(--mk-hover)}
 .lc-main--market .mk-watch svg{flex:none;fill:none;stroke:var(--orange);stroke-width:2;stroke-linejoin:round}
 .lc-main--market .mk-watch[aria-pressed="true"]{background:var(--purple);border-color:var(--purple-light);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
@@ -152,7 +189,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 
 /* chart range */
 .lc-main--market .mk-range{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.lc-main--market .mk-tf{min-width:54px;min-height:44px;padding:0 12px;border:2px solid var(--mk-edge);border-radius:0;background:transparent;color:var(--page);font-family:var(--mono);font-weight:700;font-size:14px;cursor:pointer}
+.lc-main--market .mk-tf{min-width:54px;min-height:44px;padding:0 12px;border:2px solid var(--mk-edge);border-radius:0;background:transparent;color:var(--on-dark);font-family:var(--mono);font-weight:700;font-size:14px;cursor:pointer}
 .lc-main--market .mk-tf:hover{background:var(--mk-hover)}
 .lc-main--market .mk-tf[aria-pressed="true"]{background:var(--purple);border-color:var(--purple-light);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
 .lc-main--market .mk-tf[aria-disabled="true"]{border-style:dashed;background:transparent;color:#8d8a94;cursor:not-allowed}
@@ -175,6 +212,24 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-axis{display:flex;justify-content:space-between;gap:8px;margin:-6px 64px 0 0;font-size:12px;color:var(--muted-dark)}
 .lc-main--market .mk-nohist{padding:40px 0;font-size:16px;color:var(--muted-dark);text-align:center}
 
+/* live market events on the chart: a dashed line and a square at the top, coloured by kind (3:1 on the panel);
+   the list under the chart says what each one is */
+.lc-main--market .mk-ev--hot{--ev:var(--orange)}
+.lc-main--market .mk-ev--deal{--ev:var(--purple-light)}
+.lc-main--market .mk-ev--up{--ev:var(--up)}
+.lc-main--market .mk-ev--down{--ev:var(--down)}
+.lc-main--market .mk-ev--real{--ev:var(--muted-dark)}
+.lc-main--market .mk-c-evl{fill:none;stroke:var(--ev);stroke-width:1.5;stroke-dasharray:4 3}
+.lc-main--market .mk-c-evm{fill:var(--ev)}
+.lc-main--market .mk-evs{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-right:64px}
+.lc-main--market .mk-evs .mk-cap{white-space:nowrap}
+.lc-main--market .mk-evlist{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none}
+.lc-main--market .mk-evlist>li{display:flex;align-items:center;gap:0 8px;min-height:24px;font-size:14px;line-height:1.3;white-space:nowrap}
+.lc-main--market .mk-ev-sw{flex:none;width:10px;height:10px;background:var(--ev)}
+.lc-main--market .mk-ev-word{font-weight:700;color:var(--on-dark)}
+.lc-main--market .mk-ev-pct{font-family:var(--mono);font-weight:600}
+.lc-main--market .mk-ev-ago{color:var(--muted-dark)}
+
 /* stock on the shelf, under the chart (no volume: HomeCraftMgmt doesn't publish trades) */
 .lc-main--market .mk-sb{display:flex;flex-direction:column;gap:6px;padding-right:64px}
 .lc-main--market .mk-sb-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:0 12px}
@@ -189,8 +244,10 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;border-top:1px solid var(--mk-line);border-left:1px solid var(--mk-line);background:var(--mk-panel)}
 .lc-main--market .mk-stats>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border-right:1px solid var(--mk-line);border-bottom:1px solid var(--mk-line)}
 .lc-main--market .mk-stats dt{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark);white-space:nowrap}
-.lc-main--market .mk-stats dd{margin:0;font-family:var(--mono);font-weight:700;font-size:17px;line-height:1.35;color:var(--page);overflow-wrap:normal}
+.lc-main--market .mk-stats dd{margin:0;font-family:var(--mono);font-weight:700;font-size:17px;line-height:1.35;color:var(--on-dark);overflow-wrap:normal}
 .lc-main--market .mk-stats dd.mk-warn{color:var(--orange)}
+/* nine stats (the live market's usual price too) sit three by three */
+.lc-main--market .mk-stats[data-n="9"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 
 /* where to trade in game */
 .lc-main--market .mk-trade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -200,21 +257,35 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-trade-title{font-family:var(--body);font-weight:800;font-size:16px;line-height:1.3;letter-spacing:0}
 .lc-main--market .mk-trade-box--buy .mk-trade-title{color:var(--up)}
 .lc-main--market .mk-trade-box--sell .mk-trade-title{color:var(--down)}
-.lc-main--market .mk-trade-box p{font-size:15px;line-height:1.45;color:var(--muted-dark)}
+.lc-main--market .mk-trade-box p{font-size:15px;line-height:1.45;color:var(--muted-dark);text-wrap:pretty}
 
 /* movers and sectors */
 .lc-main--market .mk-side{grid-area:side;display:flex;flex-direction:column;gap:16px;min-width:0}
-.lc-main--market .mk-panel-title{padding:10px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:12px;font-weight:700;line-height:1.5;letter-spacing:.1em;text-transform:uppercase;color:var(--page)}
+.lc-main--market .mk-panel-title{padding:10px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:12px;font-weight:700;line-height:1.5;letter-spacing:.1em;text-transform:uppercase;color:var(--on-dark)}
 .lc-main--market .mk-panel-title.lc-up{color:var(--up)}
 .lc-main--market .mk-panel-title.lc-down{color:var(--down)}
 .lc-main--market .mk-mlist{margin:0;padding:0;list-style:none}
-.lc-main--market .mk-mrow{display:grid;grid-template-columns:minmax(0,1fr) auto 64px;gap:10px;align-items:center;width:100%;min-height:44px;padding:0 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--page);font-family:var(--mono);font-size:13px;text-align:left;cursor:pointer}
+.lc-main--market .mk-mrow{display:grid;grid-template-columns:minmax(0,1fr) auto 64px;gap:10px;align-items:center;width:100%;min-height:44px;padding:0 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--on-dark);font-family:var(--mono);font-size:13px;text-align:left;cursor:pointer}
 .lc-main--market .mk-mlist li:last-child .mk-mrow{border-bottom:0}
 .lc-main--market .mk-mrow:hover{background:var(--mk-hover)}
 .lc-main--market .mk-mrow:focus-visible{outline-offset:-3px}
 .lc-main--market .mk-m-sym{font-weight:700}
 .lc-main--market .mk-m-ch{text-align:right}
 .lc-main--market .mk-mnone{padding:12px 14px;font-size:14px;color:var(--muted-dark)}
+
+/* market news: tag and time, the headline, the line; a row about an item is a button that charts it */
+.lc-main--market .mk-panel-head{display:flex;justify-content:space-between;align-items:center;gap:4px 12px;flex-wrap:wrap;padding-right:14px;border-bottom:1px solid var(--mk-line)}
+.lc-main--market .mk-panel-head .mk-panel-title{border-bottom:0}
+.lc-main--market .mk-nlist{margin:0;padding:0;list-style:none}
+.lc-main--market .mk-nrow{display:flex;flex-direction:column;gap:4px;width:100%;min-height:44px;padding:12px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--on-dark);font-family:var(--body);text-align:left}
+.lc-main--market .mk-nlist li:last-child .mk-nrow{border-bottom:0}
+.lc-main--market button.mk-nrow{cursor:pointer}
+.lc-main--market button.mk-nrow:hover{background:var(--mk-hover)}
+.lc-main--market button.mk-nrow:focus-visible{outline-offset:-3px}
+.lc-main--market .mk-n-top{display:flex;align-items:center;flex-wrap:wrap;gap:2px 10px;min-height:22px}
+.lc-main--market .mk-n-ago{font-family:var(--mono);font-size:12px;color:var(--muted-dark)}
+.lc-main--market .mk-n-head{font-weight:800;font-size:15px;line-height:1.35;color:#fff}
+.lc-main--market .mk-n-line{font-size:14px;line-height:1.45;color:var(--muted-dark)}
 .lc-main--market .mk-seclist{margin:0;padding:6px 0 8px;list-style:none}
 .lc-main--market .mk-seclist li{display:grid;grid-template-columns:112px minmax(0,1fr) 60px;gap:10px;align-items:center;padding:7px 14px}
 .lc-main--market .mk-sec-name{font-size:13px;line-height:1.3;color:var(--muted-dark)}
@@ -224,25 +295,24 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-sec-bar>.lc-down{background:var(--down)}
 .lc-main--market .mk-sec-ch{font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
 
-/* ---------- What's my stuff worth? A loud white box (light price colours, purple focus inside) ---------- */
-.lc-main--market .mk-calc{grid-area:calc;display:flex;flex-direction:column;gap:14px;min-width:0;margin:8px 10px 10px 0;padding:22px 24px 24px;background:#fff;border:3px solid var(--charcoal);box-shadow:10px 10px 0 var(--orange);color:var(--ink);
-  --up:#1f9d55;--down:#e5484d;--flat:#5f5c66}
-.lc-main--market .mk-calc :focus-visible{outline-color:var(--purple)}
+/* ---------- What's my stuff worth? A loud box in the look's colours (see the top); the look's focus ring inside ---------- */
+.lc-main--market .mk-calc{grid-area:calc;display:flex;flex-direction:column;gap:14px;min-width:0;margin:8px 10px 10px 0;padding:22px 24px 24px;background:var(--card);border:3px solid var(--edge);box-shadow:10px 10px 0 var(--orange);color:var(--ink)}
+.lc-main--market .mk-calc :focus-visible{outline-color:var(--focus)}
 .lc-main--market .mk-calc-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
 .lc-main--market .mk-calc-title{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.2;color:var(--ink)}
 .lc-main--market .mk-calc-intro{font-size:16px;color:var(--text)}
 .lc-main--market .mk-calc-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:12px;align-items:end}
 .lc-main--market .mk-cf-item{grid-column:1/-1}
 .lc-main--market .mk-calc .lc-select{padding-right:6px}
-.lc-main--market .mk-calc .lc-input[aria-invalid="true"]{border-color:#b42a30;box-shadow:inset 0 0 0 1px #b42a30}
+.lc-main--market .mk-calc .lc-input[aria-invalid="true"]{border-color:var(--mk-err);box-shadow:inset 0 0 0 1px var(--mk-err)}
 .lc-main--market .mk-cf-add{min-height:46px}
-.lc-main--market .mk-calc-err{grid-column:1/-1;font-size:15px;font-weight:700;color:#b42a30}
+.lc-main--market .mk-calc-err{grid-column:1/-1;font-size:15px;font-weight:700;color:var(--mk-err)}
 .lc-main--market .mk-calc-err:empty{display:none}
 .lc-main--market .mk-calc-table{width:100%;border-collapse:collapse;font-size:15px}
 .lc-main--market .mk-calc-table th,.lc-main--market .mk-calc-table td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 .lc-main--market .mk-calc-table :is(th,td):first-child{padding-left:0}
 .lc-main--market .mk-calc-table :is(th,td):last-child{padding-right:0}
-.lc-main--market .mk-calc-table thead th{padding-top:0;border-bottom:3px solid var(--charcoal);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lc-main--market .mk-calc-table thead th{padding-top:0;border-bottom:3px solid var(--edge);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .lc-main--market .mk-calc-table .mk-cn{text-align:right;font-family:var(--mono);white-space:nowrap}
 .lc-main--market .mk-calc-table thead .mk-cn{font-family:var(--mono)}
 .lc-main--market .mk-calc-table .mk-cx{width:1%;text-align:right}
@@ -251,7 +321,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-ci-gone{display:block;font-size:13px;color:var(--muted)}
 .lc-main--market .mk-calc-table tfoot th,.lc-main--market .mk-calc-table tfoot td{padding-top:12px;border-bottom:0;font-weight:800;font-size:17px}
 .lc-main--market .mk-calc-total{font-size:20px!important;color:var(--ink)}
-.lc-main--market .mk-rm{min-height:44px;padding:0 12px;border:2px solid var(--charcoal);border-radius:0;background:#fff;color:var(--charcoal);font-family:var(--body);font-weight:800;font-size:14px;cursor:pointer}
+.lc-main--market .mk-rm{min-height:44px;padding:0 12px;border:2px solid var(--edge-strong);border-radius:0;background:var(--card);color:var(--ink);font-family:var(--body);font-weight:800;font-size:14px;cursor:pointer}
 .lc-main--market .mk-rm:hover{background:var(--light)}
 .lc-main--market .mk-calc-empty{padding:16px;border:3px dashed var(--mid);font-size:15px;color:var(--muted);text-align:center}
 .lc-main--market .mk-calc-note{font-size:14px;line-height:1.5;color:var(--muted)}
@@ -269,6 +339,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-tile:hover{box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
 .lc-main--market .mk-tile[aria-pressed="true"]{box-shadow:inset 0 0 0 3px var(--orange)}
 .lc-main--market .mk-tile-top{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.lc-main--market .mk-tile-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:2px 6px}
 .lc-main--market .mk-tile-sym{font-weight:700;font-size:15px}
 .lc-main--market .mk-tile-name{overflow:hidden;font-family:var(--body);font-size:12px;color:rgba(255,255,255,.86);text-overflow:ellipsis;white-space:nowrap}
 .lc-main--market .mk-tile-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px;font-size:13px}
@@ -286,12 +357,20 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 
 /* ---------- how the market works, and the Marketplace ---------- */
 .lc-main--market .mk-how{border-top:1px solid var(--mk-line)}
-.lc-main--market .lc-card--dark{background:var(--mk-panel);border-color:var(--mk-line)}
+/* the panels' colours; the line under a strip stays charcoal in both looks */
+.lc-main--market .lc-card--dark{--edge:var(--charcoal);background:var(--mk-panel);border-color:var(--mk-line)}
 .lc-main--market .lc-card--dark .lc-text{color:var(--muted-dark)}
+/* hot, deals and news: a list across the section (an orange square per tag), kept to a readable width */
+.lc-main--market .mk-how-live .lc-text{max-width:880px}
+.lc-main--market .mk-how-live strong{color:var(--on-dark)}
+.lc-main--market .mk-how-list{display:flex;flex-direction:column;gap:8px;padding:0;list-style:none}
+.lc-main--market .mk-how-list>li{position:relative;padding-left:22px}
+.lc-main--market .mk-how-list>li::before{content:"";position:absolute;left:0;top:.5em;width:9px;height:9px;background:var(--orange)}
+/* The Marketplace board follows the look (see the top) */
 .lc-main--market .mk-shops{display:flex;justify-content:space-between;align-items:center;gap:24px 40px;margin-right:10px;padding:32px 36px}
 .lc-main--market .mk-shops-text{display:flex;flex-direction:column;gap:10px;max-width:760px}
 .lc-main--market .mk-shops .lc-h2{color:var(--ink)}
-.lc-main--market .mk-shops :focus-visible{outline-color:var(--purple)}
+.lc-main--market .mk-shops :focus-visible{outline-color:var(--focus)}
 .lc-main--market .mk-shops-cta{flex:none}
 .lc-main--market .mk-shops-cta .wp-block-button__link{white-space:nowrap}
 
@@ -299,7 +378,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 @media (max-width:1200px){
   .lc-main--market .mk-grid{grid-template-columns:260px minmax(0,1fr);grid-template-rows:auto auto 1fr;grid-template-areas:"list center" "list side" "list calc"}
   .lc-main--market .mk-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
-  .lc-main--market .mk-sectors{grid-column:1/-1}
+  .lc-main--market :is(.mk-news,.mk-sectors){grid-column:1/-1}
   .lc-main--market .mk-seclist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:920px){
@@ -326,7 +405,8 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market .mk-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media (max-width:600px){
-  .lc-main--market .mk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-stats,.lc-main--market .mk-stats[data-n="9"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-stats[data-n="9"]>div:last-child{grid-column:1/-1}
   .lc-main--market .mk-side{grid-template-columns:minmax(0,1fr)}
   .lc-main--market .mk-seclist{grid-template-columns:minmax(0,1fr)}
   .lc-main--market .mk-trade{grid-template-columns:minmax(0,1fr)}
@@ -342,6 +422,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market .mk-chart{height:220px;padding-right:56px}
   .lc-main--market .mk-axis{margin-right:56px}
   .lc-main--market .mk-sb{padding-right:56px}
+  .lc-main--market .mk-evs{margin-right:0}
   .lc-main--market .mk-tf-note{flex-basis:100%;margin-left:0}
   .lc-main--market .mk-calc{padding:18px 16px 20px}
   .lc-main--market .mk-calc-form{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
@@ -350,7 +431,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market .mk-calc-table,.lc-main--market .mk-calc-table>tbody,.lc-main--market .mk-calc-table>tfoot{display:block}
   .lc-main--market .mk-calc-table thead{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
   .lc-main--market .mk-calc-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"item worth" "amt rm" "each rm";gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
-  .lc-main--market .mk-calc-table tbody tr:first-child{border-top:3px solid var(--charcoal)}
+  .lc-main--market .mk-calc-table tbody tr:first-child{border-top:3px solid var(--edge)}
   .lc-main--market .mk-calc-table tbody td{display:block;padding:0;border:0}
   .lc-main--market .mk-calc-table tbody td:nth-child(1){grid-area:item}
   .lc-main--market .mk-calc-table tbody td:nth-child(2){grid-area:amt;text-align:left;white-space:normal}
@@ -378,4 +459,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market :is(.mk-row,.mk-tile,.mk-tf,.mk-watch)[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}
   .lc-main--market :is(.mk-row,.mk-tile)[aria-pressed="true"] *{color:HighlightText;background:transparent}
   .lc-main--market .mk-tf[aria-disabled="true"]{color:GrayText;border-color:GrayText}
+  .lc-main--market .mk-c-evm{fill:CanvasText}
+  .lc-main--market .mk-c-evl{stroke:CanvasText}
+  .lc-main--market .mk-ev-sw{forced-color-adjust:none;background:CanvasText}
 }

@@ -36,7 +36,7 @@ This works because `style.css` has `Update URI: https://github.com/Dierks27/Lila
 | Minecraft version | The version the server is on, shown on Downloads. Blank hides that line. |
 | CraftBridge Client version | Shown on Downloads and used in the download links (default `0.4.0`). |
 | CraftBridge download URL pattern | `{version}`, `{mc}` and `{loader}` are filled in for each pick. If a file is missing, the button links to the release page instead. |
-| Hero style | Charcoal (default) or Light: the top band of every page and the header, on the site and in the Site Editor. |
+| Hero style | Charcoal (default) or Light: the top band of every page and the header, on the site and in the Site Editor (in the dark look both are always charcoal). |
 
 Under each feed URL the settings page says when the last fetch worked or why it failed.
 
@@ -44,7 +44,7 @@ Under each feed URL the settings page says when the last fetch worked or why it 
 
 Browsers never talk to the game server. WordPress fetches, caches and serves same-origin routes:
 
-- `GET /wp-json/lilahcraft/v1/market`: the Market feed. `history7d` and `history30d` (when HomeCraftMgmt sends them) are only in `?long=1`, which the Market page asks for to turn on its 7D and 30D ranges; Home and the plain route stay small. Cached for the configured seconds. The last good copy is kept, and if a fetch fails it is served with `"stale": true`. No URL set: `{ "sample": true }`.
+- `GET /wp-json/lilahcraft/v1/market`: the Market feed. `history7d` and `history30d` (when HomeCraftMgmt sends them) and the live market's chart markers (`events`, below) are only in `?long=1`, which the Market page asks for to turn on its 7D and 30D ranges; Home and the plain route stay small. Cached for the configured seconds. The last good copy is kept, and if a fetch fails it is served with `"stale": true`. No URL set: `{ "sample": true }`.
 - `GET /wp-json/lilahcraft/v1/minis`: the same for the Minis feed. Only counts are passed on, never owners.
 - `GET /wp-json/lilahcraft/v1/status`: a Java server list ping from PHP (3 second timeout, cached 60 seconds): `{ online, players, max, version }`.
 
@@ -52,9 +52,46 @@ Only the fields the site uses are passed through; anything else in a feed is dro
 
 - `GET /wp-json/lilahcraft/v1/activity`: "When are people on?" on the Play page. WordPress keeps the highest player count of each hour from its own pings (plus a 15-minute background check) for 14 days, and serves the average day once those samples span at least three days (a log that stopped, say because the ping broke, ages out instead of passing for recent). Counts only, never names.
 
+### The live market (HomeCraftMgmt 0.33)
+
+While HomeCraftMgmt's live market runs, its `/api/market` says `"live": true` and carries HOT and DEAL badges, News Flashes, the season and "Usually $X" prices. The site passes these on only when the feed says `"live": true`. With the live market off or paused (or on 0.32) none of it is in the answer, which is then exactly what theme 2.1 served, and the pages look as they did.
+
+Each item can add, after its history:
+
+| Field | What it is |
+|---|---|
+| `usual` | The price without the mood ("Usually $X"). A number, 0 or more |
+| `moodPct` | How far `price` is from `usual`, in percent (`11.7` = +11.7 %) |
+| `status` | `hot`, `deal`, `up`, `down` or `wanted`, while a badge shows |
+| `statusEndsAt` | When that badge goes (ms). Only with a `status`; `wanted` has none |
+| `events` | Chart markers, oldest first, at most 20 (HomeCraftMgmt sends those from the last 30 days): `{ t, kind, pct }` with `kind` `hot`, `deal`, `up`, `down` or `real`. **Only with `?long=1`** |
+
+And at the top level, after `items`:
+
+| Field | What it is |
+|---|---|
+| `live` | `true` (never sent otherwise) |
+| `hot`, `deals` | Ids of the items that are HOT / on a DEAL; only ids that are in `items`, at most 50 each |
+| `season` | `{ id, name, endsAt }`, left out when no season runs |
+| `news` | The 5 newest rows, newest first: `{ id, t, kind, item, name, dir, pct, before, after, headline, line, source, active }`. `kind` is `up`, `down`, `hot`, `deal`, `wanted`, `season` or `real`; `item` is an id from `items` or `null` (always `null` for a season); `dir` is `1`, `-1` or `0`; `before` and `after` come together or not at all; `source` is `sim`, `admin`, `calendar` or `real`; `active` is `true` or `false` |
+
+How they're checked: numbers must be finite (percents within ±1000, `usual`, `before` and `after` not below 0, times above 0); a `status` or event outside its list is dropped, and a news row with an unknown `kind` or `source`, or without an id, time or headline, is left out; text is plain text with Minecraft colour codes (`§a`, `&l`) and any markup removed, and cut to 60 characters for names (and the season's name), 140 for headlines and 200 for lines. Times can't run far ahead (that would be a clock or unit slip in HomeCraftMgmt): a news row or chart marker more than a day in the future is left out, and a `statusEndsAt` or season `endsAt` more than 60 days away counts as missing, so the badge shows with no end time and the season is left out. The same fields in any other shape, and anything else the feed adds, are dropped.
+
+The labelled sample data has a small live market of its own, so the pages can be seen with it before a feed is set up: Oak Log HOT (+12 %), Copper Ingot on a DEAL (−10 %), an UP News Flash on Emerald (+21.5 %), Diamond WANTED, the Harvest Time season (Wheat −4 %) and five news rows. It only ever appears with the "Sample data" label, never mixed into a live feed.
+
 ### Fonts and share cards
 
 The fonts (Unbounded, Figtree, JetBrains Mono, Silkscreen; SIL Open Font License, see `assets/fonts/OFL.txt`) are served from the theme, so pages make no requests to Google. Each page has a description and a 1200×630 share card (`assets/img/og/`) for Discord, iMessage and search results; a news post uses its own excerpt and featured image. If an SEO plugin is installed, the theme leaves those tags to it.
+
+### Dark look and tab icon
+
+The site has a light and a dark look. It follows the device's own setting, and switches when the device does.
+
+- The sun/moon switch in the header overrides the device. The choice is remembered in that browser (localStorage `lc-theme`); picking the look the device already uses clears it, so the site follows the device again.
+- Without JavaScript the switch is hidden and the device decides.
+- In the dark look the hero and header stay charcoal, whatever Hero style says. The Market page is dark in both looks. The block editor always shows the light look.
+
+The tab icon is the logo's four squares on a charcoal tile (`assets/img/icon/`). It shows only while no Site Icon is set: a Site Icon set in WordPress (Settings → General, or the Site Editor) always wins. Until then `/favicon.ico` redirects to the theme's `favicon-32.png`.
 
 ## Editing content
 
@@ -84,13 +121,13 @@ lilahcraft/
   style.css, theme.json, functions.php
   inc/        settings, feeds + REST routes, server ping, page setup, assets, updates from GitHub,
               PHP-rendered blocks
-  parts/      header, footer
+  parts/      header, footer, news-sidebar
   templates/  front-page (Home), page-play, page-downloads, page-market, page-minis, page-arcade,
-              page-guide, home (News), single, archive, page, index, 404
+              page-guide, home (News), single, archive, category, page, index, search, 404
   patterns/   house-rules
   assets/css  fonts.css, site.css (shared) + page-<name>.css, editor.css (block editor only)
-  assets/js   site.js (shared), lc-data.js (feeds, sample data, symbols), page-<name>.js
-  assets/img  block textures (tex-*, strip-*), the Play QR code, share cards (og/)
+  assets/js   site.js (shared), lc-data.js (feeds, sample data, symbols, live-market badges and news), page-<name>.js
+  assets/img  block textures (tex-*, strip-*), the Play QR code, share cards (og/), the tab icon (icon/)
   assets/fonts  the four font families (woff2) and their licence
 tools/check-theme.php   the checks the release runs (PHP lint, JSON, no bracket placeholders, none of the 2.0 look:
                         its colours, tokens and classes, rounded corners, outlined text, the star field)

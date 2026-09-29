@@ -3,15 +3,15 @@
    Breakpoints: 1150px (header menu button), 920px (grids to one or two columns), 520px (phones). */
 
 :root{
-  /* Pixel pop tokens */
+  /* Pixel pop tokens. Softer whites (2.2): the page, the gray bands and every light surface (--card: cards, boards,
+     chips, inputs) are tinted, not white. --white stays for text and icons on colour; --on-dark is body text on charcoal.
+     The brand colours, --charcoal (header, footer, dark bands) and the hero's own tokens are the same in both looks. */
   --charcoal:#26242b; --charcoal-2:#3a3740; --panel-dark:#2f2c35;
-  --muted:#5f5c66; --muted-dark:#bdb9c6; --mid:#8d8a94; --light:#ecebef; --page:#f5f4f7; --white:#fff;
+  --muted-dark:#bdb9c6; --mid:#8d8a94; --on-dark:#f5f4f7; --white:#fff;
   --purple:#6c46e0; --purple-deep:#4b2fa8; --purple-light:#b39cff;
-  --pink:#ff5fa8; --pink-deep:#c93a7c;
-  --orange:#ff8a2b; --orange-deep:#c95f14;
-  --ink:#26242b; --text:#4a4752; --line:#ecebef;
-  /* price moves: light by default; dark contexts (.lc-dark, .lc-hero, .lc-sec--dark) switch these */
-  --up:#1f9d55; --down:#e5484d; --flat:#5f5c66;
+  /* The deep shades are text on light (4.5:1 on --card, --page and --light) and the bevels of the pink and orange buttons */
+  --pink:#ff5fa8; --pink-deep:#a42c64;
+  --orange:#ff8a2b; --orange-deep:#94450f;
   --up-dark:#5fd38d; --down-dark:#ff7a7e; --flat-dark:#bdb9c6;
   --display:"Unbounded",system-ui,sans-serif;
   --body:"Figtree",system-ui,sans-serif;
@@ -25,21 +25,64 @@
   --sticky-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 24px);
   --cell:46px;
 }
+/* The look's tokens: surfaces, text, outlines, accent text, focus and price moves. The dark look (below) changes them.
+   .lc-light keeps a box and everything in it in the light look in both looks (e.g. the light boxes on the dark Market). */
+:root,.lc-light{
+  color-scheme:light;
+  --page:#e3e1e8; --light:#d7d4de; --card:#efedf3; --line:#d7d4de;
+  --ink:#26242b; --text:#4a4752; --muted:#58555f;
+  /* Outlines: --edge for cards, boards and strips (3 px); --edge-strong for controls that must show at 3:1 (inputs,
+     selects, chips, outline buttons, checkboxes). Both charcoal here. */
+  --edge:#26242b; --edge-strong:#26242b;
+  /* Accent TEXT (links, kickers, commands): 4.5:1 on --card, --page and --light in both looks (--purple-text only on
+     --card and --page here; on --light use --purple-deep-text). Use these for text and keep --purple, --pink-deep etc.
+     for fills and bevels, which stay the same in the dark look. */
+  --purple-text:var(--purple); --purple-deep-text:var(--purple-deep); --pink-text:var(--pink-deep); --orange-text:var(--orange-deep);
+  --focus:var(--purple);
+  /* price moves: light by default (4.5:1 on every light surface); dark contexts (.lc-dark, .lc-hero, .lc-sec--dark) switch these */
+  --up:#146838; --down:#b0191e; --flat:#58555f;
+}
 .lc-hero-light{
-  --hero-bg:#ecebef; --hero-line:#d8d6de; --hero-text:#26242b; --hero-muted:#5f5c66; --addr-bg:#fff; --hero-kicker:#b02d69;
+  --hero-bg:#d7d4de; --hero-line:#c5c2cd; --hero-text:#26242b; --hero-muted:var(--muted); --addr-bg:var(--card); --hero-kicker:var(--pink-deep);
   --bg-mine:rgba(255,138,43,.38); --bg-sell:rgba(255,95,168,.36); --bg-dot:rgba(108,70,224,.35);
 }
 @media (max-width:920px){:root{--gutter:28px;--cell:30px}}
 @media (max-width:520px){:root{--gutter:20px;--header-h:64px;--cell:20px}}
+
+/* ---------- the dark look (2.2) ----------
+   <html data-theme="light|dark"> is set before first paint by the script in inc/assets.php: the visitor's choice
+   from the header switch (localStorage lc-theme), else the device's. Everything below is keyed on
+   :root[data-theme="dark"], and inc/assets.php prints each such rule again for visitors without JavaScript, inside
+   @media (prefers-color-scheme:dark) as :root:not([data-theme]) (same values; front end only, so the editor stays light).
+   Pages: stay token-driven; a dark-only rule is written :root[data-theme="dark"] .lc-main--x … and gets the same twin.
+   Page #1c1b20, grey bands #26242b, cards #2f2c35, lines #3a3740, as on the Market. Headings #f5f4f7, text #cfccd6,
+   muted #bdb9c6: 4.5:1 or more on every one of those surfaces, as are the accent text shades.
+   Not in print: paper is white and browsers leave out backgrounds, so a page printed in the dark look uses the light tokens. */
+@media not print{
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --page:#1c1b20; --light:#26242b; --card:#2f2c35; --line:#3a3740;
+    --ink:#f5f4f7; --text:#cfccd6; --muted:#bdb9c6;
+    --edge:#4a4752; --edge-strong:#8d8a94;
+    --purple-text:var(--purple-light); --purple-deep-text:var(--purple-light); --pink-text:var(--pink); --orange-text:var(--orange);
+    --focus:var(--orange);
+    --up:var(--up-dark); --down:var(--down-dark); --flat:var(--flat-dark);
+  }
+}
+/* The hero and the header are charcoal in the dark look, whatever Settings > Hero style says */
+:root[data-theme="dark"] .lc-hero-light{
+  --hero-bg:#26242b; --hero-line:#3a3740; --hero-text:#fff; --hero-muted:#bdb9c6; --addr-bg:#1c1b20; --hero-kicker:#ff5fa8;
+  --bg-mine:rgba(255,138,43,.30); --bg-sell:rgba(255,95,168,.30); --bg-dot:rgba(179,156,255,.40);
+}
 
 /* ---------- base ---------- */
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 16px);-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--page);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.55;overflow-wrap:break-word}
 [hidden]{display:none!important}
-a{color:var(--purple);text-underline-offset:3px}
-a:hover{color:var(--pink-deep)}
-:focus-visible{outline:3px solid var(--purple);outline-offset:3px}
+a{color:var(--purple-text);text-underline-offset:3px}
+a:hover{color:var(--pink-text)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 h1,h2,h3,h4{font-family:var(--display);color:inherit;letter-spacing:-.02em;margin:0;line-height:1.15}
 p,ul,ol,dl,dd,figure,blockquote{margin:0}
 img,svg{max-width:100%}
@@ -58,18 +101,20 @@ code{background:var(--light);padding:1px 6px}
 
 /* Dark surfaces: light price colours, light links, orange focus rings */
 .lc-dark,.lc-hero,.lc-sec--dark,.lc-top,.lc-foot{--up:var(--up-dark);--down:var(--down-dark);--flat:var(--flat-dark)}
-.lc-hero-light .lc-hero,.lc-hero-light .lc-top{--up:#1f9d55;--down:#e5484d;--flat:#5f5c66}
+.lc-hero-light .lc-hero,.lc-hero-light .lc-top{--up:#146838;--down:#b0191e;--flat:#58555f}
 :is(.lc-dark,.lc-sec--dark,.lc-foot) a{color:var(--purple-light)}
 :is(.lc-dark,.lc-sec--dark,.lc-foot) a:hover{color:var(--pink)}
 :is(.lc-dark,.lc-hero,.lc-sec--dark,.lc-top,.lc-foot) :focus-visible{outline-color:var(--orange)}
 .lc-hero-light :is(.lc-hero,.lc-top) :focus-visible{outline-color:var(--purple)}
+:root[data-theme="dark"] .lc-hero-light :is(.lc-hero,.lc-top){--up:var(--up-dark);--down:var(--down-dark);--flat:var(--flat-dark)}
+:root[data-theme="dark"] .lc-hero-light :is(.lc-hero,.lc-top) :focus-visible{outline-color:var(--orange)}
 
 /* ---------- layout ---------- */
 .lc-main{display:block}
 .lc-wrap{width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
 .lc-sec{padding-block:64px}
 .lc-sec--gray{background:var(--light)}
-.lc-sec--dark{background:var(--charcoal);color:var(--page)}
+.lc-sec--dark{background:var(--charcoal);color:var(--on-dark)}
 .lc-sec--dark .lc-h2,.lc-sec--dark h2{color:#fff}
 .lc-sec.lc-sec--flush{padding-top:0}
 .lc-stack{display:flex;flex-direction:column;gap:14px}
@@ -95,7 +140,7 @@ code{background:var(--light);padding:1px 6px}
 }
 
 /* ---------- type ---------- */
-.lc-kicker{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pink-deep)}
+.lc-kicker{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pink-text)}
 .lc-h1{font-family:var(--display);font-weight:800;font-size:48px;line-height:1.12;letter-spacing:-.02em}
 .lc-h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.15;letter-spacing:-.02em}
 .lc-h2--md{font-size:28px}
@@ -107,7 +152,7 @@ code{background:var(--light);padding:1px 6px}
 .lc-small{font-size:15px;color:var(--muted)}
 .lc-mono{font-family:var(--mono)}
 .lc-addr{font-family:var(--mono);font-weight:700;color:var(--ink)}
-.lc-cmd{font-family:var(--mono);color:var(--purple-deep)}
+.lc-cmd{font-family:var(--mono);color:var(--purple-deep-text)}
 :is(.lc-dark,.lc-sec--dark,.lc-hero) .lc-cmd{color:var(--purple-light)}
 /* The key phrase in a headline, in an orange block */
 .lc-hl{padding:0 10px;background:var(--orange);color:var(--charcoal);-webkit-box-decoration-break:clone;box-decoration-break:clone}
@@ -140,6 +185,10 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-hero-light .lc-hero.lc-mat--copper::after{background-image:url(../img/tex-copper-light.svg)}
 .lc-hero-light .lc-hero.lc-mat--wool::after{background-image:url(../img/tex-wool-light.svg)}
 .lc-hero-light .lc-hero.lc-mat--stone::after{background-image:url(../img/tex-stone-light.svg)}
+:root[data-theme="dark"] .lc-hero-light .lc-hero.lc-mat--amethyst::after{background-image:url(../img/tex-amethyst-dark.svg)}
+:root[data-theme="dark"] .lc-hero-light .lc-hero.lc-mat--copper::after{background-image:url(../img/tex-copper-dark.svg)}
+:root[data-theme="dark"] .lc-hero-light .lc-hero.lc-mat--wool::after{background-image:url(../img/tex-wool-dark.svg)}
+:root[data-theme="dark"] .lc-hero-light .lc-hero.lc-mat--stone::after{background-image:url(../img/tex-stone-dark.svg)}
 .lc-hero-in{display:flex;flex-direction:column;gap:14px;padding-block:56px 64px}
 .lc-hero-in>*{max-width:calc(100% - 400px)}
 .lc-hero-in>.lc-lede{max-width:min(660px, calc(100% - 400px))}
@@ -148,9 +197,10 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-hero .lc-lede,.lc-hero p{color:var(--hero-muted)}
 /* Links, not buttons (a core Button block puts .lc-btn on its wrapper, not on the link) */
 .lc-hero a:not(.lc-btn,.wp-block-button__link){color:var(--purple-light)}
-.lc-hero-light .lc-hero a:not(.lc-btn,.wp-block-button__link){color:var(--purple)}
+.lc-hero-light .lc-hero a:not(.lc-btn,.wp-block-button__link){color:var(--purple-deep)}
 .lc-hero code{background:transparent;padding:0;color:var(--purple-light)}
 .lc-hero-light .lc-hero code{color:var(--purple-deep)}
+:root[data-theme="dark"] .lc-hero-light .lc-hero :is(a:not(.lc-btn,.wp-block-button__link),code){color:var(--purple-light)}
 /* The huge background word (Home: MINE · SELL). Solid tinted letters, decorative only. */
 .lc-bgword{position:absolute;z-index:0;left:40px;bottom:-22px;margin:0;font-family:var(--pixel);font-weight:700;font-size:128px;line-height:1;letter-spacing:.02em;white-space:nowrap;pointer-events:none;user-select:none}
 .lc-bgword-a{color:var(--bg-mine)} .lc-bgword-dot{color:var(--bg-dot)} .lc-bgword-b{color:var(--bg-sell)}
@@ -169,7 +219,7 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 }
 
 /* ---------- cards and boxes ---------- */
-.lc-card{display:flex;flex-direction:column;gap:10px;padding:24px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+.lc-card{display:flex;flex-direction:column;gap:10px;padding:24px;background:var(--card);border:3px solid var(--edge);color:var(--ink)}
 .lc-card--sm{padding:20px}
 .lc-card--dashed{border-style:dashed;border-color:var(--mid)}
 .lc-card--dark{background:var(--charcoal);border-color:var(--charcoal);color:var(--muted-dark)}
@@ -179,7 +229,7 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 @media (max-width:520px){.lc-card{padding:20px}}
 /* A 12×2 material strip across the top of a card: <div class="lc-strip lc-strip--copper" aria-hidden="true"></div> as the card's first child.
    Wide cards repeat the pattern (a whole number of copies) so the cells stay about square. */
-.lc-strip{height:60px;margin:-24px -24px 6px;border-bottom:3px solid var(--charcoal);background:0 0/auto 100% round no-repeat;image-rendering:pixelated}
+.lc-strip{height:60px;margin:-24px -24px 6px;border-bottom:3px solid var(--edge);background:0 0/auto 100% round no-repeat;image-rendering:pixelated}
 .lc-card--sm>.lc-strip{margin:-20px -20px 6px}
 @media (max-width:520px){.lc-strip{height:48px;margin:-20px -20px 6px}}
 .lc-strip--copper{background-image:url(../img/strip-copper.svg)}
@@ -187,8 +237,8 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-strip--wool{background-image:url(../img/strip-wool.svg)}
 .lc-strip--stone{background-image:url(../img/strip-stone.svg)}
 
-/* Loud boxes: white, 3 px charcoal border, hard 10 px offset shadow (orange, or pink) */
-.lc-board{background:#fff;border:3px solid var(--charcoal);box-shadow:10px 10px 0 var(--orange);color:var(--ink)}
+/* Loud boxes: a light surface, 3 px charcoal border, hard 10 px offset shadow (orange, or pink) */
+.lc-board{background:var(--card);border:3px solid var(--edge);box-shadow:10px 10px 0 var(--orange);color:var(--ink)}
 .lc-board--pink{box-shadow:10px 10px 0 var(--pink)}
 @media (max-width:920px){.lc-board{box-shadow:6px 6px 0 var(--orange);margin-right:6px}.lc-board--pink{box-shadow:6px 6px 0 var(--pink)}}
 
@@ -213,8 +263,10 @@ kbd,.lc-kbd{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid
 .lc-btn--orange{--b-bg:var(--orange);--b-fg:var(--charcoal);--b-deep:var(--orange-deep)}
 .lc-btn--pink{--b-bg:var(--pink);--b-fg:var(--charcoal);--b-deep:var(--pink-deep)}
 .lc-btn--charcoal{--b-bg:var(--charcoal);--b-fg:#fff;--b-deep:#0e0d10}
+/* On the dark page a charcoal button would sink in: one step lighter */
+:root[data-theme="dark"] .lc-btn--charcoal{--b-bg:var(--charcoal-2);--b-deep:#1c1b20}
 .lc-btn--ghost{--b-bg:transparent;--b-fg:var(--hero-text);--b-deep:transparent;--b-line:var(--hero-muted)}
-.lc-btn--outline{--b-bg:#fff;--b-fg:var(--charcoal);--b-deep:var(--light);--b-line:var(--charcoal);--b-h:44px;--b-size:16px}
+.lc-btn--outline{--b-bg:var(--card);--b-fg:var(--ink);--b-deep:var(--light);--b-line:var(--edge-strong);--b-h:44px;--b-size:16px}
 a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--b-h);padding:0 22px;border:0;border-radius:0;background:var(--b-bg);color:var(--b-fg);font-family:var(--body);font-weight:800;font-size:var(--b-size);line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--b-deep);cursor:pointer;text-align:center}
 /* Filled buttons have no border, so the bevel reaches the edge; the two outline variants draw theirs */
 .lc-btn--ghost:is(a,button),.lc-btn--outline:is(a,button),.wp-block-button:is(.lc-btn--ghost,.lc-btn--outline)>.wp-block-button__link{border:2px solid var(--b-line)}
@@ -227,27 +279,41 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 
 /* ---------- chips (filters, tabs) and pills ---------- */
 .lc-chips{display:flex;flex-wrap:wrap;gap:8px}
-.lc-chip{min-height:44px;padding:0 14px;border:2px solid var(--charcoal);border-radius:0;background:#fff;color:var(--charcoal);font-family:var(--body);font-weight:700;font-size:15px;cursor:pointer}
+.lc-chip{min-height:44px;padding:0 14px;border:2px solid var(--edge-strong);border-radius:0;background:var(--card);color:var(--ink);font-family:var(--body);font-weight:700;font-size:15px;cursor:pointer}
 .lc-chip:hover{background:var(--light)}
 .lc-chip[aria-pressed="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
 .lc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;font-weight:800;font-size:13px;line-height:1.4;white-space:nowrap}
 .lc-pill.lc-pill--soon{background:#ffe3cc;color:#8a3c06}
+:root[data-theme="dark"] .lc-pill.lc-pill--soon{background:#4a2f17;color:#ffc48f}
 .lc-pill.lc-pill--dark{background:var(--charcoal);color:#fff}
 /* Minis scarcity: "Only 3 left" (Home and Minis) */
 .lc-pill.lc-pill--left{background:var(--orange);color:var(--charcoal)}
 .lc-pill--code{background:var(--charcoal);color:#fff;font-family:var(--mono);font-weight:700;font-size:14px}
+/* Live market tags: <span class="lc-tag lc-tag--hot">HOT</span>, and --deal, --up, --down, --wanted. Text, not a button.
+   Each carries its own fill (text 4.5:1 on it), so it reads the same on light and on the dark Market.
+   After a name, put a visually hidden separator first: Oak Log<span class="lc-sr">, </span><span class="lc-tag …">HOT</span> */
+.lc-tag{--tag-bg:var(--orange);--tag-fg:var(--charcoal);display:inline-block;flex:none;padding:2px 5px 1px;border:2px solid var(--charcoal);background:var(--tag-bg);color:var(--tag-fg);font-family:var(--mono);font-weight:700;font-size:12px;line-height:1.25;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;vertical-align:.1em}
+.lc-tag--deal{--tag-bg:var(--purple);--tag-fg:#fff}
+.lc-tag--up{--tag-bg:#2fbf71}
+.lc-tag--down{--tag-bg:#c7353a;--tag-fg:#fff}
+.lc-tag--wanted{--tag-bg:var(--pink)}
 
 /* ---------- forms ---------- */
 .lc-field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .lc-label{font-weight:800;font-size:15px}
-.lc-input,.lc-select{width:100%;min-height:46px;padding:0 14px;border:2px solid var(--charcoal);border-radius:0;background:#fff;font-family:var(--body);font-size:17px;color:var(--ink)}
+.lc-input,.lc-select{width:100%;min-height:46px;padding:0 14px;border:2px solid var(--edge-strong);border-radius:0;background:var(--card);font-family:var(--body);font-size:17px;color:var(--ink)}
+/* Browsers draw placeholders in their own gray, under 4.5:1 on --card: use the muted text colour */
+.lc-input::placeholder{color:var(--muted);opacity:1}
 .lc-select{padding:0 12px}
 .lc-check{display:inline-flex;align-items:center;gap:10px;min-height:46px;font-size:16px;font-weight:700;cursor:pointer}
-.lc-check input{width:20px;height:20px;margin:0;accent-color:var(--purple)}
-.lc-empty{padding:24px;background:#fff;border:3px dashed var(--mid);font-size:17px;color:var(--muted);text-align:center}
+/* A square box on --card with the control edge, like the search box beside it; ticked: purple with a white pixel tick.
+   Forced colours get the browser's own box back (below). */
+.lc-check input{flex:none;-webkit-appearance:none;appearance:none;width:22px;height:22px;margin:0;border:2px solid var(--edge-strong);border-radius:0;background:var(--card);cursor:pointer}
+.lc-check input:checked{background:var(--purple) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M6 1h2v1H6zM5 2h2v1H5zM4 3h2v1H4zM0 3h1v1H0zM0 4h2v1H0zM3 4h2v1H3zM1 5h3v1H1zM2 6h1v1H2z'/%3E%3C/svg%3E") center/16px 16px no-repeat;border-color:var(--purple-deep-text)}
+.lc-empty{padding:24px;background:var(--card);border:3px dashed var(--mid);font-size:17px;color:var(--muted);text-align:center}
 
 /* ---------- facts list (dl) ---------- */
-.lc-facts{padding:8px 22px;background:#fff;border:3px solid var(--charcoal)}
+.lc-facts{padding:8px 22px;background:var(--card);border:3px solid var(--edge)}
 .lc-facts>div{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid var(--line)}
 .lc-facts dt{color:var(--muted)}
 .lc-facts dd{margin:0;font-weight:800;text-align:right}
@@ -301,13 +367,25 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 .lc-dot{width:8px;height:8px;background:#5fd38d;flex:none}
 .lc-menu-btn{display:none}
 .lc-menu-btn svg{flex:none}
+/* The switch for the dark look (site.js): a sun in the light look, a moon on purple (pressed) in the dark look.
+   It shows at every width, after the menu; without the script it can't work, so it isn't there (the Site Editor shows it). */
+.lc-theme-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:2px solid var(--hero-line);border-radius:0;background:transparent;color:var(--hero-text);cursor:pointer}
+.lc-theme-btn:hover{background:var(--hero-line)}
+.lc-theme-btn svg{flex:none;display:block}
+.lc-theme-btn .lc-theme-moon{display:none}
+:root[data-theme="dark"] .lc-theme-btn{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+:root[data-theme="dark"] .lc-theme-btn .lc-theme-sun{display:none}
+:root[data-theme="dark"] .lc-theme-btn .lc-theme-moon{display:block}
+html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-theme-btn{display:none}
 @media (max-width:1150px){
   .lc-top-in{gap:16px}
   .lc-menu-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto;min-height:44px;padding:0 14px;border:2px solid var(--hero-line);border-radius:0;background:transparent;color:var(--hero-text);font-family:var(--body);font-weight:800;font-size:16px;cursor:pointer}
   .lc-menu-btn[aria-expanded="true"]{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
-  .lc-menu{display:block;position:absolute;top:100%;left:0;right:0;padding:12px var(--gutter) 22px;background:var(--hero-bg);border-bottom:3px solid var(--charcoal);box-shadow:0 10px 0 rgba(38,36,43,.25);max-height:calc(100vh - var(--header-h));overflow-y:auto;scroll-padding-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 24px)}
+  .lc-menu{display:block;position:absolute;top:100%;left:0;right:0;padding:12px var(--gutter) 22px;background:var(--hero-bg);border-bottom:3px solid var(--edge);box-shadow:0 10px 0 rgba(38,36,43,.25);max-height:calc(100vh - var(--header-h));overflow-y:auto;scroll-padding-top:calc(var(--header-h) + var(--wp-admin--admin-bar--height, 0px) + 24px)}
   .lc-js .lc-menu{display:none}
   .lc-js .lc-top.is-open .lc-menu{display:block}
+  /* The dark look: --edge draws the panel's foot (charcoal would match the panel) and the shadow goes deeper */
+  :root[data-theme="dark"].lc-js .lc-menu{box-shadow:0 10px 0 rgba(0,0,0,.35)}
   .lc-nav ul{flex-direction:column;align-items:stretch;gap:2px}
   .lc-nav a{min-height:52px;font-size:17px}
   .lc-tools{flex-direction:column;align-items:flex-start;gap:14px;margin-top:12px;padding-top:16px;border-top:1px solid var(--hero-line)}
@@ -318,8 +396,14 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
   html:not(.lc-js) .lc-top :is(a,button){scroll-margin-top:0}
 }
 @media (max-width:600px){.admin-bar .lc-top{top:0}}
-/* Very narrow phones: a smaller name and a tighter Menu button, so both fit */
-@media (max-width:360px){.lc-mark{font-size:19px;gap:10px}.lc-menu-btn{padding:0 10px;gap:6px}}
+/* Phones: the name, the Menu button and the switch side by side. Below 380 px the name is smaller and the Menu
+   button tighter; below 360 px the button shows only its icon (its name stays "Menu"), so all three fit at 320. */
+@media (max-width:520px){.lc-top-in{column-gap:10px}}
+@media (max-width:379px){.lc-mark{font-size:19px;gap:10px}.lc-menu-btn{padding:0 10px;gap:6px}}
+@media (max-width:359px){
+  .lc-menu-btn{justify-content:center;width:44px;padding:0}
+  .lc-menu-btn span{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+}
 
 /* ---------- footer ---------- */
 .lc-foot{background:var(--charcoal);color:var(--muted-dark)}
@@ -344,7 +428,7 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 
 /* ---------- House rules (pattern patterns/house-rules.php, inserted into the Play page) ---------- */
 .lc-rules-wrap{width:100%;max-width:1280px;margin-inline:auto;padding:0 var(--gutter) 64px}
-.lc-rules{display:flex;flex-direction:column;gap:14px;padding:32px;background:var(--charcoal);color:var(--page);box-shadow:10px 10px 0 var(--orange)}
+.lc-rules{display:flex;flex-direction:column;gap:14px;padding:32px;background:var(--charcoal);color:var(--on-dark);box-shadow:10px 10px 0 var(--orange)}
 .lc-rules h2{color:#fff}
 .lc-rules ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 40px;margin:0;padding-left:22px;font-size:17px;color:var(--muted-dark)}
 .lc-rules li:empty{display:none}
@@ -362,20 +446,27 @@ button.lc-btn[data-done="1"]{--b-bg:var(--up-dark);--b-fg:var(--charcoal);--b-de
 .lc-entry li+li{margin-top:.4em}
 .lc-entry blockquote{padding-left:18px;border-left:4px solid var(--purple);color:var(--text)}
 .lc-entry .wp-block-image{margin-inline:0}
+/* core Buttons and a File block's download button: square purple buttons, not core's round gray pill.
+   A Button block with an lc-btn class keeps its own look (that rule is more specific). */
+.lc-entry :is(.wp-block-button__link,.wp-block-file__button){display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:0;background:var(--purple);color:#fff;font-family:var(--body);font-weight:800;font-size:17px;line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--purple-deep);opacity:1}
+.lc-entry :is(.wp-block-button__link,.wp-block-file__button):hover{color:#fff;filter:brightness(1.07)}
 /* Search results (search.html, and index.html's list): the title link covers the whole card; its focus ring goes around the card.
    Not in the Site Editor, where the card's other blocks must stay clickable. */
 :is(.lc-main--search,.lc-main--index) .lc-card{position:relative}
 body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a::after{content:"";position:absolute;inset:-3px}
 body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a:focus-visible{outline:0}
-body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a:focus-visible::after{outline:3px solid var(--purple);outline-offset:3px}
+body:not(.editor-styles-wrapper) :is(.lc-main--search,.lc-main--index) .wp-block-post-title a:focus-visible::after{outline:3px solid var(--focus);outline-offset:3px}
 
-/* Forced colors replace backgrounds, which is all that marks the pressed chip; the current page's bars too.
-   Their focus ring keeps the system colour the other controls get. Filled buttons get an edge back,
-   the decorative background word goes (it would turn into full-strength system text), and the logo's squares keep their colours. */
+/* Forced colors replace backgrounds, which is all that marks the pressed chip (and the pressed dark-look switch, which
+   also swaps its icon); the current page's bars too. Their focus ring keeps the system colour the other controls get.
+   Filled buttons get an edge back, checkboxes the browser's own box (the purple tick fill would be dropped), the decorative
+   background word goes (it would turn into full-strength system text), and the logo's squares keep their colours. */
 @media (forced-colors:active){
-  .lc-chip[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight;outline-color:Highlight}
+  .lc-chip[aria-pressed="true"],
+  :root[data-theme="dark"] .lc-theme-btn{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight;outline-color:Highlight}
   .lc-nav a[aria-current]{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
-  a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link{border:2px solid ButtonText}
+  a.lc-btn,button.lc-btn,.wp-block-button.lc-btn>.wp-block-button__link,.lc-entry :is(.wp-block-button__link,.wp-block-file__button){border:2px solid ButtonText}
+  .lc-check input{-webkit-appearance:auto;appearance:auto}
   .lc-bgword{display:none}
   .lc-logo i{forced-color-adjust:none}
 }

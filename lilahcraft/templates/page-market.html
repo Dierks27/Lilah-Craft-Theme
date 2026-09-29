@@ -54,6 +54,7 @@
         <p class="mk-breadth-bar" aria-hidden="true"><span class="mk-bw-up" data-mk-bw="up"></span><span class="mk-bw-flat" data-mk-bw="flat"></span><span class="mk-bw-down" data-mk-bw="down"></span></p>
       </div>
       <p class="mk-out"><span class="mk-cap">Sold out</span> <span class="mk-out-n" data-mk-out></span></p>
+      <p class="mk-season" data-mk-season hidden><span class="mk-cap">Season</span> <span class="mk-season-v"><span class="mk-season-name" data-mk-season-name></span> <span class="mk-season-end" data-mk-season-end></span></span></p>
       <p class="lc-sample mk-index-sample" data-mk-sample hidden>Sample data</p>
     </section>
 
@@ -84,6 +85,7 @@
                 <span class="mk-q-sector" data-mk-q="sector"></span>
               </div>
               <p class="mk-q-price"><span class="mk-q-big" data-mk-q="price"></span> <span class="mk-q-ch" data-mk-q="change"></span></p>
+              <p class="mk-q-live" data-mk-live hidden></p>
             </div>
             <div class="mk-q-acts">
               <button class="mk-act mk-watch" type="button" aria-pressed="false" data-mk-watch><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Watch</button>
@@ -103,6 +105,10 @@
             <div class="mk-chart-labels" aria-hidden="true" data-mk-glabels></div>
           </div>
           <p class="mk-axis" aria-hidden="true" data-mk-axis><span data-mk-ax="start"></span><span data-mk-ax="mid"></span><span>now</span></p>
+          <div class="mk-evs" data-mk-evs hidden>
+            <p class="mk-cap" id="mkEvT">Marked on the chart</p>
+            <ul class="mk-evlist" aria-labelledby="mkEvT" data-mk-evlist></ul>
+          </div>
           <p class="mk-nohist" data-mk-nohist hidden>No price history for this item yet.</p>
           <div class="mk-sb" data-mk-sb>
             <p class="mk-sb-head"><span class="mk-cap">Stock on the shelf</span><span class="mk-sb-now" data-mk-sb-now></span></p>
@@ -113,6 +119,7 @@
           <div data-st="open"><dt data-mk-open-label>Open (48H)</dt><dd></dd></div>
           <div data-st="high"><dt>High</dt><dd class="lc-up"></dd></div>
           <div data-st="low"><dt>Low</dt><dd class="lc-down"></dd></div>
+          <div data-st="usual" hidden><dt>Usual price</dt><dd></dd></div>
           <div data-st="spread"><dt>Spread</dt><dd></dd></div>
           <div data-st="buy"><dt>You buy</dt><dd></dd></div>
           <div data-st="sell"><dt>You sell</dt><dd></dd></div>
@@ -132,6 +139,14 @@
       </section>
 
       <aside class="mk-side" aria-label="Movers and sectors" data-mk-side>
+        <section class="mk-panel mk-news" aria-labelledby="mkNewsT" data-mk-news hidden>
+          <div class="mk-panel-head">
+            <h2 class="mk-panel-title" id="mkNewsT">Market news</h2>
+            <p class="lc-sample" data-mk-sample hidden>Sample data</p>
+          </div>
+          <ul class="mk-nlist" data-mk-news-list></ul>
+          <p class="mk-mnone" data-mk-news-none hidden>No market news in the last 7 days.</p>
+        </section>
         <section class="mk-panel mk-movers" aria-labelledby="mkGainT">
           <h2 class="mk-panel-title lc-up" id="mkGainT">Top gainers</h2>
           <ul class="mk-mlist" data-mk-gainers></ul>
@@ -209,7 +224,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">Plenty on the shelf and it's cheap. Almost none left and it's expensive. Common stuff starts well stocked; diamonds and other rare things start at zero, so the first seller sets the pace.</p>
+<p class="lc-text">Plenty on the shelf means a low price; almost none left means a high one. Common items start well stocked. Diamonds and other rare items start at zero, so the first seller sets the pace.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -219,11 +234,11 @@
 <!-- /wp:html -->
 
 <!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">A little gap</h3>
+<h3 class="wp-block-heading lc-h3">The spread</h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">You always sell for a bit less than you'd pay to buy. Flipping the same stack back and forth doesn't print money.</p>
+<p class="lc-text">You always sell for a little less than you'd pay to buy, so flipping a stack back and forth loses money.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -237,9 +252,41 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">Sell at any PC and get paid on the spot. Buy and pick a shipping speed; your order waits in your Locker. Daily limits keep one player from flooding a market.</p>
+<p class="lc-text">Sell at any PC and get paid on the spot. Buy and pick a shipping speed; if you're offline or your inventory is full, the order waits in your Locker. Daily limits keep one player from flooding a market.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--dark mk-how-live"} -->
+<div class="wp-block-group lc-card lc-card--dark mk-how-live"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
+<h3 class="wp-block-heading lc-h3">Hot, deals and news</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list {"className":"lc-text mk-how-list"} -->
+<ul class="wp-block-list lc-text mk-how-list"><!-- wp:list-item -->
+<li><strong>HOT</strong>: the price is up <span class="lc-nowrap">8–15%</span> for a couple of days. A good time to sell; while it lasts, everyone has a daily sell limit.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>DEAL</strong>: down <span class="lc-nowrap">8–15%</span> for a couple of days. A good time to buy, with a daily limit on buying.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>News Flash</strong> (<strong>UP</strong> or <strong>DOWN</strong>): a sudden jump or drop of <span class="lc-nowrap">15–25%</span> that fades over about a day. At most two a day, between 7 am and 9 pm, and only while someone is online.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>WANTED</strong>: the shelf is sold out and the market wants some.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Seasons</strong>: some items move <span class="lc-nowrap">3–4%</span> for a while. Prices also drift about <span class="lc-nowrap">1–2%</span> a day on their own.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">In game: the Market News screen, the Hot &amp; Deals sort in the store, badges on signs, holograms and TVs, and a “While you were away” catch-up when you log in.</p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->

@@ -2,7 +2,8 @@
    topic archives (category.html) and other archives (archive.html). Every page starts with the charcoal
    hero band in pink wool (site.css). The Topics card is lilahcraft/topics (inc/blocks/topics.php); the
    sidebar is parts/news-sidebar.html. Everything is scoped under .lc-main--news; the sidebar rules also
-   match .editor-styles-wrapper, so the News sidebar part looks right when edited on its own. */
+   match .editor-styles-wrapper, so the News sidebar part looks right when edited on its own.
+   Colours are the look's tokens (--edge, --pink-text…), so the dark look needs no rules here. */
 
 /* ---------- hero ---------- */
 .lc-main--news .lc-hero .lc-lede p{margin:0}
@@ -20,19 +21,19 @@
 .lc-main--news .lc-empty a{display:inline-flex;align-items:center;min-height:44px;margin-block:-10px;font-weight:700}
 
 /* ---------- post meta: "SEP 25, 2026 · UPDATES" ---------- */
-.lc-main--news .lc-news-meta{display:flex;flex-wrap:wrap;column-gap:1ch;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.1em;line-height:1.5;color:var(--pink-deep);text-transform:uppercase}
+.lc-main--news .lc-news-meta{display:flex;flex-wrap:wrap;column-gap:1ch;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.1em;line-height:1.5;color:var(--pink-text);text-transform:uppercase}
 .lc-main--news .lc-news-meta>*{margin:0}
 /* only the first category (the site prints it as text; the editor preview lists them all) */
 .lc-main--news .lc-news-topic a{color:inherit;text-decoration:none}
 .lc-main--news .lc-news-topic a~a,.lc-main--news .lc-news-topic .wp-block-post-terms__separator{display:none}
 
 /* ---------- featured card: the newest post, charcoal with a pink wool strip ---------- */
-.lc-main--news .lc-news-feature{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:32px 36px 36px;background:var(--charcoal);border:3px solid var(--charcoal);color:var(--muted-dark)}
+.lc-main--news .lc-news-feature{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:32px 36px 36px;background:var(--charcoal);border:3px solid var(--edge);color:var(--muted-dark)}
 .lc-main--news .lc-news-feature>*{max-width:100%}
 /* The pink wool strip (site.css .lc-strip, drawn here so every featured post gets it, in the editor too).
    It bleeds to the card's edges. Whole copies of the 12×2 pattern fill it (round), so it never ends in a
    cut-off sliver of a cell and the cells stay close to square, as on the other strip cards. */
-.lc-main--news .lc-news-feature::before{content:"";align-self:stretch;height:60px;margin:-32px -36px 10px;border-bottom:3px solid var(--charcoal);background:url(../img/strip-wool.svg) 0 0/auto 100% round no-repeat;image-rendering:pixelated}
+.lc-main--news .lc-news-feature::before{content:"";align-self:stretch;height:60px;margin:-32px -36px 10px;border-bottom:3px solid var(--edge);background:url(../img/strip-wool.svg) 0 0/auto 100% round no-repeat;image-rendering:pixelated}
 .lc-main--news .lc-news-feature .lc-news-meta{color:var(--pink)}
 .lc-main--news .lc-news-feature-title{font-family:var(--display);font-weight:800;font-size:38px;line-height:1.12;letter-spacing:-.02em;color:#fff}
 .lc-main--news .lc-news-feature-text{max-width:660px;font-size:18px;color:var(--muted-dark)}
@@ -44,8 +45,8 @@
 .lc-main--news a.lc-news-more:hover{filter:none}
 .lc-main--news .lc-news-feature:hover .lc-news-more{--b-bg:#ffa75e}
 
-/* ---------- the other posts: white cards, 3 px charcoal border ---------- */
-.lc-main--news .lc-news-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:26px 30px 28px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+/* ---------- the other posts: cards with the 3 px outline ---------- */
+.lc-main--news .lc-news-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:26px 30px 28px;background:var(--card);border:3px solid var(--edge);color:var(--ink)}
 .lc-main--news .lc-news-card-title{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.2;letter-spacing:-.02em}
 .lc-main--news .lc-news-card-title a{color:inherit;text-decoration:none}
 /* the whole card is the title's link; hover and keyboard focus give it the pink offset shadow
@@ -53,16 +54,17 @@
 .lc-main--news .lc-news-card-title a::after{content:"";position:absolute;inset:-3px}
 .lc-main--news .lc-news-card:hover{box-shadow:8px 8px 0 var(--pink)}
 .lc-main--news .lc-news-card:has(a:focus-visible){box-shadow:8px 8px 0 var(--pink)}
-.lc-main--news .lc-news-card:hover .lc-news-card-title a{color:var(--purple)}
+.lc-main--news .lc-news-card:hover .lc-news-card-title a{color:var(--purple-text)}
 .lc-main--news .lc-news-card-text{font-size:17px;color:var(--text)}
 .lc-main--news .lc-news-card-text p{margin:0}
 
 /* ---------- pagination: square chips, current page purple ---------- */
 .lc-main--news .lc-news-pager{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
 .lc-main--news .lc-news-pager .wp-block-query-pagination-numbers{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.lc-main--news .lc-news-pager a,.lc-main--news .lc-news-pager .page-numbers{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:0;padding:0 14px;border:2px solid var(--charcoal);border-radius:0;background:#fff;color:var(--charcoal);font-weight:700;font-size:16px;line-height:1.2;text-decoration:none}
-.lc-main--news .lc-news-pager a:hover{background:var(--light);color:var(--charcoal)}
-.lc-main--news .lc-news-pager .current{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+.lc-main--news .lc-news-pager a,.lc-main--news .lc-news-pager .page-numbers{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:0;padding:0 14px;border:2px solid var(--edge-strong);border-radius:0;background:var(--card);color:var(--ink);font-weight:700;font-size:16px;line-height:1.2;text-decoration:none}
+.lc-main--news .lc-news-pager a:hover{background:var(--light);color:var(--ink)}
+/* the edge in the accent text shade: the same purple in the light look, light purple (3:1 on the page) in the dark */
+.lc-main--news .lc-news-pager .current{background:var(--purple);border-color:var(--purple-text);color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
 .lc-main--news .lc-news-pager .dots{min-width:0;padding:0 4px;border-color:transparent;background:transparent;color:var(--muted)}
 .lc-main--news .lc-news-pager .wp-block-query-pagination-next{margin-left:auto}
 
@@ -77,7 +79,9 @@
 :is(.lc-main--news,.editor-styles-wrapper) .lc-topics-list>li:last-child .lc-topic{border-bottom-color:transparent}
 :is(.lc-main--news,.editor-styles-wrapper) .lc-topic:hover{background:var(--light);color:var(--ink)}
 :is(.lc-main--news,.editor-styles-wrapper) .lc-topic-n{flex:none;font-family:var(--mono);font-weight:600;font-size:14px;color:var(--muted)}
-:is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{background:var(--purple);border-bottom-color:transparent;color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep)}
+/* the bevel, over a 2 px ring in the accent text shade (invisible on purple in the light look; in the dark look it
+   lights the top and left edges, so the row stands out 3:1 on the dark card) */
+:is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{background:var(--purple);border-bottom-color:transparent;color:#fff;box-shadow:inset -3px -3px 0 var(--purple-deep),inset 0 0 0 2px var(--purple-text)}
 :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current] .lc-topic-n{color:#fff}
 
 /* Come play: a small join bar (site.css .lc-join: purple band, pink offset shadow, white focus ring),
@@ -100,14 +104,14 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--news .lc-news-play-c
    and the current page, so they use the system's selected colours. The number sets its own colour, so it
    inherits. The pager's "…" loses its (transparent) border, which forced colours would draw. */
 @media (forced-colors:active){
-  :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;outline-color:Highlight}
+  :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current]{forced-color-adjust:none;background:Highlight;color:HighlightText;outline-color:Highlight;box-shadow:none}
   :is(.lc-main--news,.editor-styles-wrapper) .lc-topic[aria-current] .lc-topic-n{color:inherit}
   .lc-main--news .lc-news-pager .current{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}
   .lc-main--news .lc-news-pager .dots{border:0}
 }
 
 /* ---------- single post ---------- */
-.lc-main--news .lc-news-article{padding:40px 44px;background:#fff;border:3px solid var(--charcoal)}
+.lc-main--news .lc-news-article{padding:40px 44px;background:var(--card);border:3px solid var(--edge)}
 .lc-main--news .lc-news-article .lc-entry{max-width:none;font-size:18px;color:var(--text)}
 .lc-main--news .lc-entry>:first-child{margin-top:0}
 .lc-main--news .lc-entry :is(h2,h3,h4){color:var(--ink)}
@@ -117,15 +121,18 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--news .lc-news-play-c
 .lc-main--news .lc-entry strong{color:var(--ink)}
 .lc-main--news .lc-entry blockquote{padding:4px 0 4px 18px;border-left:4px solid var(--pink)}
 .lc-main--news .lc-entry blockquote cite{display:block;margin-top:8px;font-size:15px;font-style:normal;font-weight:700;color:var(--muted)}
-.lc-main--news .lc-entry pre{overflow-x:auto;padding:18px 20px;background:var(--charcoal);color:var(--page);font-family:var(--mono);font-size:15px;line-height:1.6}
+.lc-main--news .lc-entry pre{overflow-x:auto;padding:18px 20px;background:var(--charcoal);color:var(--on-dark);font-family:var(--mono);font-size:15px;line-height:1.6}
 .lc-main--news .lc-entry pre code{padding:0;background:transparent;color:inherit}
-.lc-main--news .lc-entry hr{height:0;margin-block:2em;border:0;border-top:3px solid var(--charcoal)}
+.lc-main--news .lc-entry hr{height:0;margin-block:2em;border:0;border-top:3px solid var(--edge)}
 .lc-main--news .lc-entry img{border-radius:0}
 .lc-main--news .lc-entry figcaption{margin-top:8px;font-size:15px;color:var(--muted)}
 .lc-main--news .lc-entry table{width:100%;border-collapse:collapse;font-size:16px}
-.lc-main--news .lc-entry :is(th,td){padding:10px 12px;border:1px solid var(--light);text-align:left;vertical-align:top}
+.lc-main--news .lc-entry :is(th,td){padding:10px 12px;border:1px solid var(--line);text-align:left;vertical-align:top}
 .lc-main--news .lc-entry th{background:var(--page);color:var(--ink)}
 .lc-main--news .lc-entry .wp-block-table{overflow-x:auto}
+/* core's Stripes table style paints its rows #f0f0f0, brighter than the card: stripe with the page colour instead */
+.lc-main--news .lc-entry .is-style-stripes{border-bottom-color:var(--line)}
+.lc-main--news .lc-entry .is-style-stripes tbody tr:nth-child(odd){background:var(--page)}
 /* core Buttons and a File block's download button: square purple buttons, not core's round gray pill */
 .lc-main--news .lc-entry :is(.wp-block-button__link,.wp-block-file__button){display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:0;background:var(--purple);color:#fff;font-family:var(--body);font-weight:800;font-size:17px;line-height:1.2;text-decoration:none;box-shadow:inset -4px -4px 0 var(--purple-deep);opacity:1}
 .lc-main--news .lc-entry :is(.wp-block-button__link,.wp-block-file__button):hover{color:#fff;filter:brightness(1.07)}

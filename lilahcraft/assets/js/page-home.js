@@ -1,17 +1,21 @@
 /* LilahCraft home: the hero's market board (with its headlines) and the four Minis, both from window.LCData.
    Board: Cobblestone, Oak Log, Iron Ingot, Gold Ingot, Emerald and Diamond when the feed has them,
    any empty slots filled with the biggest movers; refreshed on the feed's refreshSeconds.
-   Headlines: up to three short sentences worked out from the whole feed, always true of the prices shown
-   (sold out, biggest gain, biggest drop, lowest shelf), picked the same way every time.
+   While HomeCraftMgmt's live market runs, a row's name carries the item's tag (HOT, DEAL, UP, DOWN, WANTED).
+   Headlines: the newest market news (tag, headline, "20 min ago") when the feed has some; otherwise up to three
+   short sentences worked out from the whole feed, always true of the prices shown (sold out, biggest gain,
+   biggest drop, lowest shelf), picked the same way every time. Under them, the running season in one line.
+   Without the live market (no tags, news or season in the feed) the board is exactly 2.1's.
    Minis: the design's four when showing sample data, otherwise four picked the same way every load
    (a spread of rarities, rarest first), each with "Only N left" when nearly gone, or "Sold out".
-   Sample data is always labelled. */
+   Feed text only ever goes in as text (textContent), never as markup. Sample data is always labelled. */
 (function () {
   'use strict';
   var D = window.LCData;
   if (!D) { return; }
 
   var CANT_REACH = ' · the live feed can’t be reached right now';
+  var SVG_NS = 'http://www.w3.org/2000/svg';
 
   /* A name that is only a placeholder, like "[Rare Mini]", never shows. */
   function usable(x) {
@@ -22,6 +26,29 @@
     el.textContent = text;
     el.hidden = !text;
   }
+  /* An element with a class and, optionally, its text (always as text, never as markup). */
+  function make(tag, cls, text) {
+    var el = document.createElement(tag);
+    if (cls) { el.className = cls; }
+    if (text != null) { el.textContent = text; }
+    return el;
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+  function hide(el) {
+    el.setAttribute('aria-hidden', 'true');
+    return el;
+  }
+  function empty(el) {
+    while (el.firstChild) { el.removeChild(el.firstChild); }
+  }
+  /* A live-market tag: <span class="lc-tag lc-tag--hot">HOT</span> */
+  function tagEl(tag) {
+    return make('span', 'lc-tag lc-tag--' + tag.kind, tag.label);
+  }
 
   /* ---------- market board ---------- */
 
@@ -31,7 +58,9 @@
   var boardRows = board && board.querySelector('[data-lc-home-board-rows]');
   var boardStatus = board && board.querySelector('[data-lc-home-board-status]');
   var newsBox = board && board.querySelector('[data-lc-home-headlines]');
+  var newsLabel = newsBox && newsBox.querySelector('[data-lc-home-headlines-label]');
   var newsList = newsBox && newsBox.querySelector('[data-lc-home-headlines-list]');
+  var seasonLine = newsBox && newsBox.querySelector('[data-lc-home-season]');
 
   /* Each feed item once, by id, in feed order. */
   function uniqueItems(items) {
@@ -64,8 +93,27 @@
     return out;
   }
 
-  var NO_CHANGE = '<span aria-hidden="true">—</span><span class="lc-sr">not available</span>';
-  var SOLD_OUT = '<span class="lc-pill lc-pill--dark lc-home-bd-out">Sold out</span>';
+  /* "—", read as "not available" */
+  function noChange() {
+    var f = document.createDocumentFragment();
+    f.appendChild(hide(make('span', null, '—')));
+    f.appendChild(make('span', 'lc-sr', 'not available'));
+    return f;
+  }
+  function soldOutPill(cls) {
+    return make('span', 'lc-pill lc-pill--dark lc-home-bd-out' + (cls ? ' ' + cls : ''), 'Sold out');
+  }
+  /* The 24h change as LCData.market.change() words it: the arrow and sign hidden, "up" or "down" read out. */
+  function changeNodes(ch) {
+    if (!ch.text) { return noChange(); }
+    var m = /^(\D*)(.*)$/.exec(ch.text); // "▲ +" and "2.4%"
+    if (!m[1]) { return document.createTextNode(ch.text); }
+    var f = document.createDocumentFragment();
+    f.appendChild(hide(make('span', null, m[1])));
+    f.appendChild(make('span', 'lc-sr', ch.dir === 'up' ? 'up ' : 'down '));
+    f.appendChild(document.createTextNode(m[2]));
+    return f;
+  }
 
   function trendWord(series) {
     var first = series[0], last = series[series.length - 1];
@@ -94,30 +142,48 @@
   /* The sparkline covers the same 24 hours as the change beside it (the last 49 half-hourly prices),
      so a green "▲" never sits next to a falling line. */
   var DAY_POINTS = 49;
-  function sparkHTML(item) {
+  /* Adds the sparkline and its word ("rising") to the cell, when there are two prices to draw. */
+  function addSpark(td, item) {
     var series = thin(D.market.priceSeries(item).slice(-DAY_POINTS));
-    if (series.length < 2) { return ''; }
-    return '<svg class="lc-home-bd-spark" width="80" height="24" viewBox="0 0 80 24" preserveAspectRatio="none" aria-hidden="true" focusable="false">' +
-      '<polyline points="' + D.sparkPoints(series, 80, 24, 3) + '" fill="none" stroke="currentColor" stroke-width="2" ' +
-      'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline></svg>' +
-      '<span class="lc-sr">' + trendWord(series) + '</span>';
+    if (series.length < 2) { return; }
+    var svg = svgEl('svg', { 'class': 'lc-home-bd-spark', width: '80', height: '24', viewBox: '0 0 80 24', preserveAspectRatio: 'none', 'aria-hidden': 'true', focusable: 'false' });
+    svg.appendChild(svgEl('polyline', { points: D.sparkPoints(series, 80, 24, 3), fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
+      'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'vector-effect': 'non-scaling-stroke' }));
+    td.appendChild(svg);
+    td.appendChild(make('span', 'lc-sr', trendWord(series)));
   }
 
-  function rowHTML(item) {
-    var out = D.market.soldOut(item);
-    var ch = D.market.change(item.change24h);
-    var html = '<tr><th scope="row">' + D.esc(item.name) + '</th>' +
-      '<td class="lc-home-bd-price">' + D.esc(D.money(item.price)) + '</td>';
-    if (out) {
-      /* The second "Sold out" only shows on narrow phones, where the trend column is dropped (page-home.css). */
-      html += '<td class="lc-home-bd-chg lc-flat"><span class="lc-home-bd-dash">' + NO_CHANGE + '</span>' +
-        SOLD_OUT.replace('lc-home-bd-out"', 'lc-home-bd-out lc-home-bd-out--chg"') + '</td>' +
-        '<td class="lc-home-bd-trend">' + SOLD_OUT + '</td>';
-    } else {
-      html += '<td class="lc-home-bd-chg lc-' + ch.dir + '">' + (ch.html || NO_CHANGE) + '</td>' +
-        '<td class="lc-home-bd-trend lc-' + ch.dir + '">' + sparkHTML(item) + '</td>';
+  function row(item) {
+    var tr = make('tr');
+    var name = make('th', null, item.name);
+    name.setAttribute('scope', 'row');
+    /* The live market's tag after the name: "Oak Log, HOT" to a screen reader; it wraps under a long name. */
+    var tag = D.market.badge(item);
+    if (tag) {
+      name.appendChild(make('span', 'lc-sr', ','));
+      name.appendChild(document.createTextNode(' '));
+      name.appendChild(tagEl(tag));
     }
-    return html + '</tr>';
+    tr.appendChild(name);
+    tr.appendChild(make('td', 'lc-home-bd-price', D.money(item.price)));
+    var chg, trend;
+    if (D.market.soldOut(item)) {
+      chg = make('td', 'lc-home-bd-chg lc-flat');
+      chg.appendChild(make('span', 'lc-home-bd-dash')).appendChild(noChange());
+      /* The second "Sold out" only shows on narrow phones, where the trend column is dropped (page-home.css). */
+      chg.appendChild(soldOutPill('lc-home-bd-out--chg'));
+      trend = make('td', 'lc-home-bd-trend');
+      trend.appendChild(soldOutPill());
+    } else {
+      var ch = D.market.change(item.change24h);
+      chg = make('td', 'lc-home-bd-chg lc-' + ch.dir);
+      chg.appendChild(changeNodes(ch));
+      trend = make('td', 'lc-home-bd-trend lc-' + ch.dir);
+      addSpark(trend, item);
+    }
+    tr.appendChild(chg);
+    tr.appendChild(trend);
+    return tr;
   }
 
   function boardStatusText(res) {
@@ -186,23 +252,72 @@
     return out;
   }
 
-  function renderHeadlines(list) {
+  /* A market news row (the live market): its tag (a plain square for a season), the headline, then how long ago. */
+  function newsItem(r) {
+    var li = make('li');
+    if (r.tag) {
+      li.appendChild(tagEl(r.tag));
+      li.appendChild(make('span', 'lc-sr', ', '));
+    } else {
+      li.appendChild(hide(make('span', 'lc-home-bd-mark')));
+    }
+    var text = li.appendChild(make('span', 'lc-home-bd-flash', r.headline));
+    var when = D.ago(r.t);
+    if (when) {
+      text.appendChild(make('span', 'lc-sr', ','));
+      text.appendChild(document.createTextNode(' '));
+      var time = text.appendChild(make('time', 'lc-home-bd-ago', when));
+      /* A time past what a Date can hold (a malformed row) gets no datetime; toISOString() would throw and blank the strip. */
+      var d = new Date(r.t);
+      if (isFinite(d.getTime())) { time.setAttribute('datetime', d.toISOString()); }
+    }
+    return li;
+  }
+
+  /* The newest news rows (as many as there are computed headlines), or the computed headlines when there's no news. */
+  function renderHeadlines(list, data) {
     if (!newsList) { return; }
-    var lines = headlines(list);
-    newsList.innerHTML = lines.map(function (h) {
-      return '<li class="' + h.cls + '">' + D.esc(h.text) + '</li>';
-    }).join('');
-    newsBox.hidden = !lines.length;
+    var news = D.market.news(data).slice(0, HEADLINES);
+    var lines = news.length ? news.map(newsItem) : headlines(list).map(function (h) { return make('li', h.cls, h.text); });
+    empty(newsList);
+    lines.forEach(function (li) { newsList.appendChild(li); });
+    newsList.classList.toggle('is-news', news.length > 0);
+    newsList.hidden = !lines.length;
+    // (A copy of this template saved in the Site Editor before 2.2 has no label hook and no season line.)
+    if (newsLabel) { newsLabel.hidden = !lines.length; }
+    newsBox.hidden = !lines.length && (!seasonLine || seasonLine.hidden);
+  }
+
+  /* The running season in one line: "Season: Harvest Time, ends in 4d 2h". */
+  function renderSeason(data) {
+    if (!seasonLine) { return; }
+    var s = D.market.season(data);
+    var left = s ? D.timeLeft(s.endsAt) : '';
+    empty(seasonLine);
+    if (s) {
+      seasonLine.appendChild(make('span', 'lc-home-bd-news-label', 'Season'));
+      seasonLine.appendChild(make('span', 'lc-sr', ':'));
+      seasonLine.appendChild(document.createTextNode(' '));
+      seasonLine.appendChild(make('strong', null, s.name));
+      if (left) { seasonLine.appendChild(document.createTextNode(', ends in ' + left)); }
+    }
+    seasonLine.hidden = !s;
   }
 
   function renderBoard(res) {
-    var list = uniqueItems(res && res.data && res.data.items);
+    var data = (res && res.data) || {};
+    var list = uniqueItems(data.items);
     var items = pickBoard(list);
     setStatus(boardStatus, boardStatusText(res));
-    boardRows.innerHTML = items.length ?
-      items.map(rowHTML).join('') :
-      '<tr class="lc-home-bd-msg"><td colspan="4">Nothing is on the board right now.</td></tr>';
-    renderHeadlines(list);
+    empty(boardRows);
+    if (items.length) {
+      items.forEach(function (it) { boardRows.appendChild(row(it)); });
+    } else {
+      boardRows.appendChild(make('tr', 'lc-home-bd-msg'))
+        .appendChild(make('td', null, 'Nothing is on the board right now.')).setAttribute('colspan', '4');
+    }
+    renderSeason(data);
+    renderHeadlines(list, data);
   }
 
   if (boardRows) { D.watch('market', renderBoard); }
@@ -266,10 +381,7 @@
   }
 
   function pill(cls, text) {
-    var el = document.createElement('span');
-    el.className = cls;
-    el.textContent = text;
-    return el;
+    return make('span', cls, text);
   }
 
   function miniCard(m) {
@@ -303,7 +415,7 @@
     }
     var frag = document.createDocumentFragment();
     minis.forEach(function (m) { frag.appendChild(miniCard(m)); });
-    minisList.innerHTML = '';
+    empty(minisList);
     minisList.appendChild(frag);
   }
 

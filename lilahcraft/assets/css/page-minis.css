@@ -1,6 +1,6 @@
 /* LilahCraft 2.1 "Pixel pop": Minis page (templates/page-minis.html, assets/js/page-minis.js).
    Hero material: amethyst. Rarity colours, pills and heads come from site.css (.lc-r--*, .lc-rarity, .lc-head):
-   they are content, not theme, so they stay as they were. */
+   they are content, not theme, so they stay as they were; in the dark look only the ladder's names change shade. */
 
 /* ---------- hero: intro and the three stat tiles (they follow the hero style, Charcoal or Light) ---------- */
 .lc-main--minis .lc-mn-statbox{display:flex;flex-direction:column;gap:10px;margin-top:10px}
@@ -17,8 +17,16 @@
 /* ---------- the rarity ladder: a checker strip in each rarity's colours on top of the card ---------- */
 .lc-main--minis .lc-mn-ladder{padding-top:56px;padding-bottom:48px}
 .lc-main--minis .lc-mn-rung{gap:8px}
-.lc-main--minis .lc-mn-rung::before{content:"";flex:none;height:27px;margin:-20px -20px 8px;border-bottom:3px solid var(--charcoal);background:repeating-conic-gradient(var(--r-gem) 0 25%,var(--r-shadow) 0 50%) 0 0/24px 24px}
+.lc-main--minis .lc-mn-rung::before{content:"";flex:none;height:27px;margin:-20px -20px 8px;border-bottom:3px solid var(--edge);background:repeating-conic-gradient(var(--r-gem) 0 25%,var(--r-shadow) 0 50%) 0 0/24px 24px}
 .lc-main--minis .lc-mn-rung-name{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:18px;line-height:1.25;letter-spacing:-.01em;color:var(--r-fg)}
+/* The dark look: each rarity's light shade (the colour of its mystery head's "?", LCData.minis.RARITIES[].q),
+   7.6:1 or more on the dark card; the dark --r-fg would be under 2:1 there */
+:root[data-theme="dark"] .lc-main--minis .lc-mn-rung-name{color:var(--mn-r-light)}
+:root[data-theme="dark"] .lc-main--minis .lc-r--common{--mn-r-light:#dde2dd}
+:root[data-theme="dark"] .lc-main--minis .lc-r--uncommon{--mn-r-light:#a8e6bd}
+:root[data-theme="dark"] .lc-main--minis .lc-r--rare{--mn-r-light:#9fc3ff}
+:root[data-theme="dark"] .lc-main--minis .lc-r--epic{--mn-r-light:#d6b8f7}
+:root[data-theme="dark"] .lc-main--minis .lc-r--legendary{--mn-r-light:#ffd66b}
 /* the gem: the 2.0 design's two-path SVG, drawn in the rung's rarity colour */
 .lc-main--minis .lc-mn-rung-name::before{content:"";flex:none;width:24px;height:24px;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 9h18M9 3l3 6 3-6' fill='none' stroke='%23fff' stroke-opacity='.6' stroke-width='1.2'/%3E%3C/svg%3E") center/100% 100% no-repeat,var(--r-gem);
@@ -34,12 +42,15 @@
 .lc-main--minis .lc-mn-hide{flex:none}
 /* each rarity chip carries a small square in its rarity colour */
 .lc-main--minis .lc-mn-chips .lc-chip{display:inline-flex;align-items:center;gap:8px}
+/* Pressed: the edge in the accent text shade, so the chip stands out 3:1 on the dark page too (the same purple in the
+   light look); forced colours keep site.css's Highlight */
+@media (forced-colors:none){.lc-main--minis .lc-mn-chips .lc-chip[aria-pressed="true"]{border-color:var(--purple-text)}}
 .lc-main--minis .lc-mn-sw{flex:none;width:12px;height:12px;background:var(--r-gem);box-shadow:inset -3px -3px 0 rgba(38,36,43,.28)}
 .lc-main--minis .lc-chip[aria-pressed="true"] .lc-mn-sw{outline:2px solid #fff}
 /* the sample / last-known sentence over the grid: a full sentence, so body-size muted text */
 .lc-main--minis .lc-mn-note{margin-top:-4px;font-size:15px;font-weight:700;color:var(--muted)}
 .lc-main--minis .lc-mn-grid{margin:6px 0 0;padding:0;list-style:none}
-.lc-main--minis .lc-mn-card{--head:104px;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0;padding:26px 20px 20px;background:#fff;border:3px solid var(--charcoal)}
+.lc-main--minis .lc-mn-card{--head:104px;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0;padding:26px 20px 20px;background:var(--card);border:3px solid var(--edge)}
 /* a refresh rebuilds the card of a Mini that changed; when that card has focus, Chromium's scroll
    anchoring jumps the page, so page-minis.js sets .lc-mn-rebuild on the grid for that one refresh and
    the cards stay out of anchoring only then (the grid itself anchors instead); otherwise they anchor
@@ -68,15 +79,15 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
 .lc-main--minis .lc-mn-step-title{margin-top:4px;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.25;letter-spacing:-.01em;color:#fff}
 .lc-main--minis .lc-mn-step p:not(.lc-mn-step-n){font-size:16px;color:var(--muted-dark)}
 
-/* ---------- Wild Minis, Grades and Shiny (white cards with the amethyst strip) ---------- */
+/* ---------- Wild Minis, Grades and Shiny (cards with the amethyst strip) ---------- */
 .lc-main--minis .lc-mn-info{gap:14px;padding:32px}
 .lc-main--minis .lc-mn-info>.lc-strip{margin:-32px -32px 8px}
 .lc-main--minis .lc-mn-wild{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:24px;font-size:17px;color:var(--text)}
-.lc-main--minis .lc-mn-wild li::marker{font-family:var(--mono);font-weight:700;color:var(--purple-deep)}
+.lc-main--minis .lc-mn-wild li::marker{font-family:var(--mono);font-weight:700;color:var(--purple-deep-text)}
 .lc-main--minis .lc-mn-grades{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
 .lc-main--minis .lc-mn-grades li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 16px;background:var(--page);border:2px solid var(--light)}
 .lc-main--minis .lc-mn-grade{font-weight:800;font-size:17px}
-.lc-main--minis .lc-mn-stars{font-size:20px;letter-spacing:2px;color:var(--orange-deep);white-space:nowrap}
+.lc-main--minis .lc-mn-stars{font-size:20px;letter-spacing:2px;color:var(--orange-text);white-space:nowrap}
 
 /* ---------- Where Minis live ---------- */
 .lc-main--minis .lc-mn-homes{gap:22px}

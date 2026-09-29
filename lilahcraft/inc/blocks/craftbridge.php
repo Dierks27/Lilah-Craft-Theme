@@ -2,7 +2,7 @@
 /**
  * lilahcraft/craftbridge: the CraftBridge Client download card on the Downloads page.
  *
- * The loud white two-column board: what the mod does on the left, the picker on the right
+ * The loud two-column board: what the mod does on the left, the picker on the right
  * (Minecraft 26.2 or 26.3, Fabric or NeoForge), the Download link for the pick, the file name
  * and what else the pick needs. The default pick is rendered here, so the link works without
  * JavaScript; assets/js/page-downloads.js switches picks from the data in data-lc-cb.
@@ -263,7 +263,7 @@ function lilahcraft_render_craftbridge() {
 				<li><?php echo $feature; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?></li>
 				<?php endforeach; ?>
 			</ul>
-			<p class="lc-cb-quiet"><?php esc_html_e( 'It does nothing on other servers, and it has no settings to fiddle with.', 'lilahcraft' ); ?></p>
+			<p class="lc-cb-quiet"><?php esc_html_e( 'It does nothing on other servers and has no settings.', 'lilahcraft' ); ?></p>
 		</div>
 		<div class="lc-cb-get<?php echo $preview ? ' lc-cb-get--preview' : ''; ?>" data-lc-cb="<?php echo esc_attr( $json ); ?>">
 			<div class="lc-cb-group">
@@ -326,7 +326,7 @@ function lilahcraft_render_craftbridge() {
 	<p class="lc-note lc-cb-server">
 		<?php
 		/* translators: %s: the server's Minecraft version, like 26.2. */
-		echo esc_html( sprintf( __( 'Pick the Minecraft version the server is on right now: %s.', 'lilahcraft' ), $server ) );
+		echo esc_html( sprintf( __( 'The server runs Minecraft %s right now.', 'lilahcraft' ), $server ) );
 		?>
 	</p>
 	<?php endif; ?>

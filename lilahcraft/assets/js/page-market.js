@@ -1,11 +1,13 @@
-/* LilahCraft 2.1: the Market page, a trader's view of the feed.
-   Ticker tape, the LCX index and breadth, the market list (search, sector tabs, watchlist), the
+/* LilahCraft 2.2: the Market page, a trader's view of the feed.
+   Ticker tape, the LCX index and breadth, the market list (search, sector tabs, Hot & Deals, watchlist), the
    selected item (price, 12H/24H/48H chart, plus 7D/30D when the feed has the longer history, stock on
-   the shelf, stats, where to trade), top movers, sectors today, the heatmap and "What's my stuff worth?".
+   the shelf, stats, where to trade), market news, top movers, sectors today, the heatmap and "What's my stuff worth?".
    All from LCData.watch('market') with the long history: live, stale (the last good copy) or labelled
    sample data. The selection sits in the URL (?item=id).
+   HomeCraftMgmt's live market (data.live: HOT/DEAL/UP/DOWN/WANTED tags, "Usually $X", chart markers, news,
+   the season) shows only when the feed has it; without it the page is exactly 2.1's.
    Each refresh updates the page in place, so the selection, sector, range, search, calculator and
-   keyboard focus all stay put. */
+   keyboard focus all stay put. Feed text only ever goes in through textContent. */
 (function () {
   'use strict';
   var D = window.LCData;
@@ -22,11 +24,40 @@
   var WATCH_KEY = 'lilahcraft-market-watch';
   var CALC_KEY = 'lilahcraft-market-calc';
   var STACK = 64, MAX_QTY = 999999, MAX_LINES = 40, MAX_COUNT = 1e9;
+  /* Chart markers (events): the kinds, and the words for the one kind that has no tag */
+  var EV_KINDS = { hot: 1, deal: 1, up: 1, down: 1, real: 1 }, EV_WORDS = { real: 'Price move' };
+  /* What a tag means, beside the selected item's tag (HomeCraftMgmt's rules, in plain words) */
+  var TAG_HINT = {
+    hot: 'A good time to sell', deal: 'A good time to buy',
+    up: 'News Flash: a sudden jump', down: 'News Flash: a sudden drop', wanted: 'The market wants some'
+  };
 
   /* ---------- small helpers ---------- */
 
   function q(sel, el) { return (el || root).querySelector(sel); }
   function esc(s) { return D.esc(s); }
+  /* An element with a class and text (textContent: feed text never goes through innerHTML) */
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text != null) { e.textContent = text; }
+    return e;
+  }
+  function tagEl(b) { return el('span', 'lc-tag lc-tag--' + b.kind, b.label); }
+  /* A slot for a tag, hidden when there's none, with hidden commas so it reads "OAK, HOT, Oak Log": around the tag
+     after a name, after it when the tag leads a row (lead) */
+  function tagSlot(lead) { var s = el('span', 'mk-tagslot'); s.hidden = true; s._k = ''; s._lead = !!lead; return s; }
+  function setTag(slot, b) {
+    var k = b ? b.kind : '';
+    if (slot._k === k) { return; }
+    slot._k = k;
+    slot.textContent = '';
+    slot.hidden = !b;
+    if (!b) { return; }
+    if (!slot._lead) { slot.appendChild(el('span', 'lc-sr', ', ')); }
+    slot.appendChild(tagEl(b));
+    slot.appendChild(el('span', 'lc-sr', ', '));
+  }
   function isNum(n) { return D.isNum(n); }
   function announce(text) { if (LC.announce && text) { LC.announce(text); } }
   function setHTML(el, html) { if (el && el._h !== html) { el._h = html; el.innerHTML = html; } }
@@ -118,15 +149,18 @@
   var lcxNum = q('[data-mk-lcx]'), lcxCh = q('[data-mk-lcx-ch]'), lcxLine = q('[data-mk-lcx-line]');
   var lcxSpark = lcxLine && lcxLine.ownerSVGElement;
   var outN = q('[data-mk-out]');
+  var seasonBox = q('[data-mk-season]'), seasonName = q('[data-mk-season-name]'), seasonEnd = q('[data-mk-season-end]');
   var find = q('#mkFind'), tabBox = q('[data-mk-tabs]'), pick = q('[data-mk-pick]');
   var list = q('[data-mk-list]'), listEmpty = q('[data-mk-list-empty]'), listFoot = q('[data-mk-list-foot]');
   var center = q('[data-mk-center]'), quote = q('.mk-quote');
-  var watchBtn = q('[data-mk-watch]'), linkBtn = q('[data-mk-link]');
+  var watchBtn = q('[data-mk-watch]'), linkBtn = q('[data-mk-link]'), liveLine = q('[data-mk-live]');
   var rangeBox = q('.mk-range'), openLabel = q('[data-mk-open-label]'), tfNote = q('#mkTfNote');
   var chartBox = q('[data-mk-chart]'), svg = q('[data-mk-svg]'), gLabels = q('[data-mk-glabels]');
   var axis = q('[data-mk-axis]'), noHist = q('[data-mk-nohist]');
+  var evBox = q('[data-mk-evs]'), evList = q('[data-mk-evlist]');
   var sb = q('[data-mk-sb]'), sbNow = q('[data-mk-sb-now]'), sbSvg = q('[data-mk-sb-svg]');
-  var buyBox = q('[data-mk-buybox]'), sellBox = q('[data-mk-sellbox]');
+  var statsBox = q('[data-mk-stats]'), buyBox = q('[data-mk-buybox]'), sellBox = q('[data-mk-sellbox]');
+  var side = q('[data-mk-side]'), newsBox = q('[data-mk-news]'), newsUl = q('[data-mk-news-list]'), newsNone = q('[data-mk-news-none]');
   var gainUl = q('[data-mk-gainers]'), loseUl = q('[data-mk-losers]');
   var gainNone = q('[data-mk-gainers-none]'), loseNone = q('[data-mk-losers-none]');
   var secUl = q('[data-mk-sectors]'), heatUl = q('[data-mk-heat]');
@@ -147,7 +181,7 @@
   /* ---------- state ---------- */
 
   var state = {
-    res: null, items: [], byId: dict(),
+    res: null, items: [], byId: dict(), live: false,
     q: find.value || '', tab: 'all', sel: null, wanted: urlItem(), picked: false, tf: '48H',
     watch: dict(), lines: []
   };
@@ -177,7 +211,16 @@
   /* ---------- data ---------- */
 
   function points(a) { return (Array.isArray(a) ? a : []).filter(function (h) { return h && isNum(h.p); }); }
+  /* Chart markers: known kinds with a time, oldest first */
+  function events(a) {
+    return (Array.isArray(a) ? a : []).filter(function (e) {
+      return e && isNum(e.t) && e.t > 0 && typeof e.kind === 'string' && EV_KINDS[e.kind] === 1;
+    }).map(function (e) { return { t: e.t, kind: e.kind, pct: isNum(e.pct) ? e.pct : 0 }; })
+      .sort(function (a, b) { return a.t - b.t; });
+  }
   function ingest(data) {
+    /* HomeCraftMgmt's live market is running (the feed says so; the sample has one too). Without it, 2.1's page. */
+    state.live = !!data && data.live === true;
     var raw = data && Array.isArray(data.items) ? data.items : [];
     var items = [], byId = dict();
     raw.forEach(function (r) {
@@ -202,7 +245,12 @@
         out: M.soldOut(r),
         sector: M.categoryOf(r.material || id),
         frac: M.stockFraction(r),
-        ch: M.change(r.change24h)
+        ch: M.change(r.change24h),
+        /* live market: the tag while one shows (gone once it ends), "Usually $X" and the mood, chart markers */
+        badge: state.live ? M.badge(r) : null,
+        usual: state.live && isNum(r.usual) && r.usual >= 0 ? r.usual : null,
+        mood: state.live && isNum(r.moodPct) ? r.moodPct : null,
+        events: state.live ? events(r.events) : []
       };
       items.push(it);
       byId[id] = it;
@@ -231,7 +279,7 @@
   function visibleItems() {
     var words = norm(state.q);
     return state.items.filter(function (it) {
-      var inTab = state.tab === 'all' || (state.tab === 'watch' ? !!state.watch[it.id] : it.sector === state.tab);
+      var inTab = state.tab === 'all' || (state.tab === 'watch' ? !!state.watch[it.id] : state.tab === 'hot' ? !!it.badge : it.sector === state.tab);
       return inTab && (!words || it.find.indexOf(words) > -1);
     });
   }
@@ -274,17 +322,41 @@
 
   /* ---------- ticker tape ---------- */
 
-  var tapeCount = -1;
+  var tapeCount = -1, tapeKey = null;
+  function tapeItem(it) {
+    var li = el('li');
+    li.appendChild(el('span', 'mk-t-sym', it.sym));
+    li.appendChild(el('span', 'lc-sr', ' ' + it.name));
+    if (it.badge) {
+      li.appendChild(el('span', 'lc-sr', ', '));
+      li.appendChild(tagEl(it.badge));
+      li.appendChild(el('span', 'lc-sr', ', '));
+    }
+    li.appendChild(el('span', 'mk-t-p', D.money(it.price)));
+    if (it.out) { li.appendChild(el('span', 'mk-t-out', 'SOLD OUT')); }
+    else if (it.ch.html) {
+      var ch = el('span', 'lc-' + it.ch.dir);
+      ch.innerHTML = it.ch.html; /* arrows and a number, no feed text */
+      li.appendChild(ch);
+    }
+    return li;
+  }
   function renderTape() {
     if (!run1 || !run2 || !track) { return; }
-    var html = state.items.map(function (it) {
-      var ch = it.out ? '<span class="mk-t-out">SOLD OUT</span>' :
-        it.ch.html ? '<span class="lc-' + it.ch.dir + '">' + it.ch.html + '</span>' : '';
-      return '<li><span class="mk-t-sym">' + esc(it.sym) + '</span><span class="lc-sr"> ' + esc(it.name) + '</span> <span class="mk-t-p">' +
-        esc(D.money(it.price)) + '</span> ' + ch + '</li>';
-    }).join('');
-    setHTML(run1, html);
-    setHTML(run2, html);
+    /* Rebuilt only when something it shows has changed */
+    var key = state.items.map(function (it) {
+      return [it.id, it.sym, it.name, D.money(it.price), it.out ? 'out' : it.ch.text, it.badge ? it.badge.kind : ''].join('\u0001');
+    }).join('\u0002');
+    if (key !== tapeKey) {
+      tapeKey = key;
+      run1.textContent = '';
+      run2.textContent = '';
+      state.items.forEach(function (it) {
+        var li = tapeItem(it);
+        run1.appendChild(li);
+        run2.appendChild(li.cloneNode(true));
+      });
+    }
     /* Speed from the run's width, set once per item count so a refresh never makes the tape jump. */
     if (tapeCount !== state.items.length) {
       tapeCount = state.items.length;
@@ -367,6 +439,19 @@
     bBar.flat.style.width = (flat / n * 100).toFixed(2) + '%';
     bBar.down.style.width = (down / n * 100).toFixed(2) + '%';
     setText(outN, nOut ? nOut + plural(nOut, ' item', ' items') : 'None');
+    renderSeason();
+  }
+
+  /* The running season, one short line in the strip: "Harvest Time ends in 3d 4h" */
+  function renderSeason() {
+    if (!seasonBox) { return; }
+    var s = state.live ? M.season(state.res.data) : null;
+    seasonBox.hidden = !s;
+    seasonBox.parentNode.classList.toggle('has-season', !!s);
+    if (!s) { return; }
+    var left = D.timeLeft(s.endsAt);
+    setText(seasonName, s.name);
+    setText(seasonEnd, left ? 'ends in ' + left : '');
   }
 
   /* The LCX explainer: a disclosure. Escape, a click elsewhere or focus moving elsewhere closes it. */
@@ -395,6 +480,7 @@
   var tabs = dict();
   function tabLabel(id) {
     if (id === 'watch') { return '<span class="mk-star" aria-hidden="true">★ </span>Watchlist'; }
+    if (id === 'hot') { return 'Hot &amp; Deals'; }
     return esc(M.SECTOR_SHORT[id] || M.categoryLabel(id));
   }
   function syncTabs() {
@@ -403,7 +489,8 @@
   function renderTabs() {
     var present = dict();
     state.items.forEach(function (it) { present[it.sector] = true; });
-    var ids = ['all'].concat(SECTORS.filter(function (s) { return present[s]; })).concat(['watch']);
+    /* Hot & Deals (every item with a tag) sits beside the watchlist while the live market runs */
+    var ids = ['all'].concat(SECTORS.filter(function (s) { return present[s]; })).concat(state.live ? ['hot', 'watch'] : ['watch']);
     var active = document.activeElement, lost = false;
     if (ids.indexOf(state.tab) < 0) { state.tab = 'all'; }
     Object.keys(tabs).forEach(function (id) {
@@ -432,15 +519,24 @@
 
   var rows = dict();
   function makeRow(id) {
-    var li = document.createElement('li');
-    li.innerHTML = '<button type="button" class="mk-row" aria-pressed="false"><span class="mk-row-id"><span class="mk-row-sym"></span>' +
-      '<span class="mk-row-name"></span></span><span class="mk-row-price"></span><span class="mk-pill"></span></button>';
-    var b = li.firstChild;
+    var li = el('li'), b = el('button', 'mk-row'), idBox = el('span', 'mk-row-id'), top = el('span', 'mk-row-top');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', 'false');
     b.setAttribute('data-id', id);
-    return { li: li, btn: b, sym: b.querySelector('.mk-row-sym'), name: b.querySelector('.mk-row-name'), price: b.querySelector('.mk-row-price'), pill: b.querySelector('.mk-pill') };
+    var r = { li: li, btn: b, sym: el('span', 'mk-row-sym'), tag: tagSlot(), name: el('span', 'mk-row-name'), price: el('span', 'mk-row-price'), pill: el('span', 'mk-pill') };
+    top.appendChild(r.sym);
+    top.appendChild(r.tag);
+    idBox.appendChild(top);
+    idBox.appendChild(r.name);
+    b.appendChild(idBox);
+    b.appendChild(r.price);
+    b.appendChild(r.pill);
+    li.appendChild(b);
+    return r;
   }
   function fillRow(r, it) {
     setText(r.sym, it.sym);
+    setTag(r.tag, it.badge);
     setText(r.name, it.name);
     setText(r.price, D.money(it.price));
     var d = dirOf(it), html = pctHTML(it);
@@ -500,11 +596,15 @@
   }
 
   function emptyText(total) {
-    if (!total) { return 'Nothing is on the board right now. Check back soon.'; }
+    if (!total) { return 'Nothing is on the board right now.'; }
     var words = state.q.trim();
     if (state.tab === 'watch') {
       if (words) { return 'Nothing on your watchlist matches “' + words + '”.'; }
-      return 'Your watchlist is empty. Pick an item and press Watch to keep it here.';
+      return 'Your watchlist is empty. Press Watch on an item to keep it here.';
+    }
+    if (state.tab === 'hot') {
+      if (words) { return 'Nothing in Hot & Deals matches “' + words + '”.'; }
+      return 'Nothing is HOT, on a DEAL, in a News Flash or WANTED right now.';
     }
     if (words && state.tab !== 'all') { return 'No item in ' + M.categoryLabel(state.tab) + ' matches “' + words + '”. Try another name, or pick All.'; }
     if (words) { return 'No item matches “' + words + '”. Try a symbol like IRON, or a name.'; }
@@ -522,7 +622,12 @@
 
   function optionText(it) {
     var w = changeWords(it).replace(' today', '');
-    return it.sym + ' · ' + it.name + ' · ' + D.money(it.price) + (w ? ', ' + w : '');
+    return it.sym + ' · ' + it.name + (it.badge ? ' · ' + it.badge.label : '') + ' · ' + D.money(it.price) + (w ? ', ' + w : '');
+  }
+  function option(value, text) {
+    var o = el('option', '', text);
+    o.value = value;
+    return o;
   }
   var pickKey = '';
   function renderPick(vis) {
@@ -530,14 +635,15 @@
     var key = (inList ? '' : '+') + vis.map(function (it) { return it.id; }).join('|');
     if (key !== pickKey) {
       pickKey = key;
-      var html = '';
+      pick.textContent = '';
       if (!vis.length) {
-        html = '<option value="">No items match</option>';
+        pick.appendChild(option('', 'No items match'));
       } else if (!inList) {
-        html = '<option value="" disabled>Choose from ' + vis.length + ' ' + plural(vis.length, 'match', 'matches') + '</option>';
+        var o = option('', 'Choose from ' + vis.length + ' ' + plural(vis.length, 'match', 'matches'));
+        o.disabled = true;
+        pick.appendChild(o);
       }
-      html += vis.map(function (it) { return '<option value="' + esc(it.id) + '"></option>'; }).join('');
-      pick.innerHTML = html;
+      vis.forEach(function (it) { pick.appendChild(option(it.id, '')); });
     }
     var opts = pick.options;
     for (var i = 0; i < opts.length; i++) {
@@ -587,6 +693,7 @@
       ch.className = 'mk-q-ch';
       setHTML(ch, '');
     }
+    renderLive(it);
     watchBtn.setAttribute('aria-pressed', state.watch[it.id] ? 'true' : 'false');
     if (linkBtn) { linkBtn.setAttribute('data-lc-copy', itemURL(it.id)); }
     /* The chosen range stays across refreshes; an item without that longer history shows 48H. */
@@ -597,6 +704,36 @@
     renderStock(it);
     renderStats(it);
     renderTrade(it);
+  }
+
+  /* Under the price, while the live market runs: the tag, what it means and when it ends, and "Usually $X (+12.0%)"
+     when the price is away from the usual one. */
+  function renderLive(it) {
+    if (!liveLine) { return; }
+    var b = it.badge, left = b && b.endsAt ? D.timeLeft(b.endsAt) : '';
+    var usual = it.usual !== null && it.mood !== null && M.change(it.mood).dir !== 'flat';
+    var key = (b ? b.kind + '|' + left : '') + '|' + (usual ? D.money(it.usual) + '|' + it.mood.toFixed(1) : '');
+    liveLine.hidden = !b && !usual;
+    if (liveLine._k === key) { return; }
+    liveLine._k = key;
+    liveLine.textContent = '';
+    if (b) {
+      var badge = el('span', 'mk-q-badge');
+      badge.appendChild(tagEl(b));
+      badge.appendChild(el('span', 'lc-sr', ': '));
+      badge.appendChild(el('span', 'mk-q-hint', TAG_HINT[b.kind] + (left ? ', ends in ' + left : '')));
+      liveLine.appendChild(badge);
+      if (usual) { liveLine.appendChild(el('span', 'lc-sr', '. ')); }
+    }
+    if (usual) {
+      var u = el('span', 'mk-q-usual', 'Usually ');
+      u.appendChild(el('strong', '', D.money(it.usual)));
+      u.appendChild(document.createTextNode(' '));
+      var m = el('span', 'lc-' + M.change(it.mood).dir);
+      m.innerHTML = '(' + avgHTML(it.mood) + ')'; /* a sign and a number, no feed text */
+      u.appendChild(m);
+      liveLine.appendChild(u);
+    }
   }
 
   /* Range tabs: 7D and 30D are toggles only while the selected item has that history. Otherwise they
@@ -633,7 +770,7 @@
     chartBox.hidden = !has;
     axis.hidden = !has;
     noHist.hidden = has;
-    if (!has) { setHTML(gLabels, ''); return; }
+    if (!has) { setHTML(gLabels, ''); renderMarks([]); return; }
     var W = boxWidth(svg, 480), H = Math.round(chartBox.clientHeight) || 280;
     chartW = W;
     var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
@@ -646,14 +783,22 @@
     var grid = [0.2, 0.45, 0.7, 0.95].map(function (f) { var v = cmax - f * span; return { v: v, y: y(v) }; });
     var first = vals[0], last = vals[vals.length - 1];
     var dir = it.out ? 'flat' : last > first ? 'up' : last < first ? 'down' : 'flat';
+    /* Live market events in the range: a dashed line and a small square at the top (kinds are from a fixed list) */
+    var marks = chartMarks(it, hist, W);
     svg.setAttribute('class', 'mk-chart-svg is-' + dir);
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.setAttribute('preserveAspectRatio', 'none');
     svg.innerHTML =
       '<path class="mk-c-grid" d="' + grid.map(function (g) { return 'M0 ' + g.y.toFixed(1) + 'H' + W; }).join(' ') + '"></path>' +
       '<polygon class="mk-c-area" points="0,' + H + ' ' + pts + ' ' + W + ',' + H + '"></polygon>' +
+      marks.map(function (m) {
+        var cx = Math.max(5, Math.min(W - 5, m.x));
+        return '<path class="mk-c-evl mk-ev--' + m.e.kind + '" d="M' + m.x.toFixed(1) + ' 11V' + H + '"></path>' +
+          '<rect class="mk-c-evm mk-ev--' + m.e.kind + '" x="' + (cx - 5).toFixed(1) + '" y="0" width="10" height="10"></rect>';
+      }).join('') +
       '<polyline class="mk-c-line" points="' + pts + '"></polyline>' +
       '<circle class="mk-c-dot" cx="' + W + '" cy="' + y(last).toFixed(1) + '" r="4"></circle>';
+    renderMarks(marks);
     setHTML(gLabels, grid.map(function (g) {
       return '<span style="top:' + (g.y - 8).toFixed(1) + 'px">' + esc(fixed(g.v, dec)) + '</span>';
     }).join(''));
@@ -664,7 +809,60 @@
     var label = 'Price of ' + it.name + ' over the last ' + spanText(hrs) + ': ';
     label += lo === hi ? fine(lo) + ' the whole time.' :
       'from ' + fine(first) + ' to ' + fine(last) + '; low ' + fine(lo) + ', high ' + fine(hi) + '.';
+    if (marks.length) { label += ' ' + marks.length + (marks.length === 1 ? ' event is' : ' events are') + ' marked, listed under the chart.'; }
     svg.setAttribute('aria-label', label);
+  }
+
+  /* Where each event in the range sits on the chart's x axis: between the two snapshots around its time.
+     An event after the last snapshot (up to when the feed was made) sits at "now". */
+  function chartMarks(it, hist, W) {
+    var n = hist.length, out = [];
+    if (!it.events.length || n < 2) { return out; }
+    for (var i = 0; i < n; i++) {
+      if (!isNum(hist[i].t) || (i && hist[i].t < hist[i - 1].t)) { return out; }
+    }
+    var t0 = hist[0].t, tn = hist[n - 1].t, gen = state.res.data && state.res.data.generatedAt;
+    if (!(tn > t0)) { return out; }
+    var end = isNum(gen) && gen > tn ? gen : tn, j = 0;
+    it.events.forEach(function (e) {
+      if (e.t < t0 || e.t > end) { return; }
+      var x = W;
+      if (e.t < tn) {
+        while (j < n - 2 && hist[j + 1].t <= e.t) { j++; }
+        var a = hist[j].t, b = hist[j + 1].t;
+        x = (j + (b > a ? (e.t - a) / (b - a) : 0)) * W / (n - 1);
+      }
+      out.push({ e: e, x: x });
+    });
+    return out;
+  }
+
+  /* The markers in words, under the chart: the tag (or "Price move"), the change and how long ago, newest first */
+  function renderMarks(marks) {
+    if (!evBox || !evList) { return; }
+    var rowsIn = marks.slice().reverse().map(function (m) {
+      var tag = M.badge({ status: m.e.kind });
+      return { kind: m.e.kind, tag: tag, pct: m.e.pct, ago: D.ago(m.e.t) };
+    });
+    var key = JSON.stringify(rowsIn);
+    evBox.hidden = !rowsIn.length;
+    if (evList._k === key) { return; }
+    evList._k = key;
+    evList.textContent = '';
+    rowsIn.forEach(function (r) {
+      var li = el('li');
+      li.appendChild(el('span', 'mk-ev-sw mk-ev--' + r.kind)).setAttribute('aria-hidden', 'true');
+      li.appendChild(r.tag ? tagEl(r.tag) : el('span', 'mk-ev-word', EV_WORDS[r.kind] || ''));
+      li.appendChild(el('span', 'lc-sr', ', '));
+      var p = el('span', 'mk-ev-pct lc-' + M.change(r.pct).dir);
+      p.innerHTML = avgHTML(r.pct); /* a sign and a number, no feed text */
+      li.appendChild(p);
+      if (r.ago) {
+        li.appendChild(el('span', 'lc-sr', ', '));
+        li.appendChild(el('span', 'mk-ev-ago', r.ago));
+      }
+      evList.appendChild(li);
+    });
   }
 
   /* Stock on the shelf per snapshot (history[].s), scaled to a full shelf when the feed says how big it is. */
@@ -712,6 +910,7 @@
     setStat('open', has ? esc(fine(vals[0])) : null);
     setStat('high', has ? esc(fine(Math.max.apply(null, vals))) : null);
     setStat('low', has ? esc(fine(Math.min.apply(null, vals))) : null);
+    setStat('usual', it.usual !== null ? esc(fine(it.usual)) : null);
     var spreadOk = isNum(it.buy) && isNum(it.sell) && isNum(it.price) && it.price > 0;
     setStat('spread', spreadOk ? ((it.buy - it.sell) / it.price * 100).toFixed(1) + '%' : null);
     setStat('buy', it.out ? '<span aria-hidden="true">—</span><span class="lc-sr">none, sold out</span>' : isNum(it.buy) ? esc(exact(it.buy)) : null, it.out);
@@ -724,12 +923,16 @@
       shelf = (p === 0 && it.frac > 0 ? 'Under 1%' : p + '%') + ' full';
     }
     setStat('shelf', shelf, it.out || (it.frac !== null && it.frac < 0.25));
+    /* How many show, for the grid: nine (with the usual price) sit three by three */
+    var n = 0;
+    Object.keys(stats).forEach(function (k) { if (!stats[k].box.hidden) { n++; } });
+    if (statsBox) { statsBox.setAttribute('data-n', String(n)); }
   }
 
   function renderTrade(it) {
     setText(qv.buyName, it.name);
     setText(qv.sellName, it.name);
-    setText(qv.buyNote, it.out ? 'Nobody can buy it until someone sells one in.' : 'At any PC: Crate store. Pick a shipping speed; it waits in your Locker.');
+    setText(qv.buyNote, it.out ? 'Nobody can buy it until someone sells one in.' : 'At any PC: Crate store. Pick a shipping speed; if you’re offline or your inventory is full, it waits in your Locker.');
     setText(qv.sellNote, isNum(it.sell) ? 'At any PC: Sell to Crate. Paid instantly at ' + exact(it.sell) + ' each right now.' : 'At any PC: Sell to Crate. Paid instantly.');
     buyBox.hidden = false;
     sellBox.hidden = false;
@@ -747,14 +950,28 @@
     picks.forEach(function (it, i) {
       var li = ul.children[i];
       if (!li) {
-        li = document.createElement('li');
-        li.innerHTML = '<button type="button" class="mk-mrow"></button>';
+        li = el('li');
+        var b = el('button', 'mk-mrow'), s = el('span', 'mk-m-sym');
+        b.type = 'button';
+        b._sym = document.createTextNode('');
+        b._name = el('span', 'lc-sr');
+        s.appendChild(b._sym);
+        s.appendChild(b._name);
+        b._p = el('span', 'mk-m-p');
+        b._ch = el('span', 'mk-m-ch');
+        b.appendChild(s);
+        b.appendChild(b._p);
+        b.appendChild(b._ch);
+        li.appendChild(b);
         ul.appendChild(li);
       }
-      var b = li.firstChild;
-      b.setAttribute('data-id', it.id);
-      setHTML(b, '<span class="mk-m-sym">' + esc(it.sym) + '<span class="lc-sr"> ' + esc(it.name) + '</span></span><span class="mk-m-p">' +
-        esc(D.money(it.price)) + '</span><span class="mk-m-ch lc-' + it.ch.dir + '">' + pctHTML(it) + '</span>');
+      var btn = li.firstChild;
+      btn.setAttribute('data-id', it.id);
+      if (btn._sym.data !== it.sym) { btn._sym.data = it.sym; }
+      setText(btn._name, ' ' + it.name);
+      setText(btn._p, D.money(it.price));
+      btn._ch.className = 'mk-m-ch lc-' + it.ch.dir;
+      setHTML(btn._ch, pctHTML(it));
     });
     ul.hidden = !picks.length;
     none.hidden = picks.length > 0;
@@ -787,6 +1004,61 @@
     }).join(''));
   }
 
+  /* ---------- market news (the live market's 5 newest rows from the last 7 days) ---------- */
+
+  /* Each row: its tag, how long ago, the headline and the line. A row about an item is a button that charts it;
+     a season (or a real-world row) isn't about one item, so it's plain text. Rows are kept by id, so a refresh
+     updates them in place and focus stays on the row it was on. */
+  var newsRows = dict();
+  function makeNewsRow(r) {
+    var li = el('li'), box = el(r.item ? 'button' : 'div', 'mk-nrow'), top = el('span', 'mk-n-top');
+    if (r.item) { box.type = 'button'; }
+    var n = { li: li, box: box, tag: tagSlot(true), ago: el('span', 'mk-n-ago'), head: el('span', 'mk-n-head'), line: el('span', 'mk-n-line') };
+    top.appendChild(n.tag);
+    top.appendChild(n.ago);
+    box.appendChild(top);
+    box.appendChild(el('span', 'lc-sr', '. '));
+    box.appendChild(n.head);
+    box.appendChild(el('span', 'lc-sr', ' '));
+    box.appendChild(n.line);
+    li.appendChild(box);
+    return n;
+  }
+  function renderNews() {
+    if (!newsBox) { return; }
+    /* The panel is part of the live market: a feed without it (sim off) shows 2.1's page */
+    newsBox.hidden = !state.live;
+    if (side) { side.setAttribute('aria-label', state.live ? 'Market news, movers and sectors' : 'Movers and sectors'); }
+    var list = state.live ? M.news(state.res.data) : [];
+    var active = document.activeElement, lost = false, keep = dict();
+    list.forEach(function (r, i) {
+      var key = r.id + ':' + r.t + ':' + (r.item ? r.item : '');
+      keep[key] = true;
+      var n = newsRows[key] || (newsRows[key] = makeNewsRow(r));
+      if (r.item) { n.box.setAttribute('data-id', r.item); }
+      setTag(n.tag, r.tag);
+      setText(n.ago, D.ago(r.t));
+      setText(n.head, r.headline);
+      setText(n.line, r.line);
+      n.line.hidden = !r.line;
+      if (newsUl.children[i] !== n.li) { put(newsUl, n.li, newsUl.children[i] || null); }
+    });
+    Object.keys(newsRows).forEach(function (key) {
+      if (keep[key]) { return; }
+      if (newsRows[key].li.contains(active)) { lost = true; }
+      if (newsRows[key].li.parentNode) { newsRows[key].li.parentNode.removeChild(newsRows[key].li); }
+      delete newsRows[key];
+    });
+    newsUl.hidden = !list.length;
+    newsNone.hidden = !state.live || list.length > 0;
+    if (lost) {
+      var next = newsUl.querySelector('button');
+      (next || find).focus();
+    } else {
+      refocus(active);
+    }
+  }
+
   /* ---------- heatmap ---------- */
 
   var tiles = dict();
@@ -801,20 +1073,35 @@
     if (c > -4) { return 'dn2'; }
     return 'dn3';
   }
+  /* A tile: symbol and tag on top, the name, then price and today's move */
+  function makeTile(id) {
+    var li = el('li'), b = el('button', 'mk-tile'), top = el('span', 'mk-tile-top'), head = el('span', 'mk-tile-head'), row = el('span', 'mk-tile-row');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('data-id', id);
+    var t = { li: li, btn: b, sym: el('span', 'mk-tile-sym'), tag: tagSlot(), name: el('span', 'mk-tile-name'), p: el('span', 'mk-tile-p'), ch: el('span') };
+    head.appendChild(t.sym);
+    head.appendChild(t.tag);
+    top.appendChild(head);
+    top.appendChild(t.name);
+    row.appendChild(t.p);
+    row.appendChild(t.ch);
+    b.appendChild(top);
+    b.appendChild(row);
+    li.appendChild(b);
+    return t;
+  }
   function renderHeat() {
     var keep = dict(), active = document.activeElement, lost = false;
     state.items.forEach(function (it, i) {
       keep[it.id] = true;
-      var t = tiles[it.id];
-      if (!t) {
-        var li = document.createElement('li');
-        li.innerHTML = '<button type="button" class="mk-tile" aria-pressed="false"></button>';
-        t = tiles[it.id] = { li: li, btn: li.firstChild };
-        t.btn.setAttribute('data-id', it.id);
-      }
+      var t = tiles[it.id] || (tiles[it.id] = makeTile(it.id));
       t.btn.className = 'mk-tile mk-h-' + heatClass(it);
-      setHTML(t.btn, '<span class="mk-tile-top"><span class="mk-tile-sym">' + esc(it.sym) + '</span><span class="mk-tile-name">' + esc(it.name) +
-        '</span></span><span class="mk-tile-row"><span class="mk-tile-p">' + esc(D.money(it.price)) + '</span><span>' + pctHTML(it) + '</span></span>');
+      setText(t.sym, it.sym);
+      setTag(t.tag, it.badge);
+      setText(t.name, it.name);
+      setText(t.p, D.money(it.price));
+      setHTML(t.ch, pctHTML(it));
       if (heatUl.children[i] !== t.li) { put(heatUl, t.li, heatUl.children[i] || null); }
     });
     Object.keys(tiles).forEach(function (id) {
@@ -867,8 +1154,9 @@
     var keepVal = calcItem.value;
     if (key !== calcKey) {
       calcKey = key;
-      calcItem.innerHTML = opts.length ? opts.map(function (it) { return '<option value="' + esc(it.id) + '"></option>'; }).join('') :
-        '<option value="">No item has a sell price right now</option>';
+      calcItem.textContent = '';
+      opts.forEach(function (it) { calcItem.appendChild(option(it.id, '')); });
+      if (!opts.length) { calcItem.appendChild(option('', 'No item has a sell price right now')); }
     }
     for (var i = 0; i < calcItem.options.length; i++) {
       var it = state.byId[calcItem.options[i].value];
@@ -893,7 +1181,10 @@
       '<td role="cell" class="mk-cn mk-cw"></td><td role="cell" class="mk-cx"><button type="button" class="mk-rm">Remove<span class="lc-sr"></span></button></td>';
     tr.setAttribute('data-id', id);
     var td = tr.children;
-    return { tr: tr, item: td[0], amt: td[1], each: td[2], worth: td[3], rm: tr.querySelector('.mk-rm'), rmName: tr.querySelector('.mk-rm .lc-sr') };
+    var r = { tr: tr, item: td[0], amt: td[1], each: td[2], worth: td[3], rm: tr.querySelector('.mk-rm'), rmName: tr.querySelector('.mk-rm .lc-sr'),
+      name: el('span', 'mk-ci-name'), sub: el('span', 'mk-ci-sub'), gone: el('span', 'mk-ci-gone', 'Not on the market right now') };
+    r.item.appendChild(r.name);
+    return r;
   }
 
   function renderCalc() {
@@ -906,8 +1197,14 @@
       if (it) { l.name = it.name; }
       var name = it ? it.name : (l.name || l.id);
       var w = lineCents(l), st = stacksText(l.n);
-      setHTML(r.item, '<span class="mk-ci-name">' + esc(name) + '</span>' + (it ? '<span class="mk-ci-sub">' + esc(it.sym) + '</span>' :
-        '<span class="mk-ci-gone">Not on the market right now</span>'));
+      setText(r.name, name);
+      /* under the name: its symbol, or a note when it has left the market */
+      if (it) { setText(r.sub, it.sym); }
+      var under = it ? r.sub : r.gone;
+      if (r.item.lastChild !== under) {
+        if (r.item.childNodes.length > 1) { r.item.removeChild(r.item.lastChild); }
+        r.item.appendChild(under);
+      }
       setHTML(r.amt, esc(amountText(l.n)) + (st ? '<span class="mk-ci-sub">' + esc(st) + '</span>' : ''));
       setHTML(r.each, w === null ? '<span aria-hidden="true">—</span><span class="lc-sr">no price</span>' : esc(exact(it.sell)) + '<span class="mk-k"> each</span>');
       setHTML(r.worth, w === null ? '<span aria-hidden="true">—</span><span class="lc-sr">not counted</span>' : esc(D.money(w / 100)));
@@ -958,7 +1255,7 @@
       state.lines.forEach(function (l) { if (l.id === it.id) { line = l; } });
       if (!line) {
         if (state.lines.length >= MAX_LINES) {
-          calcError('That’s a long list. Remove a line to add another.', true);
+          calcError('The list holds ' + MAX_LINES + ' lines. Remove one to add another.', true);
           return;
         }
         line = { id: it.id, n: 0, name: it.name };
@@ -1022,7 +1319,7 @@
     if (how === 'jump') { showQuote(); }
     if (how !== 'pick') {
       var words = changeWords(it);
-      announce(it.name + ', ' + D.money(it.price) + (words ? ', ' + words : '') + '.');
+      announce(it.name + ', ' + D.money(it.price) + (words ? ', ' + words : '') + (it.badge ? ', ' + it.badge.label : '') + '.');
     }
   }
 
@@ -1039,6 +1336,7 @@
       renderTape();
       renderIndex();
       renderQuote();
+      renderNews();
       renderMovers();
       renderSectors();
       renderHeat();
@@ -1090,6 +1388,12 @@
       if (b) { select(b.getAttribute('data-id'), 'jump'); }
     });
   });
+  if (newsUl) {
+    newsUl.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button.mk-nrow') : null;
+      if (b) { select(b.getAttribute('data-id'), 'jump'); }
+    });
+  }
   rangeBox.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('.mk-tf') : null;
     if (!b || b.getAttribute('aria-disabled') === 'true' || !b.hasAttribute('data-tf')) { return; }
@@ -1119,7 +1423,16 @@
   }
   if (window.ResizeObserver) { new ResizeObserver(onResize).observe(chartBox); } else { window.addEventListener('resize', onResize); }
 
-  /* { long: true } asks for the 7D/30D history too (only this page does; Home stays on the lean feed) */
+  /* The live market's times ("ends in 5h", "3h ago") and tags that run out move on between refreshes (sample data
+     isn't reloaded at all): once a minute, redraw from the same copy. */
+  setInterval(function () {
+    if (state.res && state.live && !document.hidden) {
+      ingest(state.res.data);
+      renderAll();
+    }
+  }, 60000);
+
+  /* { long: true } asks for the 7D/30D history and the chart markers too (only this page does; Home stays on the lean feed) */
   D.watch('market', function (res) {
     var first = !state.res;
     state.res = res;

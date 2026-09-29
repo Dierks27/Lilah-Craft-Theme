@@ -99,6 +99,10 @@ function lilahcraft_hero_light_css( $css ) {
 	}
 	if ( preg_match_all( '/[^{}]*\.lc-hero-light(?![\w-])[^{}]*\{[^{}]*\}/', $css, $rules ) ) {
 		foreach ( $rules[0] as $rule ) {
+			// The dark look's rules (the hero stays charcoal there) never apply in the editor, which stays light.
+			if ( false !== strpos( $rule, 'data-theme' ) ) {
+				continue;
+			}
 			$out .= preg_replace( '/(?:body)?\.lc-hero-light(?![\w-])/', 'body', trim( $rule ) ) . "\n";
 		}
 	}

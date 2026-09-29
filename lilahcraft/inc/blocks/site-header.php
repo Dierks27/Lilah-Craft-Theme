@@ -2,6 +2,7 @@
 /**
  * lilahcraft/site-header: logo, main nav with the current page marked, the live player count
  * (the address and its copy button live in each page's hero and the join bar). Below 1150 px the nav folds behind a Menu button (assets/js/site.js).
+ * Last, at every width, the sun/moon switch for the dark look (assets/js/site.js; hidden without JavaScript).
  *
  * @package LilahCraft
  */
@@ -87,6 +88,11 @@ function lilahcraft_render_site_header() {
 				<p class="lc-status" data-lc-status hidden><span class="lc-dot" aria-hidden="true"></span><span data-lc-status-text></span></p>
 			</div>
 		</div>
+		<button class="lc-theme-btn" type="button" aria-pressed="false" data-lc-theme-btn>
+			<svg class="lc-theme-sun" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg>
+			<svg class="lc-theme-moon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/></svg>
+			<span class="lc-sr"><?php esc_html_e( 'Dark mode', 'lilahcraft' ); ?></span>
+		</button>
 	</div>
 </header>
 	<?php

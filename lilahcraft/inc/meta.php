@@ -30,7 +30,7 @@ function lilahcraft_seo_plugin_active() {
  */
 function lilahcraft_page_descriptions() {
 	return array(
-		'home'      => __( 'A family Minecraft server for Java and Bedrock where every block is worth something. Mine it, sell it, watch the price move.', 'lilahcraft' ),
+		'home'      => __( 'A survival Minecraft server for Java and Bedrock where every block is worth something. Mine it, sell it, watch the price move.', 'lilahcraft' ),
 		'play'      => __( 'Pick your kind of Minecraft and you’re in within a minute. Java and Bedrock land in the same hub: mc.lilahcraft.com.', 'lilahcraft' ),
 		'downloads' => __( 'Optional extras for Java players: the CraftBridge Client mod, resource packs and recommended mods.', 'lilahcraft' ),
 		'market'    => __( 'Live prices from the LilahCraft market. Every raw item has real stock: sell some in and the price drops.', 'lilahcraft' ),
@@ -50,7 +50,8 @@ add_action(
 		$key   = lilahcraft_page_key();
 		$descs = lilahcraft_page_descriptions();
 		$type  = 'website';
-		$image = get_theme_file_uri( 'assets/img/og/' . ( $key ? $key : 'home' ) . '.png' );
+		// ?ver= so sites that cached an older card fetch it again after an update.
+		$image = add_query_arg( 'ver', lilahcraft_version(), get_theme_file_uri( 'assets/img/og/' . ( $key ? $key : 'home' ) . '.png' ) );
 		$desc  = isset( $descs[ $key ] ) ? $descs[ $key ] : $descs['home'];
 		$url   = home_url( ! empty( $GLOBALS['wp']->request ) ? user_trailingslashit( $GLOBALS['wp']->request ) : '/' );
 

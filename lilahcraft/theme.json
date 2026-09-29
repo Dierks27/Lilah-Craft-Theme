@@ -41,7 +41,7 @@
         {
           "slug": "pink-deep",
           "name": "Deep pink (text on light)",
-          "color": "#b02d69"
+          "color": "#a42c64"
         },
         {
           "slug": "orange",
@@ -51,17 +51,22 @@
         {
           "slug": "page",
           "name": "Page",
-          "color": "#f5f4f7"
+          "color": "#e3e1e8"
+        },
+        {
+          "slug": "card",
+          "name": "Card",
+          "color": "#efedf3"
         },
         {
           "slug": "light",
           "name": "Light gray",
-          "color": "#ecebef"
+          "color": "#d7d4de"
         },
         {
           "slug": "muted",
           "name": "Muted",
-          "color": "#5f5c66"
+          "color": "#58555f"
         },
         {
           "slug": "white",
@@ -98,7 +103,7 @@
   },
   "styles": {
     "color": {
-      "background": "#f5f4f7",
+      "background": "#e3e1e8",
       "text": "#26242b"
     },
     "typography": {

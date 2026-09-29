@@ -3,14 +3,17 @@
  * Same-origin REST routes for the live data.
  *
  *   GET /wp-json/lilahcraft/v1/market   the Market feed (HomeCraftMgmt /api/market), without the long
- *                                       history; ?long=1 adds history7d and history30d when the feed has them
+ *                                       history; ?long=1 adds history7d and history30d when the feed has them,
+ *                                       and the live market's chart markers (events)
  *   GET /wp-json/lilahcraft/v1/minis    the Minis feed  (HomeCraftMgmt /api/minis)
  *   GET /wp-json/lilahcraft/v1/status   { online, players, max, version }
  *
  * WordPress fetches each feed, keeps it in a transient for the configured seconds and keeps the
  * last good copy in an option (both whole, long history included). A failed fetch serves that copy
  * with "stale": true. With no URL set, or nothing good yet, the answer is { "sample": true } and the
- * page shows labelled sample data. Only whitelisted fields are passed on.
+ * page shows labelled sample data. Only whitelisted fields are passed on. The live market's fields
+ * (HomeCraftMgmt 0.33) only come through while the feed says "live": true; without them the answer
+ * is exactly what 2.1 served.
  *
  * @package LilahCraft
  */
@@ -44,8 +47,8 @@ add_action(
 );
 
 /**
- * The Market feed without the long history (history7d, history30d): up to 288 more points per item
- * that only the Market page's 7D and 30D ranges use.
+ * The Market feed without the long history (history7d, history30d: up to 288 more points per item)
+ * and the chart markers (events), which only the Market page's chart uses.
  *
  * @param array $data Market feed, as stored.
  * @return array
@@ -55,7 +58,7 @@ function lilahcraft_market_lean( $data ) {
 		return $data;
 	}
 	foreach ( array_keys( $data['items'] ) as $i ) {
-		unset( $data['items'][ $i ]['history7d'], $data['items'][ $i ]['history30d'] );
+		unset( $data['items'][ $i ]['history7d'], $data['items'][ $i ]['history30d'], $data['items'][ $i ]['events'] );
 	}
 	return $data;
 }
@@ -241,6 +244,81 @@ function lilahcraft_int( $n, $default = 0 ) {
 }
 
 /**
+ * A time in ms since 1970, above 0 and no later than $latest, or 0. A time far ahead is a clock or unit
+ * slip upstream (micro- or nanoseconds), so it counts as missing.
+ *
+ * @param mixed $n      Value.
+ * @param int   $latest The latest time allowed (ms).
+ * @return int
+ */
+function lilahcraft_time( $n, $latest ) {
+	$t = lilahcraft_int( $n, 0 );
+	return ( $t > 0 && $t <= $latest ) ? $t : 0;
+}
+
+/**
+ * A feed id: lower case letters, digits, _ : - and at most 80 of them ('' when there's nothing left).
+ *
+ * @param mixed $s Value.
+ * @return string
+ */
+function lilahcraft_id( $s ) {
+	return is_scalar( $s ) ? substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $s ) ), 0, 80 ) : '';
+}
+
+/**
+ * Plain text for the live market's names, headlines and lines: like lilahcraft_text, and the
+ * &-style colour codes (&a, &l, &x…) go too.
+ *
+ * @param mixed $s   Value.
+ * @param int   $max Longest allowed.
+ * @return string
+ */
+function lilahcraft_plain( $s, $max ) {
+	if ( ! is_scalar( $s ) ) {
+		return '';
+	}
+	// Codes out before and after the tags, so neither can hide the other ("&<b></b>a").
+	$code = '/[\x{00A7}&][0-9a-fk-orx]/iu';
+	$s    = lilahcraft_text( preg_replace( $code, '', (string) $s ), 1000 );
+	return lilahcraft_text( preg_replace( $code, '', $s ), $max );
+}
+
+/**
+ * A percent (11.7 = +11.7 %): a finite number no further than ±1000 from zero, or null.
+ *
+ * @param mixed $n Value.
+ * @return float|null
+ */
+function lilahcraft_pct( $n ) {
+	$n = lilahcraft_num( $n );
+	return ( null !== $n && abs( $n ) <= 1000 ) ? $n : null;
+}
+
+/**
+ * One of the allowed words (any case in the feed, lower case out), or ''.
+ *
+ * @param mixed $s       Value.
+ * @param array $allowed Lower case words.
+ * @return string
+ */
+function lilahcraft_enum( $s, $allowed ) {
+	$s = is_string( $s ) ? strtolower( trim( $s ) ) : '';
+	return in_array( $s, $allowed, true ) ? $s : '';
+}
+
+/**
+ * $a[ $key ] when $a is an array that has it, else null.
+ *
+ * @param mixed  $a   Value.
+ * @param string $key Key.
+ * @return mixed
+ */
+function lilahcraft_field( $a, $key ) {
+	return ( is_array( $a ) && isset( $a[ $key ] ) ) ? $a[ $key ] : null;
+}
+
+/**
  * Request headers for a feed: JSON, plus the shared secret when Settings > LilahCraft has one
  * (HomeCraftMgmt checks it; visitors never see it).
  *
@@ -287,6 +365,11 @@ function lilahcraft_clean_points( $list, $max ) {
  * history30d (every 6 hours, up to 120 points) are kept only when the feed has them and served
  * only with ?long=1; the Market page asks for them and turns its 7D and 30D ranges on when they're there.
  *
+ * While HomeCraftMgmt's live market runs (the feed says "live": true) its fields come through too,
+ * typed and bounded: per item see lilahcraft_clean_live_item(), at the top level
+ * lilahcraft_clean_live_market(). Without "live": true none of them do, so a feed from 0.32 (or 0.33
+ * with the live market off) gives exactly 2.1's answer.
+ *
  * @param array $j Decoded feed.
  * @return array|WP_Error
  */
@@ -294,23 +377,30 @@ function lilahcraft_clean_market( $j ) {
 	if ( ! isset( $j['items'] ) || ! is_array( $j['items'] ) ) {
 		return new WP_Error( 'lilahcraft_feed', __( 'The market feed has no items list.', 'lilahcraft' ) );
 	}
+	$live  = isset( $j['live'] ) && true === $j['live'];
+	$now   = (int) round( microtime( true ) * 1000 );
 	$items = array();
 	foreach ( $j['items'] as $it ) {
 		if ( ! is_array( $it ) || ! isset( $it['id'] ) || ! is_scalar( $it['id'] ) ) {
 			continue;
 		}
-		$id    = substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $it['id'] ) ), 0, 80 );
+		$id    = lilahcraft_id( $it['id'] );
 		$price = lilahcraft_num( isset( $it['price'] ) ? $it['price'] : null );
 		if ( '' === $id || null === $price ) {
 			continue;
 		}
 		$history = lilahcraft_clean_points( isset( $it['history'] ) ? $it['history'] : null, 96 );
 		$name    = lilahcraft_text( isset( $it['name'] ) ? $it['name'] : '' );
+		if ( '' === $name ) {
+			// No name: the id in words, as plain text too (so markup in an id never comes along).
+			$name = lilahcraft_text( ucwords( str_replace( '_', ' ', strtolower( (string) $it['id'] ) ) ) );
+			$name = '' !== $name ? $name : $id;
+		}
 		$stock   = isset( $it['stock'] ) ? lilahcraft_int( $it['stock'], null ) : null;
 		$max     = isset( $it['maxStock'] ) ? lilahcraft_int( $it['maxStock'], null ) : null;
 		$items[] = array(
 			'id'        => $id,
-			'name'      => '' !== $name ? $name : ucwords( str_replace( '_', ' ', strtolower( (string) $it['id'] ) ) ),
+			'name'      => $name,
 			'material'  => substr( preg_replace( '/[^A-Z0-9_]/', '', strtoupper( (string) ( isset( $it['material'] ) && is_scalar( $it['material'] ) ? $it['material'] : $it['id'] ) ) ), 0, 80 ),
 			'price'     => $price,
 			'buy'       => lilahcraft_num( isset( $it['buy'] ) ? $it['buy'] : null ),
@@ -327,14 +417,186 @@ function lilahcraft_clean_market( $j ) {
 				$items[ $last ][ $key ] = $points;
 			}
 		}
+		if ( $live ) {
+			$items[ $last ] += lilahcraft_clean_live_item( $it, $now );
+		}
 	}
 	$refresh = isset( $j['refreshSeconds'] ) ? lilahcraft_int( $j['refreshSeconds'], 30 ) : 30;
-	return array(
+	$out     = array(
 		'title'          => lilahcraft_text( isset( $j['title'] ) ? $j['title'] : '' ),
 		'generatedAt'    => isset( $j['generatedAt'] ) ? lilahcraft_int( $j['generatedAt'] ) : 0,
 		'refreshSeconds' => max( 5, min( 3600, $refresh ? $refresh : 30 ) ),
 		'items'          => $items,
 	);
+	return $live ? $out + lilahcraft_clean_live_market( $j, $items, $now ) : $out;
+}
+
+/**
+ * One item's live-market fields, in the feed's order (each only when the feed has a good one):
+ *
+ *   usual         number ≥ 0, the price without the mood ("Usually $X")
+ *   moodPct       percent against usual now (11.7 = +11.7 %)
+ *   status        hot | deal | up | down | wanted, while a badge shows
+ *   statusEndsAt  ms, when that badge goes (only with a status; left out when it's more than 60 days ahead)
+ *   events        chart markers, oldest first, the newest 20: { t ms, kind: hot|deal|up|down|real, pct };
+ *                 a marker more than a day ahead is skipped; served only with ?long=1
+ *
+ * @param array $it  Feed item.
+ * @param int   $now The time now (ms).
+ * @return array
+ */
+function lilahcraft_clean_live_item( $it, $now ) {
+	$out   = array();
+	$usual = lilahcraft_num( lilahcraft_field( $it, 'usual' ) );
+	if ( null !== $usual && $usual >= 0 ) {
+		$out['usual'] = $usual;
+	}
+	$mood = lilahcraft_pct( lilahcraft_field( $it, 'moodPct' ) );
+	if ( null !== $mood ) {
+		$out['moodPct'] = $mood;
+	}
+	$status = lilahcraft_enum( lilahcraft_field( $it, 'status' ), array( 'hot', 'deal', 'up', 'down', 'wanted' ) );
+	if ( '' !== $status ) {
+		$out['status'] = $status;
+		$ends          = lilahcraft_time( lilahcraft_field( $it, 'statusEndsAt' ), $now + 60 * DAY_IN_SECONDS * 1000 );
+		if ( $ends > 0 ) {
+			$out['statusEndsAt'] = $ends;
+		}
+	}
+	$events = array();
+	$list   = lilahcraft_field( $it, 'events' );
+	foreach ( is_array( $list ) ? $list : array() as $e ) {
+		$kind = lilahcraft_enum( lilahcraft_field( $e, 'kind' ), array( 'hot', 'deal', 'up', 'down', 'real' ) );
+		$t    = lilahcraft_time( lilahcraft_field( $e, 't' ), $now + DAY_IN_SECONDS * 1000 );
+		if ( '' === $kind || $t <= 0 ) {
+			continue;
+		}
+		$pct      = lilahcraft_pct( lilahcraft_field( $e, 'pct' ) );
+		$events[] = array(
+			't'    => $t,
+			'kind' => $kind,
+			'pct'  => null === $pct ? 0.0 : $pct,
+		);
+	}
+	if ( $events ) {
+		usort(
+			$events,
+			function ( $a, $b ) {
+				return $a['t'] <=> $b['t'];
+			}
+		);
+		$out['events'] = array_slice( $events, -20 );
+	}
+	return $out;
+}
+
+/**
+ * The live market's top-level fields, in the feed's order:
+ *
+ *   live    true
+ *   hot     item ids that are HOT, deals: ids on a DEAL (only ids in items, at most 50 each)
+ *   season  { id, name, endsAt ms }, left out when there's none (or it ends more than 60 days ahead)
+ *   news    the 5 newest rows, newest first, see lilahcraft_clean_news_row()
+ *
+ * @param array $j     Decoded feed.
+ * @param array $items The cleaned items.
+ * @param int   $now   The time now (ms).
+ * @return array
+ */
+function lilahcraft_clean_live_market( $j, $items, $now ) {
+	$ids = array();
+	foreach ( $items as $it ) {
+		$ids[ $it['id'] ] = true;
+	}
+	$out = array( 'live' => true );
+	foreach ( array( 'hot', 'deals' ) as $key ) {
+		if ( ! isset( $j[ $key ] ) || ! is_array( $j[ $key ] ) ) {
+			continue;
+		}
+		$out[ $key ] = array();
+		foreach ( $j[ $key ] as $id ) {
+			$id = lilahcraft_id( $id );
+			if ( isset( $ids[ $id ] ) && ! in_array( $id, $out[ $key ], true ) && count( $out[ $key ] ) < 50 ) {
+				$out[ $key ][] = $id;
+			}
+		}
+	}
+	$season = lilahcraft_field( $j, 'season' );
+	$sid    = lilahcraft_id( lilahcraft_field( $season, 'id' ) );
+	$name   = lilahcraft_plain( lilahcraft_field( $season, 'name' ), 60 );
+	$ends   = lilahcraft_time( lilahcraft_field( $season, 'endsAt' ), $now + 60 * DAY_IN_SECONDS * 1000 );
+	if ( '' !== $sid && $ends > 0 ) {
+		$out['season'] = array(
+			'id'     => $sid,
+			// A season with no name reads as its id in words, as in game (harvest_time: Harvest Time).
+			'name'   => '' !== $name ? $name : substr( ucwords( str_replace( '_', ' ', $sid ) ), 0, 60 ),
+			'endsAt' => $ends,
+		);
+	}
+	if ( isset( $j['news'] ) && is_array( $j['news'] ) ) {
+		$news = array();
+		foreach ( $j['news'] as $row ) {
+			$row = lilahcraft_clean_news_row( $row, $ids, $now );
+			if ( $row ) {
+				$news[] = $row;
+			}
+		}
+		usort(
+			$news,
+			function ( $a, $b ) {
+				return $b['t'] <=> $a['t'];
+			}
+		);
+		$out['news'] = array_slice( $news, 0, 5 );
+	}
+	return $out;
+}
+
+/**
+ * One news row, or null when it isn't one the site can show (an unknown kind or source, no id,
+ * headline or time, or a time more than a day ahead, which would sit on top as "just now"):
+ *
+ *   { id int, t ms, kind: up|down|hot|deal|wanted|season|real, item: an id from items or null,
+ *     name, dir: 1|-1|0, pct, before and after (money, both or neither), headline, line,
+ *     source: sim|admin|calendar|real, active bool }
+ *
+ * @param mixed $n   Feed row.
+ * @param array $ids The cleaned items' ids, as keys.
+ * @param int   $now The time now (ms).
+ * @return array|null
+ */
+function lilahcraft_clean_news_row( $n, $ids, $now ) {
+	$kind     = lilahcraft_enum( lilahcraft_field( $n, 'kind' ), array( 'up', 'down', 'hot', 'deal', 'wanted', 'season', 'real' ) );
+	$source   = lilahcraft_enum( lilahcraft_field( $n, 'source' ), array( 'sim', 'admin', 'calendar', 'real' ) );
+	$id       = lilahcraft_int( lilahcraft_field( $n, 'id' ), -1 );
+	$t        = lilahcraft_time( lilahcraft_field( $n, 't' ), $now + DAY_IN_SECONDS * 1000 );
+	$headline = lilahcraft_plain( lilahcraft_field( $n, 'headline' ), 140 );
+	if ( '' === $kind || '' === $source || $id < 0 || $t <= 0 || '' === $headline ) {
+		return null;
+	}
+	$item = 'season' === $kind ? '' : lilahcraft_id( lilahcraft_field( $n, 'item' ) );
+	$dir  = lilahcraft_int( lilahcraft_field( $n, 'dir' ), 0 );
+	$pct  = lilahcraft_pct( lilahcraft_field( $n, 'pct' ) );
+	$row  = array(
+		'id'   => $id,
+		't'    => $t,
+		'kind' => $kind,
+		'item' => ( '' !== $item && isset( $ids[ $item ] ) ) ? $item : null,
+		'name' => lilahcraft_plain( lilahcraft_field( $n, 'name' ), 60 ),
+		'dir'  => $dir > 0 ? 1 : ( $dir < 0 ? -1 : 0 ),
+		'pct'  => null === $pct ? 0.0 : $pct,
+	);
+	$before = lilahcraft_num( lilahcraft_field( $n, 'before' ) );
+	$after  = lilahcraft_num( lilahcraft_field( $n, 'after' ) );
+	if ( null !== $before && null !== $after && $before >= 0 && $after >= 0 ) {
+		$row['before'] = $before;
+		$row['after']  = $after;
+	}
+	$row['headline'] = $headline;
+	$row['line']     = lilahcraft_plain( lilahcraft_field( $n, 'line' ), 200 );
+	$row['source']   = $source;
+	$row['active']   = true === lilahcraft_field( $n, 'active' );
+	return $row;
 }
 
 /**
@@ -366,7 +628,7 @@ function lilahcraft_clean_minis( $j ) {
 		if ( ! is_array( $m ) || ! isset( $m['id'] ) || ! is_scalar( $m['id'] ) ) {
 			continue;
 		}
-		$id = substr( preg_replace( '/[^a-z0-9_:\-]/', '', strtolower( (string) $m['id'] ) ), 0, 80 );
+		$id = lilahcraft_id( $m['id'] );
 		if ( '' === $id ) {
 			continue;
 		}

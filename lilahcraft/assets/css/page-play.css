@@ -1,7 +1,8 @@
 /* LilahCraft 2.1 "Pixel pop": Play page (templates/page-play.html). Material: stone.
    Every rule is scoped under .lc-main--play (the editor loads all page files).
-   Headings and cards inside the world, mod and parent grids are styled by position, not by class,
-   so a card Jeff duplicates or adds in the Site Editor looks right without extra classes. */
+   Headings and cards inside the world, mod and Good to know grids are styled by position, not by class,
+   so a card Jeff duplicates or adds in the Site Editor looks right without extra classes.
+   Colours are the look's tokens (--edge, --focus, --purple-deep-text…); the dark look adds three rules of its own. */
 
 /* The Site Editor gives flow-layout children a 24px top margin that the front end doesn't;
    spacing here comes from flex and grid gaps, so the editor matches the page. */
@@ -23,7 +24,7 @@
 .lc-main--play .lc-play-addr-label{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark)}
 .lc-main--play .lc-play-addr-val{font-family:var(--mono);font-weight:700;font-size:20px;line-height:1.3;color:#fff}
 .lc-main--play .lc-play-addr .lc-btn{flex:1 0 auto;min-width:164px;min-height:52px}
-.lc-main--play .lc-play-addr :focus-visible{outline-color:var(--purple)}
+.lc-main--play .lc-play-addr :focus-visible{outline-color:var(--focus)}
 /* The copy button needs the script; without it the address is still there to select. (Shown in the Site Editor.) */
 html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .lc-btn{display:none}
 /* Bedrock's one-tap link */
@@ -37,8 +38,10 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 .lc-main--play .lc-play-act-text{display:flex;flex-direction:column;gap:12px;align-self:center}
 .lc-main--play .lc-play-act-busy{font-size:20px;font-weight:800;line-height:1.5;color:var(--ink)}
 .lc-main--play .lc-play-act-busy .lc-hl{white-space:nowrap}
-.lc-main--play .lc-play-act-bars{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:4px;align-items:end;height:150px;border-bottom:3px solid var(--charcoal)}
-.lc-main--play .lc-play-act-bars>span{display:block;min-height:0;background:var(--purple);box-shadow:inset -3px 0 0 var(--purple-deep)}
+.lc-main--play .lc-play-act-bars{--bar:var(--purple);--bar-deep:var(--purple-deep);display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:4px;align-items:end;height:150px;border-bottom:3px solid var(--edge-strong)}
+/* The dark look: light purple bars (5.9:1 on the dark card; plain purple would be 2.3:1) */
+:root[data-theme="dark"] .lc-main--play .lc-play-act-bars{--bar:var(--purple-light);--bar-deep:var(--purple)}
+.lc-main--play .lc-play-act-bars>span{display:block;min-height:0;background:var(--bar);box-shadow:inset -3px 0 0 var(--bar-deep)}
 .lc-main--play .lc-play-act-bars>span.is-peak{background:var(--orange);box-shadow:inset -3px 0 0 var(--orange-deep)}
 .lc-main--play .lc-play-act-bars>span.is-none{height:6px;background:repeating-linear-gradient(90deg,var(--mid) 0 3px,transparent 3px 6px);box-shadow:none}
 .lc-main--play .lc-play-act-axis{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:4px;margin-top:8px;font-family:var(--mono);font-weight:600;font-size:12px;line-height:1.2;color:var(--muted);white-space:nowrap}
@@ -50,13 +53,16 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 }
 
 /* ---------- The worlds: one card (group) per world, any number of them ---------- */
-.lc-main--play .lc-play-worlds>.wp-block-group{display:flex;flex-direction:column;gap:10px;padding:24px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+.lc-main--play .lc-play-worlds>.wp-block-group{display:flex;flex-direction:column;gap:10px;padding:24px;background:var(--card);border:3px solid var(--edge);color:var(--ink)}
 .lc-main--play .lc-play-worlds h3{font-family:var(--display);font-size:24px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
 .lc-main--play .lc-play-worlds p{font-size:17px;color:var(--text)}
 /* The stone strip on top of a card bleeds to its edges (the flow-margin reset above would zero its margins) */
 .lc-main--play .lc-play-worlds .lc-strip{margin:-24px -24px 6px}
 
-/* ---------- Your first day: charcoal band, the checklist on a loud white board ---------- */
+/* ---------- Your first day: charcoal band, the checklist on a loud board ---------- */
+/* In the dark look the gray band above (The worlds) and this charcoal band are one shade: a hairline between
+   them, like the hero's */
+:root[data-theme="dark"] .lc-main--play .lc-play-firstday{border-top:1px solid var(--line)}
 .lc-main--play .lc-play-fd{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:32px 64px;align-items:start}
 .lc-main--play .lc-play-fd-intro{padding-top:8px}
 .lc-main--play .lc-sec--dark .lc-kicker{color:var(--pink)}
@@ -67,26 +73,26 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 .lc-main--play .lc-play-check-title{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.3;letter-spacing:-.01em}
 .lc-main--play .lc-play-check-count{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink)}
 /* Six cells fill as items are ticked, in the orange, pink, purple of the current-page bars */
-.lc-main--play .lc-play-check-bar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));height:16px;border-block:3px solid var(--charcoal);background:var(--light)}
+.lc-main--play .lc-play-check-bar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));height:16px;border-block:3px solid var(--edge);background:var(--light)}
 .lc-main--play .lc-play-check-bar i{display:block;background:transparent}
-.lc-main--play .lc-play-check-bar i+i{border-left:3px solid var(--charcoal)}
+.lc-main--play .lc-play-check-bar i+i{border-left:3px solid var(--edge)}
 .lc-main--play .lc-play-check-bar i.is-on:nth-child(3n+1){background:var(--orange)}
 .lc-main--play .lc-play-check-bar i.is-on:nth-child(3n+2){background:var(--pink)}
 .lc-main--play .lc-play-check-bar i.is-on:nth-child(3n){background:var(--purple)}
 /* Without the script there's no bar: a plain rule under the title instead */
-.lc-main--play .lc-play-check-bar[hidden]+.lc-play-check-list{border-top:3px solid var(--charcoal)}
+.lc-main--play .lc-play-check-bar[hidden]+.lc-play-check-list{border-top:3px solid var(--edge)}
 .lc-main--play .lc-play-check-list{list-style:none;margin:0;padding:0}
 .lc-main--play .lc-play-check-list>li+li{border-top:1px solid var(--line)}
 .lc-main--play .lc-play-check-item{display:flex;align-items:center;gap:14px;min-height:58px;padding:10px 22px;font-size:17px;font-weight:600;color:var(--ink);cursor:pointer}
 .lc-main--play .lc-play-check-item:hover{background:var(--page)}
-.lc-main--play .lc-play-check-item input{flex:none;-webkit-appearance:none;appearance:none;width:28px;height:28px;margin:0;border:3px solid var(--charcoal);border-radius:0;background:#fff;cursor:pointer}
-.lc-main--play .lc-play-check-item input:checked{background:var(--purple) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M6 1h2v1H6zM5 2h2v1H5zM4 3h2v1H4zM0 3h1v1H0zM0 4h2v1H0zM3 4h2v1H3zM1 5h3v1H1zM2 6h1v1H2z'/%3E%3C/svg%3E") center/16px 16px no-repeat;border-color:var(--purple-deep)}
-.lc-main--play .lc-play-check-item input:focus-visible{outline:3px solid var(--purple);outline-offset:3px}
-.lc-main--play .lc-play-check-item code{font-size:.9em;font-weight:600;color:var(--purple-deep);white-space:nowrap}
+.lc-main--play .lc-play-check-item input{flex:none;-webkit-appearance:none;appearance:none;width:28px;height:28px;margin:0;border:3px solid var(--edge-strong);border-radius:0;background:var(--card);cursor:pointer}
+.lc-main--play .lc-play-check-item input:checked{background:var(--purple) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M6 1h2v1H6zM5 2h2v1H5zM4 3h2v1H4zM0 3h1v1H0zM0 4h2v1H0zM3 4h2v1H3zM1 5h3v1H1zM2 6h1v1H2z'/%3E%3C/svg%3E") center/16px 16px no-repeat;border-color:var(--purple-deep-text)}
+.lc-main--play .lc-play-check-item input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.lc-main--play .lc-play-check-item code{font-size:.9em;font-weight:600;color:var(--purple-deep-text);white-space:nowrap}
 .lc-main--play .lc-play-check-item input:checked+span{color:var(--muted);text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--mid)}
-.lc-main--play .lc-play-check-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px 20px;padding:16px 22px;border-top:3px solid var(--charcoal)}
+.lc-main--play .lc-play-check-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px 20px;padding:16px 22px;border-top:3px solid var(--edge)}
 .lc-main--play .lc-play-check-saved{font-size:15px;color:var(--muted)}
-.lc-main--play .lc-play-check :focus-visible{outline-color:var(--purple)}
+.lc-main--play .lc-play-check :focus-visible{outline-color:var(--focus)}
 @media (forced-colors:active){
   .lc-main--play .lc-play-check-item input{-webkit-appearance:auto;appearance:auto;width:22px;height:22px}
   .lc-main--play .lc-play-check-bar i.is-on{forced-color-adjust:none;background:Highlight}
@@ -98,7 +104,7 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 .lc-main--play .lc-play-col .lc-actions{align-self:flex-start}
 .lc-main--play .lc-play-soon{gap:8px;padding:22px}
 /* The mods: one bordered list, a row per mod (a group each, so Jeff can add one) */
-.lc-main--play .lc-play-mods{display:flex;flex-direction:column;background:#fff;border:3px solid var(--charcoal)}
+.lc-main--play .lc-play-mods{display:flex;flex-direction:column;background:var(--card);border:3px solid var(--edge)}
 .lc-main--play .lc-play-mods>.wp-block-group{display:flex;flex-direction:column;gap:2px;padding:16px 20px;color:var(--ink)}
 .lc-main--play .lc-play-mods>.wp-block-group+.wp-block-group{border-top:1px solid var(--line)}
 .lc-main--play .lc-play-soon h3,
@@ -106,18 +112,26 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 .lc-main--play .lc-play-soon p,
 .lc-main--play .lc-play-mods p{font-size:16px;color:var(--text)}
 
-/* ---------- For parents: six plain facts, a card each ---------- */
-.lc-main--play .lc-play-parents-head .lc-lede{max-width:800px}
+/* ---------- Good to know: plain facts, a card each ---------- */
+.lc-main--play .lc-play-know-head .lc-lede{max-width:800px}
+/* In the dark look this gray band and the charcoal footer are one shade: a hairline between them */
+:root[data-theme="dark"] .lc-main--play .lc-play-know{border-bottom:1px solid var(--line)}
 .lc-main--play .lc-play-facts{gap:20px}
-.lc-main--play .lc-play-facts>.wp-block-group{display:flex;flex-direction:column;gap:8px;padding:22px;background:#fff;border:3px solid var(--charcoal);color:var(--ink)}
+/* A last card alone in its row fills the row (three across here, two at 1100 px and below) */
+.lc-main--play .lc-play-facts>:last-child:nth-child(3n+1){grid-column:1 / -1}
+.lc-main--play .lc-play-facts>.wp-block-group{display:flex;flex-direction:column;gap:8px;padding:22px;background:var(--card);border:3px solid var(--edge);color:var(--ink)}
 .lc-main--play .lc-play-facts h3{font-family:var(--display);font-size:19px;font-weight:800;line-height:1.25;letter-spacing:-.01em}
 .lc-main--play .lc-play-facts h3::before{content:"";display:block;width:14px;height:14px;margin-bottom:12px;background:var(--orange)}
 .lc-main--play .lc-play-facts>:nth-child(3n+2) h3::before{background:var(--pink)}
 .lc-main--play .lc-play-facts>:nth-child(3n) h3::before{background:var(--purple)}
 .lc-main--play .lc-play-facts p{font-size:16px;color:var(--text)}
+/* "Read the house rules" jumps to the House rules card below (#house-rules, just before the page content). Until a
+   rule is typed that card hides itself, so the link does too (it stays in the Site Editor, to be editable). */
+.lc-main--play .lc-play-rules-link a{display:inline-flex;align-items:center;min-height:44px;font-weight:800}
+body:not(.editor-styles-wrapper) .lc-main--play:not(:has(.lc-rules li:not(:empty))) .lc-play-rules-link{display:none}
 
 /* ---------- Page content (Pages > Play), e.g. the House rules pattern ----------
-   Empty page: the Post Content block renders nothing. It follows the gray For parents band, so it
+   Empty page: the Post Content block renders nothing. It follows the gray Good to know band, so it
    brings its own space above. The House rules pattern has its own wrapper (and hides itself until a
    rule is typed); anything else Jeff adds gets the page width and gutter. */
 .lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:64px}
@@ -131,6 +145,8 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
   .lc-main--play .lc-play-fd-intro{padding-top:0;max-width:720px}
   .lc-main--play .lc-play-check{max-width:760px}
   .lc-main--play .lc-play-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--play .lc-play-facts>:last-child:nth-child(3n+1){grid-column:auto}
+  .lc-main--play .lc-play-facts>:last-child:nth-child(odd){grid-column:1 / -1}
 }
 @media (max-width:920px){
   .lc-main--play .lc-play-paths{gap:28px}

@@ -1,6 +1,7 @@
 /* LilahCraft: shared behaviour on every page.
    - [data-lc-copy="text"] buttons copy text (data-lc-copied="Copied!" is the done label; data-lc-copy-what="link" names it when it's announced)
    - header Menu button below 1150 px
+   - header switch for the dark look (the <head> script in inc/assets.php picks the look before first paint)
    - header player count from /wp-json/lilahcraft/v1/status, hidden when the ping fails
    - [data-lc-filter="tableId"] search boxes filter [data-lc-row] rows, grouped by [data-lc-group]
    - LC.announce(text) speaks through one polite live region */
@@ -83,6 +84,44 @@
     });
     window.matchMedia('(min-width: 1151px)').addEventListener('change', function (mq) {
       if (mq.matches) { setOpen(false, false); }
+    });
+  }
+
+  /* DARK LOOK: <html data-theme="light|dark">. The switch stores the visitor's choice in localStorage lc-theme,
+     or removes it when the choice is what the device asks for anyway, so the site follows the device again.
+     aria-pressed follows the attribute, whoever sets it (this switch, the <head> script on a device change,
+     another tab). */
+  var root = document.documentElement;
+  var themeBtn = header && header.querySelector('[data-lc-theme-btn]');
+  var deviceDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  var deviceTheme = function () { return deviceDark && deviceDark.matches ? 'dark' : 'light'; };
+  if (themeBtn) {
+    var syncBtn = function () {
+      themeBtn.setAttribute('aria-pressed', root.getAttribute('data-theme') === 'dark' ? 'true' : 'false');
+    };
+    syncBtn();
+    if (window.MutationObserver) {
+      new MutationObserver(syncBtn).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+    themeBtn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      try {
+        if (next === deviceTheme()) { localStorage.removeItem('lc-theme'); } else { localStorage.setItem('lc-theme', next); }
+      } catch (e) { /* not stored: this page still switches */ }
+      root.setAttribute('data-theme', next);
+      syncBtn();
+    });
+    // A choice made in another tab applies here too, and on a page the Back button brings back from memory
+    var applyStored = function () {
+      var s = null;
+      try { s = localStorage.getItem('lc-theme'); } catch (e) { return; }
+      root.setAttribute('data-theme', s === 'dark' || s === 'light' ? s : deviceTheme());
+    };
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'lc-theme' || e.key === null) { applyStored(); }
+    });
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) { applyStored(); }
     });
   }
 

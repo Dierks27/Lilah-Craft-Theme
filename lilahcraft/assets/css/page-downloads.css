@@ -2,12 +2,12 @@
    card (lilahcraft/craftbridge, inc/blocks/craftbridge.php; picker in assets/js/page-downloads.js).
    Every rule is scoped under .lc-main--downloads (the editor loads all page files).
    Shared pieces come from site.css: .lc-hero (copper), .lc-sec, .lc-wrap, .lc-grid, .lc-card, .lc-board,
-   .lc-btn, .lc-chip, .lc-pill. */
+   .lc-btn, .lc-chip, .lc-pill. Colours are the look's tokens (--edge, --purple-text…), so the dark look needs no rules here. */
 
 .lc-main--downloads .lc-dl-made{gap:20px}
 .lc-main--downloads .lc-dl-stack{gap:24px}
 
-/* ---------- CraftBridge Client: the loud white board, two columns ---------- */
+/* ---------- CraftBridge Client: the loud board, two columns ---------- */
 .lc-main--downloads .lc-cb{display:flex;flex-direction:column;gap:28px}
 .lc-main--downloads .lc-cb-board{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
 
@@ -22,14 +22,17 @@
 .lc-main--downloads .lc-cb-quiet{font-size:15px;color:var(--muted)}
 
 /* right: the picker, on a light gray panel */
-.lc-main--downloads .lc-cb-get{display:flex;flex-direction:column;gap:18px;padding:36px;background:var(--light);border-left:3px solid var(--charcoal)}
+.lc-main--downloads .lc-cb-get{display:flex;flex-direction:column;gap:18px;padding:36px;background:var(--light);border-left:3px solid var(--edge)}
 .lc-main--downloads .lc-cb-group{display:flex;flex-direction:column;gap:8px}
 .lc-main--downloads .lc-cb-label{font-weight:800;font-size:15px;color:var(--ink)}
 .lc-main--downloads .lc-cb-opts{display:flex;gap:8px}
 /* The toggles are .lc-chip (square, 2 px charcoal edge, pressed = purple with the bevel, forced colours handled) */
 .lc-main--downloads .lc-cb-opt{flex-grow:1;min-height:46px;padding:0 12px;font-size:16px;line-height:1.2}
 .lc-main--downloads .lc-cb-opt--mono{font-family:var(--mono);font-weight:700}
-.lc-main--downloads .lc-cb-opt[aria-pressed="false"]:hover{background:#fff;border-color:var(--purple);color:var(--purple-deep)}
+.lc-main--downloads .lc-cb-opt[aria-pressed="false"]:hover{background:var(--card);border-color:var(--purple-text);color:var(--purple-deep-text)}
+/* Pressed: the edge in the accent text shade, so the pick stands out 3:1 on the dark panel too (the same purple in
+   the light look); forced colours keep site.css's Highlight */
+@media (forced-colors:none){.lc-main--downloads .lc-cb-opt[aria-pressed="true"]{border-color:var(--purple-text)}}
 /* Without JavaScript the buttons can't switch anything: the default pick and the full list show instead.
    The Site Editor preview (--preview, rendered over REST) keeps them, to look like the page. */
 html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-group{display:none}
@@ -43,7 +46,9 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 .lc-main--downloads .lc-cb-all{display:flex;flex-direction:column;gap:6px;padding-top:16px;border-top:2px solid var(--mid)}
 .lc-main--downloads .lc-cb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--text)}
 .lc-main--downloads .lc-cb-need{font-size:15px;color:var(--text)}
-.lc-main--downloads .lc-cb-all a{display:inline-flex;align-items:center;min-height:44px;font-weight:800}
+/* the deep shade: plain purple is under 4.5:1 on the gray panel */
+.lc-main--downloads .lc-cb-all a{display:inline-flex;align-items:center;min-height:44px;font-weight:800;color:var(--purple-deep-text)}
+.lc-main--downloads .lc-cb-all a:hover{color:var(--pink-text)}
 .lc-main--downloads .lc-cb-all-file,
 .lc-main--downloads .lc-cb-all-needs{display:block;overflow-wrap:anywhere}
 .lc-main--downloads .lc-cb-all-file{font-family:var(--mono);font-size:14px;color:var(--ink)}
@@ -69,7 +74,7 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 @media (max-width:920px){
   .lc-main--downloads .lc-cb-board{grid-template-columns:minmax(0,1fr)}
   .lc-main--downloads .lc-cb-about,.lc-main--downloads .lc-cb-get{padding:28px}
-  .lc-main--downloads .lc-cb-get{border-left:0;border-top:3px solid var(--charcoal)}
+  .lc-main--downloads .lc-cb-get{border-left:0;border-top:3px solid var(--edge)}
   .lc-main--downloads .lc-cb-title{font-size:24px}
 }
 @media (max-width:520px){

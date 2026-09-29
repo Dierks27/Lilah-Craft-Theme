@@ -29,6 +29,28 @@
   function timeText(ms) {
     return isNum(ms) && ms > 0 ? new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
   }
+  /* Time until `endsAt` (ms since 1970, like statusEndsAt): "2d 4h", "1d", "5h", "40 min"; '' when it has
+     passed or isn't a time. Minutes round up (30 s left is "1 min"), hours and days down. `now` defaults to Date.now(). */
+  function timeLeft(endsAt, now) {
+    var n = isNum(now) ? now : Date.now();
+    if (!isNum(endsAt) || endsAt <= n) { return ''; }
+    var mins = Math.ceil((endsAt - n) / 60000);
+    if (mins < 60) { return mins + ' min'; }
+    var hours = Math.floor(mins / 60);
+    if (hours < 24) { return hours + 'h'; }
+    return Math.floor(hours / 24) + 'd' + (hours % 24 ? ' ' + (hours % 24) + 'h' : '');
+  }
+  /* How long ago `t` (ms since 1970, like a news row's t) was: "just now" (under a minute, or a clock a little
+     ahead), "20 min ago", "3h ago", "2d ago"; '' when it isn't a time. Rounds down. */
+  function ago(t, now) {
+    var n = isNum(now) ? now : Date.now();
+    if (!isNum(t) || t <= 0) { return ''; }
+    var mins = Math.floor(Math.max(0, n - t) / 60000);
+    if (mins < 1) { return 'just now'; }
+    if (mins < 60) { return mins + ' min ago'; }
+    if (mins < 1440) { return Math.floor(mins / 60) + 'h ago'; }
+    return Math.floor(mins / 1440) + 'd ago';
+  }
 
   /* ---------- loading ---------- */
 
@@ -249,6 +271,63 @@
     return ((item && item.history) || []).map(function (h) { return h && h.p; }).filter(isNum);
   }
 
+  /* ---------- the live market (HomeCraftMgmt 0.33) ----------
+     Only in the feed while HomeCraftMgmt's live market runs (data.live is true), and in the sample.
+     Without it these give null / [] and the pages look exactly like 2.1. */
+
+  var TAGS = { hot: 'HOT', deal: 'DEAL', up: 'UP', down: 'DOWN', wanted: 'WANTED' };
+  function tagOf(kind) {
+    return typeof kind === 'string' && hasOwn(TAGS, kind) ? { kind: kind, label: TAGS[kind] } : null;
+  }
+  /* Times further ahead than these are a clock or unit slip upstream (micro- or nanoseconds), as in inc/feeds.php:
+     a news row more than a day ahead is left out, an end more than 60 days away counts as missing. */
+  var DAY_MS = 24 * 3600000, END_MS = 60 * DAY_MS;
+
+  /* The item's badge while one shows: { kind: 'hot'|'deal'|'up'|'down'|'wanted', label: 'HOT'|'DEAL'|'UP'|'DOWN'|'WANTED',
+     endsAt: ms or null (WANTED has no end) }, or null. A badge whose end has passed (an old copy of the feed) is gone. */
+  function badge(item) {
+    var tag = item ? tagOf(item.status) : null;
+    if (!tag) { return null; }
+    var now = Date.now(), ends = item.statusEndsAt;
+    tag.endsAt = isNum(ends) && ends > 0 && ends <= now + END_MS ? ends : null;
+    return tag.endsAt !== null && tag.endsAt <= now ? null : tag;
+  }
+
+  /* The market news: at most 5 rows from the last 7 days, newest first, as copies:
+     { id, t, kind: 'up'|'down'|'hot'|'deal'|'wanted'|'season'|'real', item: an id in data.items or null, name,
+       dir: 1|-1|0, pct, before and after (only when both are known), headline, line, source, active,
+       tag: { kind, label } for up/down/hot/deal/wanted, null for season and real }.
+     Rows with an unknown kind, no time, a time more than a day ahead or no headline are left out. [] when the feed has none. */
+  var NEWS_KINDS = ['up', 'down', 'hot', 'deal', 'wanted', 'season', 'real'];
+  var WEEK_MS = 7 * DAY_MS;
+  function news(data) {
+    var list = data && Array.isArray(data.news) ? data.news : [];
+    var ids = Object.create(null), now = Date.now(), since = now - WEEK_MS;
+    ((data && data.items) || []).forEach(function (it) { if (it) { ids[it.id] = true; } });
+    return list.filter(function (r) {
+      return !!r && NEWS_KINDS.indexOf(r.kind) > -1 && isNum(r.t) && r.t > since && r.t <= now + DAY_MS &&
+        typeof r.headline === 'string' && r.headline.trim() !== '';
+    }).map(function (r) {
+      var row = {
+        id: isNum(r.id) ? r.id : null, t: r.t, kind: r.kind,
+        item: typeof r.item === 'string' && ids[r.item] ? r.item : null,
+        name: typeof r.name === 'string' ? r.name : '',
+        dir: r.dir > 0 ? 1 : (r.dir < 0 ? -1 : 0), pct: isNum(r.pct) ? r.pct : 0,
+        headline: r.headline, line: typeof r.line === 'string' ? r.line : '',
+        source: typeof r.source === 'string' ? r.source : '', active: r.active === true, tag: tagOf(r.kind)
+      };
+      if (isNum(r.before) && isNum(r.after)) { row.before = r.before; row.after = r.after; }
+      return row;
+    }).sort(function (a, b) { return b.t - a.t; }).slice(0, 5);
+  }
+
+  /* The running season: { id, name, endsAt }, or null (none, it has ended, or its end is more than 60 days away). */
+  function season(data) {
+    var s = data && data.season, now = Date.now();
+    if (!s || typeof s.name !== 'string' || !s.name || !isNum(s.endsAt) || s.endsAt <= now || s.endsAt > now + END_MS) { return null; }
+    return { id: typeof s.id === 'string' ? s.id : '', name: s.name, endsAt: s.endsAt };
+  }
+
   /* Short sector names for tabs (the long ones are in CATEGORIES). */
   var SECTOR_SHORT = { all: 'All', ores: 'Ores', stone: 'Stone', wood: 'Wood', farm: 'Farm', mob: 'Mob', nether: 'Nether', other: 'Other' };
 
@@ -362,7 +441,57 @@
         };
       })
     };
+    addLiveSample(marketCache, now);
     return marketCache;
+  }
+
+  /* The sample's live market, like the test feed's: Oak Log HOT, Copper Ingot on a DEAL, an UP News Flash
+     (on Emerald: the test feed's Blaze Rod isn't a sample item), Diamond WANTED (it's sold out) and the
+     Harvest Time season (Wheat −4 %). The times fit each item's history (a HOT or DEAL that began more than
+     a day ago, a flash half gone), and the headlines and lines are HomeCraftMgmt's own wording. */
+  var HOUR_MS = 3600000;
+  var LIVE_SRC = {
+    // id: [mood %, badge, badge ends in (hours), marker (hours ago), marker %]
+    oak_log: [12, 'hot', 22, 26, 12],
+    copper_ingot: [-10, 'deal', 14, 30, -10],
+    emerald: [12, 'up', 19, 5, 21.5],
+    diamond: [0, 'wanted'],
+    wheat: [-4]
+  };
+  function addLiveSample(market, now) {
+    market.items.forEach(function (it) {
+      var s = hasOwn(LIVE_SRC, it.id) ? LIVE_SRC[it.id] : [0];
+      it.usual = round(it.price / (1 + s[0] / 100), 4);
+      it.moodPct = s[0];
+      if (s[1]) { it.status = s[1]; }
+      if (s[2]) { it.statusEndsAt = now + s[2] * HOUR_MS; }
+      if (s[3]) { it.events = [{ t: now - s[3] * HOUR_MS, kind: s[1], pct: s[4] }]; }
+    });
+    // The season ends at local midnight after its last day, four days from now.
+    var ends = new Date(now);
+    ends.setHours(24 * 5, 0, 0, 0);
+    var lastDay = new Date(ends.getTime() - 12 * HOUR_MS).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // The flash's sell prices before and after it, from Emerald's usual price (sell is 95 % of the price here).
+    var usual = market.items.filter(function (it) { return it.id === 'emerald'; })[0].usual;
+    var before = round(usual * 0.95, 2), after = round(usual * 1.215 * 0.95, 2);
+    market.live = true;
+    market.hot = ['oak_log'];
+    market.deals = ['copper_ingot'];
+    market.season = { id: 'harvest_time', name: 'Harvest Time', endsAt: ends.getTime() };
+    market.news = [
+      // Diamond's shelf ran out in the last half hour of its history.
+      { id: 41, t: now - 20 * 60000, kind: 'wanted', item: 'diamond', name: 'Diamond', dir: 0, pct: 0,
+        headline: 'Crate is looking for Diamonds!', line: 'Be the first to sell some!', source: 'sim', active: true },
+      { id: 40, t: now - 5 * HOUR_MS, kind: 'up', item: 'emerald', name: 'Emerald', dir: 1, pct: 21.5, before: before, after: after,
+        headline: 'A famous builder just ordered lots of Emeralds!',
+        line: 'Emerald is going UP! Crate pays ' + money(before) + ' → ' + money(after) + ' (+22%) Sell now!', source: 'sim', active: true },
+      { id: 39, t: now - 26 * HOUR_MS, kind: 'hot', item: 'oak_log', name: 'Oak Log', dir: 1, pct: 12,
+        headline: 'Builders all over the land need Oak Logs!', line: 'Oak Log: Crate pays about +12% for about 2 days. Sell now!', source: 'sim', active: true },
+      { id: 38, t: now - 30 * HOUR_MS, kind: 'deal', item: 'copper_ingot', name: 'Copper Ingot', dir: -1, pct: -10,
+        headline: 'Copper Ingot is on sale at Crate!', line: 'Copper Ingot is about 10% off for about 2 days. Limit 64 a day. Order at a PC!', source: 'sim', active: true },
+      { id: 37, t: now - 50 * HOUR_MS, kind: 'season', item: null, name: 'Harvest Time', dir: -1, pct: -4,
+        headline: 'Harvest time! The farms are full of wheat.', line: 'Wheat -4% until ' + lastDay, source: 'calendar', active: true }
+    ];
   }
 
   /* ---------- minis ---------- */
@@ -484,11 +613,12 @@
 
   window.LCData = {
     SAMPLE_LABEL: 'Sample data',
-    esc: esc, isNum: isNum, money: money, count: count, timeText: timeText,
+    esc: esc, isNum: isNum, money: money, count: count, timeText: timeText, timeLeft: timeLeft, ago: ago,
     load: load, watch: watch, sparkPoints: sparkPoints,
     market: {
       CATEGORIES: CATEGORIES, categoryOf: categoryOf, categoryLabel: categoryLabel, swatchOf: swatchOf,
-      stockFraction: stockFraction, soldOut: soldOut, symbols: symbols, SECTOR_SHORT: SECTOR_SHORT, change: change, priceSeries: priceSeries, sample: marketSample
+      stockFraction: stockFraction, soldOut: soldOut, symbols: symbols, SECTOR_SHORT: SECTOR_SHORT, change: change, priceSeries: priceSeries,
+      badge: badge, news: news, season: season, sample: marketSample
     },
     minis: {
       RARITY_ORDER: RARITY_ORDER, RARITIES: RARITIES, CATEGORY_ORDER: CATEGORY_ORDER, rarityKey: rarityKey,

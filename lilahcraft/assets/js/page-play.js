@@ -142,7 +142,7 @@
     }
     function update() {
       var n = ticked().length, total = boxes.length;
-      count.textContent = n + ' of ' + total + ' done' + (n === total ? '. You’re all set!' : '');
+      count.textContent = n + ' of ' + total + ' done';
       cells.forEach(function (c, i) { c.className = i < Math.round(n / total * cells.length) ? 'is-on' : ''; });
     }
 
