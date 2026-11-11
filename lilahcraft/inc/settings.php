@@ -20,6 +20,7 @@ function lilahcraft_defaults() {
 	return array(
 		'market_url'    => '',
 		'minis_url'     => '',
+		'arcade_url'    => '',
 		'server_host'   => 'mc.lilahcraft.com',
 		'server_port'   => 25565,
 		'mc_version'    => '',
@@ -50,6 +51,7 @@ function lilahcraft_setting_labels() {
 	return array(
 		'market_url'    => __( 'Market feed URL', 'lilahcraft' ),
 		'minis_url'     => __( 'Minis feed URL', 'lilahcraft' ),
+		'arcade_url'    => __( 'Arcade feed URL', 'lilahcraft' ),
 		'cache_seconds' => __( 'Cache seconds', 'lilahcraft' ),
 		'server_host'   => __( 'Server address', 'lilahcraft' ),
 		'server_port'   => __( 'Server port', 'lilahcraft' ),
@@ -70,6 +72,38 @@ function lilahcraft_setting_labels() {
 function lilahcraft_setting( $key ) {
 	$all = lilahcraft_settings();
 	return isset( $all[ $key ] ) ? $all[ $key ] : null;
+}
+
+/**
+ * The address a feed is fetched from: its setting, or for the Arcade with that setting blank, the Market
+ * feed URL with its trailing /api/market changed to /api/arcade (the same HomeCraftMgmt dashboard serves both).
+ * '' when there is none, and the pages show labelled sample data.
+ *
+ * @param string $feed market, minis or arcade.
+ * @return string
+ */
+function lilahcraft_feed_url( $feed ) {
+	$url = (string) lilahcraft_setting( $feed . '_url' );
+	if ( '' !== $url || 'arcade' !== $feed ) {
+		return $url;
+	}
+	return lilahcraft_arcade_url_from( (string) lilahcraft_setting( 'market_url' ) );
+}
+
+/**
+ * The Arcade feed's address worked out from a Market feed URL: a trailing /api/market (or /api/market/) becomes
+ * /api/arcade, keeping any query. '' when the URL doesn't end that way.
+ *
+ * @param string $market Market feed URL.
+ * @return string
+ */
+function lilahcraft_arcade_url_from( $market ) {
+	$cut  = strcspn( $market, '?#' );
+	$path = substr( $market, 0, $cut );
+	if ( '' === $market || ! preg_match( '#/api/market/?$#i', $path ) ) {
+		return '';
+	}
+	return preg_replace( '#/api/market/?$#i', '/api/arcade', $path ) . substr( $market, $cut );
 }
 
 /**
@@ -121,8 +155,9 @@ function lilahcraft_sanitize_settings( $in ) {
 	};
 
 	// A value that fails its check keeps what was saved before, and the page says why
-	// (lilahcraft_setting_rejected). Blank feed URLs are fine: they mean sample data.
-	foreach ( array( 'market_url', 'minis_url' ) as $key ) {
+	// (lilahcraft_setting_rejected). Blank feed URLs are fine: they mean sample data (a blank Arcade URL
+	// follows the Market one, see lilahcraft_feed_url()).
+	foreach ( array( 'market_url', 'minis_url', 'arcade_url' ) as $key ) {
 		$out[ $key ] = lilahcraft_clean_url( $val( $key ) );
 		if ( '' === $out[ $key ] && '' !== $val( $key ) ) {
 			$out[ $key ] = lilahcraft_setting_rejected( $key, __( 'it must be a full address starting with http:// or https://, with no spaces or quotes.', 'lilahcraft' ) );
@@ -200,7 +235,7 @@ function lilahcraft_sanitize_settings( $in ) {
  * Forget every cached copy when the settings change, so the next request uses them.
  */
 function lilahcraft_flush_caches() {
-	foreach ( array( 'market', 'minis' ) as $feed ) {
+	foreach ( array( 'market', 'minis', 'arcade' ) as $feed ) {
 		delete_transient( 'lilahcraft_feed_' . $feed );
 		delete_transient( 'lilahcraft_lock_' . $feed );
 	}
@@ -242,6 +277,7 @@ add_action(
 		$fields = array(
 			array( 'market_url', $l['market_url'], 'lilahcraft_feeds', 'url', __( 'The HomeCraftMgmt dashboard\'s /api/market address. Leave blank to show labelled sample data.', 'lilahcraft' ) ),
 			array( 'minis_url', $l['minis_url'], 'lilahcraft_feeds', 'url', __( 'The HomeCraftMgmt dashboard\'s /api/minis address. Leave blank to show labelled sample data.', 'lilahcraft' ) ),
+			array( 'arcade_url', $l['arcade_url'], 'lilahcraft_feeds', 'url', __( 'The HomeCraftMgmt dashboard\'s /api/arcade address (games, odds, records, the Prize Counter). Leave blank to use the Market feed URL with /api/market changed to /api/arcade (the same server). With neither, the Arcade page shows labelled sample data.', 'lilahcraft' ) ),
 			array( 'feed_token', $l['feed_token'], 'lilahcraft_feeds', 'password', __( 'Optional. If HomeCraftMgmt is set up with a token, paste the same token here: WordPress sends it with every feed request (as Authorization: Bearer). Visitors never see it. Leave blank for none.', 'lilahcraft' ) ),
 			array( 'cache_seconds', $l['cache_seconds'], 'lilahcraft_feeds', 'number', __( 'How long WordPress keeps a copy of each feed before asking again. Visitors never reach your server directly.', 'lilahcraft' ) ),
 			array( 'server_host', $l['server_host'], 'lilahcraft_server', 'text', __( 'Pinged for the player count in the header. If the ping fails, the count is hidden.', 'lilahcraft' ) ),
@@ -289,8 +325,8 @@ function lilahcraft_render_field( $args ) {
 		printf( '<p class="description" id="%s_help">%s</p>', esc_attr( $id ), esc_html( $args['help'] ) );
 		// A token sent over plain http to somewhere on the internet can be read on the way.
 		if ( '' !== (string) $value ) {
-			foreach ( array( 'market_url', 'minis_url' ) as $feed_key ) {
-				$feed_url = (string) lilahcraft_setting( $feed_key );
+			foreach ( array( 'market', 'minis', 'arcade' ) as $feed ) {
+				$feed_url = lilahcraft_feed_url( $feed );
 				$host     = (string) wp_parse_url( $feed_url, PHP_URL_HOST );
 				$is_http  = 0 === stripos( $feed_url, 'http://' );
 				// A LAN name has no dot. An IPv6 address ([2001:db8::1]) has none either: only loopback,
@@ -323,21 +359,26 @@ function lilahcraft_render_field( $args ) {
 	if ( 'cb_url' === $key ) {
 		$type = 'text'; // The pattern holds {braces}, which a url input would reject.
 	}
+	// A blank Arcade URL says which address it follows instead (lilahcraft_feed_url()).
+	$from = 'arcade_url' === $key && '' === (string) $value ? lilahcraft_arcade_from_text() : '';
 	printf(
-		'<input type="%1$s" id="%2$s" name="lilahcraft_settings[%3$s]" value="%4$s" class="%5$s" aria-describedby="%2$s_help"%6$s>',
+		'<input type="%1$s" id="%2$s" name="lilahcraft_settings[%3$s]" value="%4$s" class="%5$s" aria-describedby="%2$s_help%7$s"%6$s>',
 		esc_attr( $type ),
 		esc_attr( $id ),
 		esc_attr( $key ),
 		esc_attr( (string) $value ),
 		esc_attr( $class ),
 		// 8em wide: WordPress's small-text (65 px) cuts the port 25565 to "2556".
-		'number' === $type ? ( 'server_port' === $key ? ' min="1" max="65535"' : ' min="5" max="3600"' ) . ' style="width:8em"' : ''
+		'number' === $type ? ( 'server_port' === $key ? ' min="1" max="65535"' : ' min="5" max="3600"' ) . ' style="width:8em"' : '',
+		$from ? ' ' . esc_attr( $id ) . '_from' : ''
 	);
 	printf( '<p class="description" id="%s_help">%s</p>', esc_attr( $id ), esc_html( $args['help'] ) );
+	if ( $from ) {
+		printf( '<p class="description" id="%s_from">%s</p>', esc_attr( $id ), $from ); // Escaped in lilahcraft_arcade_from_text().
+	}
 
-	if ( 'market_url' === $key || 'minis_url' === $key ) {
-		$feed = 'market_url' === $key ? 'market' : 'minis';
-		$note = lilahcraft_feed_status_text( $feed );
+	if ( in_array( $key, array( 'market_url', 'minis_url', 'arcade_url' ), true ) ) {
+		$note = lilahcraft_feed_status_text( substr( $key, 0, -4 ) );
 		if ( $note ) {
 			printf( '<p class="description"><strong>%s</strong></p>', esc_html( $note ) );
 		}
@@ -347,16 +388,17 @@ function lilahcraft_render_field( $args ) {
 /**
  * A plain sentence about the last fetch of a feed, for the settings page.
  *
- * @param string $feed market or minis.
+ * @param string $feed market, minis or arcade.
  * @return string
  */
 function lilahcraft_feed_status_text( $feed ) {
-	if ( ! lilahcraft_setting( $feed . '_url' ) ) {
+	$url = lilahcraft_feed_url( $feed );
+	if ( '' === $url ) {
 		return '';
 	}
 	$st = get_option( 'lilahcraft_feedstat_' . $feed );
 	// A note about another URL (the one before a change) says nothing about this one.
-	if ( ! is_array( $st ) || empty( $st['time'] ) || ! isset( $st['url'] ) || lilahcraft_setting( $feed . '_url' ) !== $st['url'] ) {
+	if ( ! is_array( $st ) || empty( $st['time'] ) || ! isset( $st['url'] ) || $url !== $st['url'] ) {
 		return __( 'Not fetched yet. It is fetched the first time someone opens a page that uses it.', 'lilahcraft' );
 	}
 	$when = wp_date( get_option( 'time_format' ) . ', ' . get_option( 'date_format' ), (int) $st['time'] );
@@ -366,6 +408,24 @@ function lilahcraft_feed_status_text( $feed ) {
 	}
 	/* translators: 1: time of the fetch, 2: error message. */
 	return sprintf( __( 'Last fetch failed at %1$s: %2$s', 'lilahcraft' ), $when, (string) $st['error'] );
+}
+
+/**
+ * For a blank Arcade feed URL: the address the Arcade uses instead, as escaped HTML for the settings page.
+ *
+ * @return string
+ */
+function lilahcraft_arcade_from_text() {
+	$market = (string) lilahcraft_setting( 'market_url' );
+	$url    = lilahcraft_arcade_url_from( $market );
+	if ( '' !== $url ) {
+		/* translators: %s: the feed address, like http://192.168.1.20:8080/api/arcade. */
+		return sprintf( esc_html__( 'Blank, so the Arcade uses %s (from the Market feed URL).', 'lilahcraft' ), '<code>' . esc_html( $url ) . '</code>' );
+	}
+	if ( '' !== $market ) {
+		return esc_html__( 'Blank, and the Market feed URL doesn\'t end in /api/market, so the Arcade page shows labelled sample data. Enter the /api/arcade address here.', 'lilahcraft' );
+	}
+	return esc_html__( 'Blank, and so is the Market feed URL: the Arcade page shows labelled sample data.', 'lilahcraft' );
 }
 
 add_action(

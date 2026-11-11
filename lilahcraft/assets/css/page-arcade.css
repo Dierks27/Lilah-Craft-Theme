@@ -1,8 +1,9 @@
-/* LilahCraft 2.1 "Pixel pop": the Arcade page (templates/page-arcade.html).
+/* LilahCraft 2.2: the Arcade page (templates/page-arcade.html, assets/js/page-arcade.js).
    Every rule is scoped under .lc-main--arcade (the editor loads all page files).
    Shared pieces come from site.css: .lc-hero with the pink wool texture, .lc-hl, .lc-sec, .lc-wrap,
-   .lc-grid, .lc-card, .lc-strip, .lc-board (the loud box), .lc-pill--code. Colours are the look's tokens, except
-   the pink notice, which has its own dark tint. */
+   .lc-grid, .lc-card, .lc-strip, .lc-board (the loud box), .lc-chip, .lc-pill--code, .lc-rarity and the .lc-r--*
+   rarity colours. Colours are the look's tokens, except content colours that carry their own text colour
+   (the group bars, the course tiers, the pills), which read the same in both looks. */
 
 /* ---------- hero: the intro beside the Wallet, which sits over the wool texture like Home's market board ---------- */
 .lc-main--arcade .lc-arcade-hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:48px;align-items:center}
@@ -10,6 +11,12 @@
 .lc-main--arcade .lc-arcade-intro{display:flex;flex-direction:column;gap:14px;max-width:660px}
 .lc-main--arcade .lc-arcade-hero .lc-note{font-size:16px}
 .lc-main--arcade .lc-arcade-hero code{font-size:1em;white-space:nowrap}
+/* The feed's status (page-arcade.js), like the Market's: Live, Last known, or Sample data */
+.lc-main--arcade .lc-ac-status{display:inline-flex;align-self:flex-start;align-items:center;gap:10px;margin-top:4px;padding:8px 14px;border:2px solid var(--hero-line);font-size:15px;font-weight:600;line-height:1.35;color:var(--hero-muted)}
+.lc-main--arcade .lc-ac-dot{flex:none;width:10px;height:10px;background:var(--mid)}
+.lc-main--arcade .lc-ac-status[data-mode="live"] .lc-ac-dot{background:#5fd38d}
+.lc-main--arcade .lc-ac-status:is([data-mode="stale"],[data-mode="sample"]) .lc-ac-dot{background:var(--orange)}
+.lc-main--arcade .lc-ac-status[data-mode="sample"] [data-ac-status-text]{color:var(--hero-text);font-weight:800}
 
 /* Your Wallet: the loud box. The values live in game (per player), so it lists what the Wallet shows. */
 .lc-main--arcade .lc-arcade-wallet{display:flex;flex-direction:column;padding:0}
@@ -29,12 +36,14 @@
 /* ---------- sections ---------- */
 .lc-main--arcade .lc-arcade-stack{gap:24px}
 .lc-main--arcade .lc-arcade-prizes .lc-lede{font-size:18px;max-width:680px}
+/* Card Packs and Achievements are both on the page colour: one band, not two paddings */
+.lc-main--arcade .lc-ac-pack-sec:not([hidden])+.lc-ac-ach-sec{padding-top:0}
 
-/* Earn and prize cards */
+/* Earn cards */
 .lc-main--arcade .lc-arcade-card{gap:8px}
 .lc-main--arcade :is(.lc-arcade-card,.lc-arcade-game) p{font-size:16px}
 
-/* Game cards: a pink wool strip on top, then the cost pill */
+/* Crates and Cards: a pink wool strip on top, then the cost pill */
 .lc-main--arcade .lc-arcade-game{gap:10px}
 .lc-main--arcade .lc-arcade-game .lc-arcade-cost{align-self:flex-start;padding:4px 10px;font-size:14px;line-height:1.5;color:#fff}
 
@@ -45,6 +54,183 @@
 .lc-main--arcade .lc-arcade-warn-icon{display:block;flex:none;width:24px;height:24px}
 .lc-main--arcade .lc-arcade-warn p{font-size:17px;font-weight:600;color:var(--ink)}
 
+/* ---------- live parts (page-arcade.js): labels, the no-JavaScript line ---------- */
+.lc-main--arcade .lc-ac-app,.lc-main--arcade .lc-ac-slot{display:flex;flex-direction:column;gap:20px}
+/* "Sample data" / "Last known": over the games a sentence, so body-size muted text */
+.lc-main--arcade .lc-ac-app>.lc-ac-note{font-size:15px;font-weight:700;color:var(--muted)}
+.lc-main--arcade .lc-ac-lede{margin-top:-4px}
+/* A command in running text stays on one line */
+.lc-main--arcade :is(.lc-ac-lede,.lc-ac-cmd,.lc-ac-promise,.lc-ac-break) code{white-space:nowrap}
+/* A cost pill in a card keeps its white text (.lc-card p would set the body colour) */
+.lc-main--arcade .lc-card .lc-pill--code{color:#fff}
+.lc-main--arcade .lc-ac-nojs{display:none}
+html:not(.lc-js) .lc-main--arcade .lc-ac-nojs{display:block}
+html:not(.lc-js) .lc-main--arcade :is(.lc-ac-status,.lc-ac-note,.lc-ac-count){display:none}
+
+/* ---------- Today's pick: the loud box, a pixel nether star, the name big ---------- */
+.lc-main--arcade .lc-ac-pick{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px 28px;padding:24px 28px}
+.lc-main--arcade .lc-ac-pick-star{display:block;width:56px;height:56px}
+.lc-main--arcade .lc-ac-pick-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.lc-main--arcade .lc-ac-pick-kicker{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.14em;line-height:1.4;text-transform:uppercase;color:var(--pink-text)}
+.lc-main--arcade .lc-ac-pick-name{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.15;letter-spacing:-.02em;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-pick-meta{font-size:16px;font-weight:600;color:var(--muted)}
+.lc-main--arcade .lc-ac-pick-facts{display:flex;flex-wrap:wrap;gap:12px 32px;margin:0}
+.lc-main--arcade .lc-ac-pick-facts>div{min-width:0}
+.lc-main--arcade .lc-ac-pick-facts dt{font-size:14px;font-weight:600;color:var(--muted)}
+.lc-main--arcade .lc-ac-pick-facts dd{margin:0;font-family:var(--mono);font-weight:700;font-size:20px;line-height:1.3;color:var(--ink);overflow-wrap:anywhere;text-wrap:balance}
+.lc-main--arcade .lc-ac-pick-facts code{padding:0;background:none;font-size:1em}
+.lc-main--arcade .lc-ac-pick-bonus{grid-column:2 / -1;font-size:15px;color:var(--text)}
+
+/* ---------- jump links to the groups (chip-shaped links) ---------- */
+.lc-main--arcade .lc-ac-jump-list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-jump-link{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:2px solid var(--edge-strong);background:var(--card);color:var(--ink);font-weight:700;font-size:15px;text-decoration:none}
+.lc-main--arcade .lc-ac-jump-link:hover{background:var(--page);color:var(--ink)}
+.lc-main--arcade .lc-ac-jump-n{font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+/* ---------- the groups and the game cards ----------
+   Each group has its colour, drawn as a bar across the top of its cards and a block beside its title:
+   Luck orange, Cabinets purple, Courses pink, Mini golf green (decoration only; every word stays in the text colours). */
+.lc-main--arcade .lc-ac-groups{display:flex;flex-direction:column;gap:48px}
+.lc-main--arcade .lc-ac-group{--ac:var(--orange);--ac-deep:var(--orange-deep);display:flex;flex-direction:column;gap:14px}
+.lc-main--arcade .lc-ac-group--cabinets{--ac:var(--purple);--ac-deep:var(--purple-deep)}
+.lc-main--arcade .lc-ac-group--courses{--ac:var(--pink);--ac-deep:var(--pink-deep)}
+.lc-main--arcade .lc-ac-group--golf{--ac:#2fbf71;--ac-deep:#1a8048}
+.lc-main--arcade .lc-ac-group-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.lc-main--arcade .lc-ac-group-title{display:flex;align-items:center;gap:12px;font-family:var(--display);font-weight:800;font-size:26px;line-height:1.2;letter-spacing:-.02em;color:var(--ink)}
+.lc-main--arcade .lc-ac-group-title::before{content:"";flex:none;width:18px;height:18px;background:var(--ac);box-shadow:inset -4px -4px 0 var(--ac-deep)}
+.lc-main--arcade .lc-ac-group-count{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--muted)}
+.lc-main--arcade .lc-ac-group-intro{max-width:780px;font-size:17px;color:var(--text)}
+/* Luck's Take a break link, on its own line under the intro: a 44 px target whose focus ring clears the text above
+   and the cards below. On the gray band: the deep purple link shade (4.5:1 on --light) */
+.lc-main--arcade .lc-ac-break-line{margin-top:-8px}
+.lc-main--arcade .lc-ac-break-line a{display:inline-flex;align-items:center;min-height:44px;font-size:17px;color:var(--purple-deep-text)}
+/* Cards line up in rows but keep their own height: an open "What it pays" table doesn't stretch its neighbours */
+.lc-main--arcade .lc-ac-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:20px;align-items:start;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-game{display:flex;flex-direction:column;gap:12px;min-width:0;padding:28px 22px 22px;background:var(--card);border:3px solid var(--edge);box-shadow:inset 0 6px 0 var(--ac)}
+.lc-main--arcade .lc-ac-game-top{display:flex;flex-direction:column;gap:8px}
+.lc-main--arcade .lc-ac-game-name{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-.01em;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-tags{display:flex;flex-wrap:wrap;gap:6px}
+.lc-main--arcade .lc-ac-tags .lc-pill{line-height:1.4;white-space:normal}
+/* Free: the text colour as a fill (it flips with the look); the pick: pink; kinds: the gray band's colour */
+.lc-main--arcade .lc-pill.lc-ac-pill-free{background:var(--ink);color:var(--card)}
+.lc-main--arcade .lc-pill.lc-ac-pill-pick{background:var(--pink);color:var(--charcoal)}
+.lc-main--arcade .lc-pill.lc-ac-pill-kind{background:var(--light);color:var(--ink)}
+/* Course tiers, easiest to hardest: green, gold, orange, purple (each with its own text colour, 5.4:1 or more) */
+.lc-main--arcade .lc-pill.lc-ac-tier--easy{background:#2fbf71;color:var(--charcoal)}
+.lc-main--arcade .lc-pill.lc-ac-tier--medium{background:#ffc53d;color:var(--charcoal)}
+.lc-main--arcade .lc-pill.lc-ac-tier--hard{background:var(--orange);color:var(--charcoal)}
+.lc-main--arcade .lc-pill.lc-ac-tier--extreme{background:var(--purple);color:#fff}
+.lc-main--arcade .lc-ac-game-line{font-size:16px;color:var(--text)}
+
+/* The facts: label column, value column */
+.lc-main--arcade .lc-ac-facts{display:flex;flex-direction:column;gap:6px;margin:0;font-size:15px;line-height:1.45}
+.lc-main--arcade .lc-ac-facts>div{display:grid;grid-template-columns:7.4em minmax(0,1fr);gap:12px;align-items:baseline}
+.lc-main--arcade .lc-ac-facts dt{font-weight:600;color:var(--muted)}
+.lc-main--arcade .lc-ac-facts dd{margin:0;min-width:0;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-facts code{font-size:.93em}
+/* A command breaks after "/hcm play" before it breaks inside the id (page-arcade.js puts a <wbr> after each "_";
+   balanced lines take the space first), and mid-id only as the last resort */
+.lc-main--arcade .lc-ac-facts .lc-ac-code{text-wrap:balance}
+.lc-main--arcade .lc-ac-dd-after{font-weight:600;color:var(--text)}
+/* The Scratch Ticket's pot, always with its odds: the headline orange */
+.lc-main--arcade .lc-ac-facts .lc-ac-jackpot{margin:2px -8px;padding:6px 8px;background:var(--orange)}
+.lc-main--arcade .lc-ac-facts .lc-ac-jackpot :is(dt,dd){color:var(--charcoal)}
+/* A record: the score in mono, then when and (only if the feed has names on) who */
+.lc-main--arcade .lc-ac-rec-val{font-family:var(--mono);font-size:17px}
+.lc-main--arcade .lc-ac-rec-hint{font-weight:600;color:var(--text)}
+.lc-main--arcade .lc-ac-rec-meta{display:block;font-weight:600;font-size:14px;color:var(--muted)}
+
+/* "What it pays": a disclosure button, then the stake chips, the give-back line and the table */
+.lc-main--arcade .lc-ac-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;margin-top:2px;padding:0 14px;border:2px solid var(--edge-strong);border-radius:0;background:var(--card);color:var(--ink);font-family:var(--body);font-weight:800;font-size:15px;text-align:left;cursor:pointer}
+.lc-main--arcade .lc-ac-toggle:hover,.lc-main--arcade .lc-ac-toggle[aria-expanded="true"]{background:var(--light)}
+.lc-main--arcade .lc-ac-toggle svg{flex:none;display:block;fill:currentColor;transition:transform .15s}
+.lc-main--arcade .lc-ac-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
+.lc-main--arcade .lc-ac-pays{display:flex;flex-direction:column;gap:12px}
+.lc-main--arcade .lc-ac-pays-body{display:flex;flex-direction:column;gap:12px}
+.lc-main--arcade .lc-ac-stakes{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.lc-main--arcade .lc-ac-stakes-label{font-size:14px;font-weight:700;color:var(--muted)}
+.lc-main--arcade .lc-ac-chips{gap:6px}
+.lc-main--arcade .lc-ac-chips .lc-chip{min-width:48px;font-family:var(--mono)}
+/* Pressed: the edge in the accent text shade, so it stands out on the dark card too (forced colours keep Highlight) */
+@media (forced-colors:none){.lc-main--arcade .lc-ac-chips .lc-chip[aria-pressed="true"]{border-color:var(--purple-text)}}
+.lc-main--arcade .lc-ac-pays-back{font-size:15px;font-weight:700;color:var(--ink)}
+.lc-main--arcade .lc-ac-pays-line{font-size:15px;color:var(--text)}
+.lc-main--arcade .lc-ac-pays-note{font-size:14px;line-height:1.5;color:var(--muted)}
+.lc-main--arcade .lc-ac-table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.35}
+.lc-main--arcade .lc-ac-table :is(th,td){padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.lc-main--arcade .lc-ac-table :is(th,td):first-child{padding-left:0}
+.lc-main--arcade .lc-ac-table :is(th,td):last-child{padding-right:0}
+.lc-main--arcade .lc-ac-table thead th{padding-top:0;border-bottom:2px solid var(--edge-strong);font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lc-main--arcade .lc-ac-table tbody th{font-weight:700;color:var(--ink)}
+.lc-main--arcade .lc-ac-table td{color:var(--ink)}
+.lc-main--arcade .lc-ac-table :is(.lc-ac-num,.lc-ac-odds){text-align:right;white-space:nowrap}
+.lc-main--arcade .lc-ac-table td:is(.lc-ac-num,.lc-ac-odds){font-family:var(--mono);font-weight:700}
+.lc-main--arcade .lc-ac-table td.lc-ac-odds{font-weight:600}
+
+/* ---------- How to play: command cards ---------- */
+.lc-main--arcade .lc-ac-cmd{gap:8px}
+.lc-main--arcade .lc-ac-cmd-code{display:flex;flex-wrap:wrap;gap:6px}
+.lc-main--arcade .lc-ac-cmd-code code{padding:3px 8px;background:var(--light);color:var(--purple-deep-text);font-size:15px;font-weight:700}
+.lc-main--arcade .lc-ac-cmd p:not(.lc-ac-cmd-code){font-size:15px}
+
+/* ---------- the fairness promises (charcoal band in both looks) and Take a break ---------- */
+.lc-main--arcade .lc-ac-fair-in{gap:48px}
+.lc-main--arcade .lc-ac-promises{gap:24px}
+.lc-main--arcade .lc-ac-fair .lc-ac-promises .lc-lede{color:var(--muted-dark)}
+/* Panels like the Minis page's steps, each with a coloured bar on top: orange, pink, purple */
+.lc-main--arcade .lc-ac-promise{--bar:var(--orange);display:flex;flex-direction:column;gap:10px;padding:26px 24px 24px;background:var(--panel-dark);border:2px solid var(--charcoal-2);box-shadow:inset 0 5px 0 var(--bar)}
+.lc-main--arcade .lc-ac-promise:nth-child(3n+2){--bar:var(--pink)}
+.lc-main--arcade .lc-ac-promise:nth-child(3n){--bar:var(--purple-light)}
+.lc-main--arcade .lc-ac-promise-title{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.25;letter-spacing:-.01em;color:#fff}
+.lc-main--arcade .lc-ac-promise p{font-size:16px;color:var(--muted-dark)}
+.lc-main--arcade .lc-ac-promise code{background:var(--charcoal);color:#fff}
+/* Take a break: the loud box (pink shadow). It carries its own surface, so its words take the page colours */
+.lc-main--arcade .lc-ac-break{display:flex;flex-direction:column;gap:14px;padding:32px}
+.lc-main--arcade .lc-sec--dark .lc-ac-break h2{color:var(--ink)}
+.lc-main--arcade .lc-ac-break .lc-text{max-width:760px}
+.lc-main--arcade .lc-ac-break-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 36px;margin:4px 0;padding:0;list-style:none;font-size:17px;color:var(--text)}
+.lc-main--arcade .lc-ac-break-list li{position:relative;padding-left:24px}
+/* a small blue block, the colour of the bed that opens it in game */
+.lc-main--arcade .lc-ac-break-list li::before{content:"";position:absolute;left:0;top:.45em;width:12px;height:12px;background:#4a8fe0;box-shadow:inset -3px -3px 0 #1b529a}
+.lc-main--arcade .lc-ac-break-how{font-size:17px;font-weight:700;color:var(--ink)}
+
+/* ---------- the Prize Counter ---------- */
+.lc-main--arcade .lc-ac-prizecats{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:20px;align-items:start;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-prizecat{gap:6px}
+.lc-main--arcade .lc-ac-prizes{display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-prize{display:flex;flex-direction:column;gap:2px;padding:12px 0}
+.lc-main--arcade .lc-ac-prize+.lc-ac-prize{border-top:1px solid var(--line)}
+.lc-main--arcade .lc-ac-prize:last-child{padding-bottom:0}
+.lc-main--arcade .lc-ac-prize-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lc-main--arcade .lc-ac-prize-name{min-width:0;font-weight:800;font-size:17px;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-prize-top .lc-pill{flex:none}
+.lc-main--arcade .lc-ac-prize-desc{font-size:15px}
+
+/* ---------- Card Packs: cost, a bar of the rarity chances in the Minis colours, then each chance ---------- */
+.lc-main--arcade .lc-ac-packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:20px;align-items:start;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-pack{gap:14px}
+.lc-main--arcade .lc-ac-pack-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 12px}
+.lc-main--arcade .lc-ac-pack-name{min-width:0;overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-oddsbar{display:flex;height:18px;border:2px solid var(--edge-strong);background:var(--light)}
+.lc-main--arcade .lc-ac-oddsbar span{display:block;height:100%;background:var(--r-gem)}
+.lc-main--arcade .lc-ac-oddsbar span+span{box-shadow:inset 2px 0 0 var(--card)}
+/* Forced colours drop the bar's fills (an empty box would be left): the list under it carries every number */
+@media (forced-colors:active){.lc-main--arcade .lc-ac-oddsbar{display:none}}
+.lc-main--arcade .lc-ac-rarities{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-rarities li{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lc-main--arcade .lc-ac-rarities .lc-rarity{font-size:14px}
+.lc-main--arcade .lc-ac-odds-pct{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--ink)}
+
+/* ---------- Achievements: a few, then "Show all" ---------- */
+.lc-main--arcade .lc-ac-count{font-weight:700}
+.lc-main--arcade .lc-ac-achs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 20px;margin:0;padding:0;list-style:none}
+.lc-main--arcade .lc-ac-ach{display:flex;justify-content:space-between;align-items:center;gap:14px;min-width:0;min-height:58px;padding:10px 16px;background:var(--card);border:2px solid var(--edge)}
+.lc-main--arcade .lc-ac-ach-text{min-width:0}
+.lc-main--arcade .lc-ac-ach-name{font-weight:700;font-size:16px;line-height:1.35;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-ach-desc{font-size:14px;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+.lc-main--arcade .lc-ac-ach-tok{flex:none;font-family:var(--mono);font-weight:700;font-size:14px;color:var(--orange-text);white-space:nowrap}
+.lc-main--arcade .lc-ac-more{align-self:flex-start}
+
 /* Above 920 px the wool texture starts 36 px down and is nine blocks tall (site.css): the hero is at least
    that tall, so its bottom row shows whole instead of as a thin sliver at the hero's foot */
 @media (min-width:921px){
@@ -53,6 +239,14 @@
 @media (max-width:920px){
   .lc-main--arcade .lc-arcade-hero-in{grid-template-columns:minmax(0,1fr);gap:36px}
   .lc-main--arcade .lc-arcade-wallet{max-width:480px}
+  .lc-main--arcade .lc-ac-pick{grid-template-columns:auto minmax(0,1fr)}
+  .lc-main--arcade :is(.lc-ac-pick-facts,.lc-ac-pick-bonus){grid-column:1 / -1}
+  .lc-main--arcade .lc-ac-groups{gap:40px}
+  .lc-main--arcade .lc-ac-group-title{font-size:23px}
+  .lc-main--arcade .lc-ac-fair-in{gap:40px}
+  .lc-main--arcade .lc-ac-break{padding:26px 24px}
+  .lc-main--arcade .lc-ac-break-list{grid-template-columns:minmax(0,1fr)}
+  .lc-main--arcade .lc-ac-achs{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:520px){
   .lc-main--arcade .lc-arcade-wallet-title{padding:12px 16px;font-size:18px}
@@ -60,4 +254,22 @@
   .lc-main--arcade .lc-arcade-wallet .lc-arcade-wallet-note{padding:12px 16px}
   .lc-main--arcade .lc-arcade-warn{align-items:flex-start;padding:14px 16px}
   .lc-main--arcade .lc-arcade-warn p{font-size:16px}
+  .lc-main--arcade .lc-ac-pick{gap:12px 16px;padding:20px}
+  .lc-main--arcade .lc-ac-pick-star{width:40px;height:40px}
+  .lc-main--arcade .lc-ac-pick-name{font-size:24px}
+  .lc-main--arcade .lc-ac-pick-facts dd{font-size:18px}
+  .lc-main--arcade .lc-ac-group-title{font-size:21px}
+  .lc-main--arcade .lc-ac-game{padding:26px 18px 18px}
+  .lc-main--arcade .lc-ac-facts>div{grid-template-columns:6.6em minmax(0,1fr);gap:10px}
+  /* a narrow table: the odds may take two lines ("13 of 24 / spaces") */
+  .lc-main--arcade .lc-ac-table td.lc-ac-odds{white-space:normal}
+  .lc-main--arcade .lc-ac-promise{padding:24px 20px 20px}
+  .lc-main--arcade .lc-ac-break{padding:22px 20px}
+  .lc-main--arcade .lc-ac-break-list{font-size:16px}
+  .lc-main--arcade .lc-ac-achs{grid-template-columns:minmax(0,1fr)}
+}
+/* The narrowest phones: each fact's label over its value, so a command gets the card's whole width */
+@media (max-width:360px){
+  .lc-main--arcade .lc-ac-facts{gap:10px}
+  .lc-main--arcade .lc-ac-facts>div{grid-template-columns:minmax(0,1fr);gap:0}
 }

@@ -18,7 +18,11 @@
 
 <!-- wp:paragraph {"className":"lc-note"} -->
 <p class="lc-note">Open it in game with <code>/hcm arcade</code>, or visit the Arcade in the hub.</p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<p class="lc-ac-status" data-ac-status data-mode="loading"><span class="lc-ac-dot" aria-hidden="true"></span><span data-ac-status-text>Loading the Arcade…</span></p>
+<!-- /wp:html --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"lc-board lc-arcade-wallet"} -->
@@ -37,6 +41,10 @@
 
 <!-- wp:list-item -->
 <li>Next playtime token</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Take a break (the blue bed)</li>
 <!-- /wp:list-item --></ul>
 <!-- /wp:list -->
 
@@ -115,20 +123,257 @@
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
+<!-- wp:paragraph {"className":"lc-note lc-ac-if-skill"} -->
+<p class="lc-note lc-ac-if-skill">Skill games pay a few tokens too: milestones, daily challenges, Today’s pick and first finishes. By default they pay up to 6 tokens a day between them, plus first finishes.</p>
+<!-- /wp:paragraph -->
+
 <!-- wp:paragraph {"className":"lc-note"} -->
-<p class="lc-note">Days roll over at local midnight, so streaks and daily quests reset at the same time for everyone.</p>
+<p class="lc-note">Days roll over at midnight, server time, so streaks, daily quests and daily limits reset at the same moment for everyone.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-sec lc-sec--gray lc-arcade-games"} -->
-<section class="wp-block-group lc-sec lc-sec--gray lc-arcade-games"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
+<!-- wp:group {"tagName":"section","anchor":"games","className":"lc-sec lc-sec--gray lc-ac-games"} -->
+<section id="games" class="wp-block-group lc-sec lc-sec--gray lc-ac-games"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
 <div class="wp-block-group lc-wrap lc-stack lc-arcade-stack"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">The games</h2>
 <!-- /wp:heading -->
 
-<!-- wp:group {"className":"lc-grid lc-cols-4 lc-gap-md"} -->
-<div class="wp-block-group lc-grid lc-cols-4 lc-gap-md"><!-- wp:group {"className":"lc-card lc-arcade-game"} -->
+<!-- wp:html -->
+<div class="lc-ac-app" data-ac-games>
+  <p class="lc-sample lc-ac-note" data-ac-note>Loading the games…</p>
+  <p class="lc-lede lc-ac-lede" data-ac-lede hidden>Everything open right now, grouped like the Games screen in game (<code>/hcm play</code>).</p>
+  <div class="lc-board lc-ac-pick" data-ac-pick hidden>
+    <svg class="lc-ac-pick-star" width="56" height="56" viewBox="0 0 8 8" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="#ffc53d" d="M3 0h2v3h3v2H5v3H3V5H0V3h3z"/><path fill="#c9951a" d="M5 4h3v1H5zM4 5h1v3H4z"/><path fill="#fff3c4" d="M3 3h1v1H3z"/></svg>
+    <div class="lc-ac-pick-main">
+      <h3 class="lc-ac-pick-kicker">Today’s pick</h3>
+      <p class="lc-ac-pick-name" data-ac-pick-name></p>
+      <p class="lc-ac-pick-meta" data-ac-pick-meta></p>
+    </div>
+    <dl class="lc-ac-pick-facts">
+      <div><dt>Changes in</dt><dd data-ac-pick-left></dd></div>
+      <div><dt>Open it</dt><dd><code data-ac-pick-cmd></code></dd></div>
+    </dl>
+    <p class="lc-ac-pick-bonus" data-ac-pick-bonus>Your first finish of it today pays 1 extra token (by default). The next pick comes at midnight.</p>
+  </div>
+  <nav class="lc-ac-jump" aria-label="Game groups" data-ac-jump hidden><ul class="lc-ac-jump-list" role="list" data-ac-jump-list></ul></nav>
+  <div class="lc-ac-groups" data-ac-groups></div>
+  <p class="lc-empty lc-ac-nojs">Turn on JavaScript to see which games are open, with their odds and records.</p>
+</div>
+<!-- /wp:html --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"how-to-play","className":"lc-sec lc-ac-how lc-ac-if-games"} -->
+<section id="how-to-play" class="wp-block-group lc-sec lc-ac-how lc-ac-if-games"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-arcade-stack"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">How to play</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-4 lc-gap-md lc-ac-cmds"} -->
+<div class="wp-block-group lc-grid lc-cols-4 lc-gap-md lc-ac-cmds"><!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm play</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The Games screen: every game that’s open right now.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm play &lt;id&gt;</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Opens one game: its rules first, and for a game of chance its odds. Each game above shows its command.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd lc-ac-if-courses"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd lc-ac-if-courses"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm play trials</code> <code>/hcm play golf</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The time-trial courses, easiest first, and the golf courses.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm arcade</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The Arcade: your Wallet, crates, the Scratch Ticket, the Prize Counter, Card Packs, quests, achievements and a Play row for the games.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd lc-ac-if-chance"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd lc-ac-if-chance"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm arcade odds</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>One line per open game of chance: what it gives back and how many plays a day.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm play break</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Take a break: your own daily token limit for games of chance, or a pause of 1, 7 or 30 days.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd lc-ac-if-courses"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd lc-ac-if-courses"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm leave</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Leave a time-trial course or golf round. You go home with all your things.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-card--sm lc-ac-cmd lc-ac-if-invites"} -->
+<div class="wp-block-group lc-card lc-card--sm lc-ac-cmd lc-ac-if-invites"><!-- wp:paragraph {"className":"lc-ac-cmd-code"} -->
+<p class="lc-ac-cmd-code"><code>/hcm play accept</code> <code>/hcm play deny</code></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Answer a game invite (on Java you can click it in chat). <code>/hcm play invites off</code> turns every invite off.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"fairness","className":"lc-sec lc-sec--dark lc-ac-fair"} -->
+<section id="fairness" class="wp-block-group lc-sec lc-sec--dark lc-ac-fair"><!-- wp:group {"className":"lc-wrap lc-stack lc-ac-fair-in"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-ac-fair-in"><!-- wp:group {"className":"lc-stack lc-ac-promises lc-ac-if-chance"} -->
+<div class="wp-block-group lc-stack lc-ac-promises lc-ac-if-chance"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">The fairness promises</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">Games of chance give back less than you put in. These rules keep them honest about it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-3 lc-gap-md"} -->
+<div class="wp-block-group lc-grid lc-cols-3 lc-gap-md"><!-- wp:group {"className":"lc-ac-promise"} -->
+<div class="wp-block-group lc-ac-promise"><!-- wp:heading {"level":3,"className":"lc-ac-promise-title"} -->
+<h3 class="wp-block-heading lc-ac-promise-title">Tokens only</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>No game takes or pays dollars, or takes your Cards, Minis or anything you could sell. Tokens never turn into money.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-ac-promise"} -->
+<div class="wp-block-group lc-ac-promise"><!-- wp:heading {"level":3,"className":"lc-ac-promise-title"} -->
+<h3 class="wp-block-heading lc-ac-promise-title">Less back than you put in</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Each game of chance is set to give back 85 to 95 of every 100 tokens over many plays: about 87 to 90 as shipped, with the best choices in the card games. The Scratch Ticket gives back about 77. Play for fun, not to get more tokens.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-ac-promise"} -->
+<div class="wp-block-group lc-ac-promise"><!-- wp:heading {"level":3,"className":"lc-ac-promise-title"} -->
+<h3 class="wp-block-heading lc-ac-promise-title">Odds first</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Before your first play, the screen shows what every result pays, how often it comes up and what the game gives back. <code>/hcm arcade odds</code> and this page show the same numbers.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-ac-promise"} -->
+<div class="wp-block-group lc-ac-promise"><!-- wp:heading {"level":3,"className":"lc-ac-promise-title"} -->
+<h3 class="wp-block-heading lc-ac-promise-title">Decided first, then shown</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The result is saved and paid before any animation starts, and each card is saved before you see it. What stops on screen is what came up. Closing early just shows the result in chat.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-ac-promise"} -->
+<div class="wp-block-group lc-ac-promise"><!-- wp:heading {"level":3,"className":"lc-ac-promise-title"} -->
+<h3 class="wp-block-heading lc-ac-promise-title">Daily limits</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Every game of chance has its own plays a day. By default they take at most 100 tokens a day between them, crates, Scratch Tickets and Card Packs bought with tokens included. The lowest limit that applies counts, and it all resets at midnight.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-ac-promise"} -->
+<div class="wp-block-group lc-ac-promise"><!-- wp:heading {"level":3,"className":"lc-ac-promise-title"} -->
+<h3 class="wp-block-heading lc-ac-promise-title">“No win this time.”</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>That is all a loss says: no teasing line, no play-again button, no win sound. Getting your own tokens back is never called a win.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"anchor":"take-a-break","className":"lc-board lc-board--pink lc-ac-break"} -->
+<div id="take-a-break" class="wp-block-group lc-board lc-board--pink lc-ac-break"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--md">Take a break</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">Choose how many tokens go into games of chance each day, or stop them for a while. It works even while the games are closed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"lc-ac-break-list"} -->
+<ul class="wp-block-list lc-ac-break-list"><!-- wp:list-item -->
+<li>Your own daily limit: 10, 25, 50 or 100 tokens, or none.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>A pause of 1, 7 or 30 days. It ends at midnight and can’t be cancelled.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>A lower limit starts now. A higher limit, or none, waits 7 days. A pause can be made longer, never shorter.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>It covers crates, Scratch Tickets and Card Packs bought with tokens too.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>A grown-up can ask an admin to set a limit or a pause the player can’t lift, or to switch games of chance off for them.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph {"className":"lc-ac-break-how"} -->
+<p class="lc-ac-break-how">Open it with <code>/hcm play break</code> or the blue bed in your Wallet.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","className":"lc-sec lc-ac-older"} -->
+<section class="wp-block-group lc-sec lc-ac-older"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-arcade-stack"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">Crates and Cards</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"lc-grid lc-cols-3 lc-gap-md"} -->
+<div class="wp-block-group lc-grid lc-cols-3 lc-gap-md"><!-- wp:group {"className":"lc-card lc-arcade-game"} -->
 <div class="wp-block-group lc-card lc-arcade-game"><!-- wp:html -->
 <div class="lc-strip lc-strip--wool" aria-hidden="true"></div>
 <!-- /wp:html -->
@@ -142,25 +387,11 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Spins and lands on a prize: boosts, hunt gear, trails, hats, filament, tokens back, or rarely a Card for any Mini.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-arcade-game"} -->
-<div class="wp-block-group lc-card lc-arcade-game"><!-- wp:html -->
-<div class="lc-strip lc-strip--wool" aria-hidden="true"></div>
-<!-- /wp:html -->
-
-<!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Scratch Ticket</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"className":"lc-pill lc-pill--code lc-arcade-cost"} -->
-<p class="lc-pill lc-pill--code lc-arcade-cost">10 tokens</p>
+<p>One prize per crate. Before you open one, the crate screen shows every prize and its chance.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Scratch three squares. Three the same wins. The jackpot grows with every ticket anyone buys.</p>
+<p>On average a crate holds less than 15 tokens’ worth at Prize Counter prices. The spin is only a show: your prize is decided before it starts.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -178,7 +409,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Once a week. A Card that’s Rare or better.</p>
+<p>Once a week, on the Prize Counter’s Minis tab. Always Rare, Epic or Legendary, and the rarer ones come up less often. If none are left, nothing is charged.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -188,27 +419,27 @@
 <!-- /wp:html -->
 
 <!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Card Packs</h3>
+<h3 class="wp-block-heading lc-h3">Card trade-in</h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-pill lc-pill--code lc-arcade-cost"} -->
-<p class="lc-pill lc-pill--code lc-arcade-cost">tokens or $</p>
+<p class="lc-pill lc-pill--code lc-arcade-cost">Free</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Some packs can be bought with tokens as well as dollars.</p>
+<p>Spare Cards for tokens: Common 3, Uncommon 5, Rare 12, Epic 25 and Legendary 50 each. Prize Counter, Minis tab, Trade In Cards.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"className":"lc-note"} -->
-<p class="lc-note">Every crate shows its chances before you open it. Animations are only a show: the result is decided and paid first, so closing early just shows the result.</p>
+<p class="lc-note">Take a break covers crates. It doesn’t cover the Rare Card.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-sec lc-arcade-prizes"} -->
-<section class="wp-block-group lc-sec lc-arcade-prizes"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
+<!-- wp:group {"tagName":"section","anchor":"prizes","className":"lc-sec lc-sec--gray lc-arcade-prizes lc-ac-prize-sec"} -->
+<section id="prizes" class="wp-block-group lc-sec lc-sec--gray lc-arcade-prizes lc-ac-prize-sec"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
 <div class="wp-block-group lc-wrap lc-stack lc-arcade-stack"><!-- wp:heading {"className":"lc-h2"} -->
 <h2 class="wp-block-heading lc-h2">The Prize Counter</h2>
 <!-- /wp:heading -->
@@ -217,67 +448,13 @@
 <p class="lc-lede">Pick exactly what you want, at a fixed price.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"className":"lc-grid lc-cols-3 lc-gap-md"} -->
-<div class="wp-block-group lc-grid lc-cols-3 lc-gap-md"><!-- wp:group {"className":"lc-card lc-arcade-card"} -->
-<div class="wp-block-group lc-card lc-arcade-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Boosts</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Speed, mining, night vision, water breathing, lucky fishing.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-arcade-card"} -->
-<div class="wp-block-group lc-card lc-arcade-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Hunt gear</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>A Mini Radar and a Mini Lure for the next wild Mini.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-arcade-card"} -->
-<div class="wp-block-group lc-card lc-arcade-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Cosmetics</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Firework shows, particle trails and hats.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-arcade-card"} -->
-<div class="wp-block-group lc-card lc-arcade-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Perks</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>An extra home, and the /hat command.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-arcade-card"} -->
-<div class="wp-block-group lc-card lc-arcade-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Trophies</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>A numbered Arcade Trophy.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-arcade-card"} -->
-<div class="wp-block-group lc-card lc-arcade-card"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">Mini supplies</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Filament, a Display Case, and the weekly Rare Card.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group -->
+<!-- wp:html -->
+<div class="lc-ac-slot" data-ac-prizes>
+  <p class="lc-sample lc-ac-note" data-ac-note hidden></p>
+  <ul class="lc-ac-prizecats" role="list" data-ac-list></ul>
+  <p class="lc-empty lc-ac-nojs">Turn on JavaScript to see the prizes and their prices.</p>
+</div>
+<!-- /wp:html -->
 
 <!-- wp:group {"className":"lc-arcade-warn"} -->
 <div class="wp-block-group lc-arcade-warn"><!-- wp:html -->
@@ -288,6 +465,48 @@
 <p>Prizes can’t be sold for money. Shops, Pallets, vending machines, the Auction House and Courier runs all say no.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"packs","className":"lc-sec lc-ac-pack-sec"} -->
+<section id="packs" class="wp-block-group lc-sec lc-ac-pack-sec"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-arcade-stack"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">Card Packs</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">Packs sold for tokens. Each opens to one Card, with these chances for its rarity.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<div class="lc-ac-slot" data-ac-packs>
+  <p class="lc-sample lc-ac-note" data-ac-note hidden></p>
+  <ul class="lc-ac-packs" role="list" data-ac-list></ul>
+  <p class="lc-empty lc-ac-nojs">Turn on JavaScript to see the packs and their odds.</p>
+</div>
+<!-- /wp:html --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"achievements","className":"lc-sec lc-ac-ach-sec"} -->
+<section id="achievements" class="wp-block-group lc-sec lc-ac-ach-sec"><!-- wp:group {"className":"lc-wrap lc-stack lc-arcade-stack"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-arcade-stack"><!-- wp:heading {"className":"lc-h2"} -->
+<h2 class="wp-block-heading lc-h2">Achievements</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-lede"} -->
+<p class="lc-lede">Each one pays its tokens once.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<div class="lc-ac-slot" data-ac-achievements>
+  <p class="lc-sample lc-ac-note" data-ac-note hidden></p>
+  <p class="lc-small lc-ac-count" data-ac-count hidden></p>
+  <ul class="lc-ac-achs" id="lcAcAchs" role="list" data-ac-list></ul>
+  <button class="lc-btn lc-btn--outline lc-ac-more" type="button" aria-expanded="false" aria-controls="lcAcAchs" data-ac-more data-ac-key="achs-more" hidden>Show all</button>
+  <p class="lc-empty lc-ac-nojs">Turn on JavaScript to see the achievements.</p>
+</div>
+<!-- /wp:html --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group --></main>
 <!-- /wp:group -->

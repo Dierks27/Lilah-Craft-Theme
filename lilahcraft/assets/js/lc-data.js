@@ -1,6 +1,6 @@
-/* LilahCraft shared data for Home, Market and Minis: window.LCData.
+/* LilahCraft shared data for Home, Market, Minis and the Arcade: window.LCData.
    Loads the same-origin feeds, falls back to labelled sample data, and has the
-   formatting and drawing helpers both pages share. Never talks to the game server. */
+   formatting and drawing helpers the pages share. Never talks to the game server. */
 (function () {
   'use strict';
   var CFG = window.LC || {};
@@ -51,6 +51,19 @@
     if (mins < 1440) { return Math.floor(mins / 60) + 'h ago'; }
     return Math.floor(mins / 1440) + 'd ago';
   }
+  /* The same in words, for a date in a sentence ("set 2 days ago"): "just now", "1 minute ago", "3 hours ago",
+     "2 days ago", and from 30 days on the date ("on Mar 4, 2026"); '' when it isn't a time. Rounds down. */
+  function agoWords(t, now) {
+    var n = isNum(now) ? now : Date.now();
+    if (!isNum(t) || t <= 0) { return ''; }
+    var mins = Math.floor(Math.max(0, n - t) / 60000);
+    function unit(k, word) { return k + ' ' + word + (k === 1 ? '' : 's') + ' ago'; }
+    if (mins < 1) { return 'just now'; }
+    if (mins < 60) { return unit(mins, 'minute'); }
+    if (mins < 1440) { return unit(Math.floor(mins / 60), 'hour'); }
+    if (mins < 30 * 1440) { return unit(Math.floor(mins / 1440), 'day'); }
+    return 'on ' + new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
 
   /* ---------- loading ---------- */
 
@@ -60,7 +73,7 @@
   /* The last real copy of each feed (and variant) this page has seen, kept for when a refresh fails. */
   var lastGood = {};
 
-  /* Resolves to { mode: 'live'|'stale'|'sample', unreachable: bool, data: feed }.
+  /* Resolves to { mode: 'live'|'stale'|'sample', unreachable: bool, data: feed } for 'market', 'minis' or 'arcade'.
      sample = no feed URL set, or the feed can't be reached and there's no good copy yet.
      opts.long asks for the long 7D/30D history too (?long=1, Market only); it keeps its own last good copy. */
   function load(name, opts) {
@@ -95,7 +108,8 @@
       .catch(function () { clearTimeout(timer); return unreachableResult(name, key); });
   }
   function sampleResult(name, unreachable) {
-    return { mode: 'sample', unreachable: !!unreachable, data: name === 'market' ? marketSample() : minisSample() };
+    var data = name === 'market' ? marketSample() : (name === 'arcade' ? arcadeSample() : minisSample());
+    return { mode: 'sample', unreachable: !!unreachable, data: data };
   }
   /* Can't reach the feed: the last good copy as stale if there is one, otherwise labelled sample data. */
   function unreachableResult(name, key) {
@@ -104,12 +118,15 @@
   }
   function normalize(name, j, key) {
     if (j && j.sample && !j.unreachable) { return sampleResult(name, false); }
-    var list = j && !j.sample ? (name === 'market' ? j.items : j.minis) : null;
-    if (!Array.isArray(list)) { return unreachableResult(name, key); }
+    // The arcade feed can be just its timestamp (the Arcade switched off): every other key may be missing.
+    var ok = !!j && !j.sample && (name === 'arcade' ? isNum(j.generatedAt) && j.generatedAt > 0 :
+      Array.isArray(name === 'market' ? j.items : j.minis));
+    if (!ok) { return unreachableResult(name, key); }
     return { mode: j.stale ? 'stale' : 'live', unreachable: false, data: j };
   }
 
-  /* Load now and again every refreshSeconds (market) or `everySeconds`; `opts` as for load().
+  /* Load now and again every `everySeconds`, else the feed's refreshSeconds (market), else Cache seconds (Settings >
+     LilahCraft, 60 by default; the arcade feed has no refreshSeconds); `opts` as for load().
      Sample data isn't reloaded unless the feed was unreachable. While the tab is hidden a due
      refresh waits, and runs as soon as the tab is shown again. Returns a stop function. */
   function watch(name, cb, everySeconds, opts) {
@@ -611,9 +628,233 @@
     return minisCache;
   }
 
+  /* ---------- the Arcade (HomeCraftMgmt 0.35) ----------
+     The feed is inc/feeds.php's lilahcraft_clean_arcade(): every section can be missing (games off, or the Arcade
+     switched off), so read data.games || [] and so on. These helpers check what they use, like the market ones. */
+
+  /* The in-game Games screen's tabs, in its order. */
+  var GROUPS = [
+    { id: 'luck', label: 'Luck', kinds: ['chance'] },
+    { id: 'cabinets', label: 'Cabinets', kinds: ['cabinet'] },
+    { id: 'courses', label: 'Courses', kinds: ['parkour', 'elytra', 'boat'] },
+    { id: 'golf', label: 'Mini golf', kinds: ['golf'] }
+  ];
+  var KIND_LABEL = { chance: 'Game of chance', cabinet: 'Arcade cabinet', parkour: 'Parkour', elytra: 'Elytra', boat: 'Boat', golf: 'Mini golf' };
+  var TIERS = ['easy', 'medium', 'hard', 'extreme'];
+  var TIER_LABEL = { easy: 'Easy', medium: 'Medium', hard: 'Hard', extreme: 'Why did we build this?' };
+  var CABINET_UNITS = ['ms', 'points', 'flips', 'apples', 'wins'];
+  var UNIT_WORD = { points: 'point', apples: 'apple', flips: 'flip', wins: 'win', strokes: 'stroke' };
+
+  function kindLabel(kind) { return typeof kind === 'string' && hasOwn(KIND_LABEL, kind) ? KIND_LABEL[kind] : ''; }
+  function tierLabel(tier) { return typeof tier === 'string' && hasOwn(TIER_LABEL, tier) ? TIER_LABEL[tier] : ''; }
+  function groupOf(kind) {
+    for (var i = 0; i < GROUPS.length; i++) { if (GROUPS[i].kinds.indexOf(kind) > -1) { return GROUPS[i].id; } }
+    return null;
+  }
+  /* Open games in the feed's order (the Scratch Ticket first), each a { id, name, kind, … } entry. */
+  function games(data) {
+    return (data && Array.isArray(data.games) ? data.games : []).filter(function (g) {
+      return !!g && typeof g.id === 'string' && typeof g.name === 'string' && groupOf(g.kind) !== null;
+    });
+  }
+  function game(data, id) { return games(data).filter(function (g) { return g.id === id; })[0] || null; }
+  /* The games by tab: [{ id: 'luck'|'cabinets'|'courses'|'golf', label, games: […] }], only tabs with a game in them. */
+  function byGroup(data) {
+    var list = games(data);
+    return GROUPS.map(function (grp) {
+      return { id: grp.id, label: grp.label, games: list.filter(function (g) { return grp.kinds.indexOf(g.kind) > -1; }) };
+    }).filter(function (grp) { return grp.games.length > 0; });
+  }
+  /* The Scratch Ticket has no /hcm play id: it's bought from the Arcade's Luck row or the Games screen's Luck tab. */
+  function playCommand(g) { return g && typeof g.id === 'string' && g.id !== 'scratch_ticket' ? '/hcm play ' + g.id : ''; }
+
+  /* A game of chance's give-back as the game words it, "about N of every 100 tokens": N is the feed's percent
+     rounded DOWN (89.7 is 89), never up. At `stake` when given (rtpByStake), else the headline (the lowest). null if unknown. */
+  function giveBack(g, stake) {
+    var p = !g ? null : (stake == null ? g.rtp : (g.rtpByStake && hasOwn(g.rtpByStake, String(stake)) ? g.rtpByStake[String(stake)] : null));
+    return isNum(p) && p > 0 && p <= 100 ? Math.floor(p) : null;
+  }
+  /* A paytable row's odds as the game screen shows them: "1 in 1,829", or "3 of 24 spaces" (the Wheel); '' if it has none. */
+  function odds(row) {
+    if (!row) { return ''; }
+    if (isNum(row.oneIn) && row.oneIn >= 1 && isNum(row.chance) && row.chance > 0) { return '1 in ' + count(row.oneIn); }
+    if (isNum(row.spaces) && isNum(row.of) && row.spaces > 0 && row.spaces <= row.of) { return row.spaces + ' of ' + row.of + ' spaces'; }
+    return '';
+  }
+  /* What each result pays at one stake (default: the first), in the feed's order, only rows with their odds:
+     [{ combo, tokens: whole tokens back at that stake, times: the multiple for a row that pays one (Ore Slots) else null,
+        odds: '1 in 1,829' | '3 of 24 spaces', chance, oneIn, spaces, of }] ([] for a stake the game doesn't have). */
+  function paytable(g, stake) {
+    var stakes = g && Array.isArray(g.stakes) ? g.stakes : [];
+    var s = stake == null ? stakes[0] : stake;
+    if (!isNum(s) || stakes.indexOf(s) < 0 || !Array.isArray(g.paytable)) { return []; }
+    return g.paytable.filter(function (r) {
+      return !!r && typeof r.combo === 'string' && isNum(r.pays) && (r.stake == null || r.stake === s) && odds(r) !== '';
+    }).map(function (r) {
+      var times = r.stake == null;
+      return {
+        combo: r.combo, tokens: times ? r.pays * s : r.pays, times: times ? r.pays : null, odds: odds(r),
+        chance: isNum(r.chance) ? r.chance : null, oneIn: isNum(r.oneIn) ? r.oneIn : null,
+        spaces: isNum(r.spaces) ? r.spaces : null, of: isNum(r.of) ? r.of : null
+      };
+    });
+  }
+
+  /* A time as the game shows it: m:ss.t, tenths rounded down (83456 ms is "1:23.4", 18400 is "0:18.4"). */
+  function time(ms) {
+    if (!isNum(ms) || ms < 0) { return ''; }
+    var t = Math.floor(ms / 100), secs = Math.floor(t / 10) % 60;
+    return Math.floor(t / 600) + ':' + (secs < 10 ? '0' : '') + secs + '.' + (t % 10);
+  }
+  /* A score with its unit: "1:23.4" (ms), "18,400 points", "34 apples", "22 flips", "7 wins", "24 strokes" (1 point…). */
+  function score(value, unit) {
+    if (!isNum(value)) { return ''; }
+    if (unit === 'ms') { return time(value); }
+    if (!hasOwn(UNIT_WORD, unit)) { return count(value); }
+    return count(value) + ' ' + UNIT_WORD[unit] + (value === 1 ? '' : 's');
+  }
+  /* A game's server record, the same for every kind, or null (none yet, or a game of chance):
+     { value, unit: 'ms'|'points'|'flips'|'apples'|'wins'|'strokes', text: score(value, unit), lowerIsBetter,
+       at: ms or null (cabinets have no date), holder: a name or null (only when the feed has names on) }. */
+  function record(g) {
+    if (!g) { return null; }
+    var r = null;
+    if (g.kind === 'cabinet' && isNum(g.best) && CABINET_UNITS.indexOf(g.unit) > -1) {
+      r = { value: g.best, unit: g.unit, lowerIsBetter: g.lowerIsBetter === true, at: null, holder: g.holder };
+    } else if (g.kind === 'golf' && g.record && isNum(g.record.strokes)) {
+      r = { value: g.record.strokes, unit: 'strokes', lowerIsBetter: true, at: g.record.at, holder: g.record.holder };
+    } else if (groupOf(g.kind) === 'courses' && g.record && isNum(g.record.ms)) {
+      r = { value: g.record.ms, unit: 'ms', lowerIsBetter: true, at: g.record.at, holder: g.record.holder };
+    }
+    if (!r) { return null; }
+    r.text = score(r.value, r.unit);
+    r.at = isNum(r.at) && r.at > 0 ? r.at : null;
+    r.holder = typeof r.holder === 'string' && r.holder !== '' ? r.holder : null;
+    return r;
+  }
+
+  /* An admin can pin a whole world game as today's pick: "trials" (every parkour, elytra and boat course) or "golf". */
+  var WHOLE_PICKS = {
+    trials: { name: 'All time-trial courses', kinds: ['parkour', 'elytra', 'boat'] },
+    golf: { name: 'All mini golf courses', kinds: ['golf'] }
+  };
+  /* Today's pick: { game, games: [every entry that is the pick], until: ms (the next midnight) }, or null (none, a game
+     that isn't open, a game of chance, or an old copy whose day is over). For a whole world game, game is a stand-in
+     { id: 'trials'|'golf', name, kind, whole: true } (its /hcm play id works) and games lists its open courses. */
+  function featured(data) {
+    var f = data && data.featured, now = Date.now();
+    if (!f || typeof f.game !== 'string' || !isNum(f.until) || f.until <= now || f.until > now + 2 * DAY_MS) { return null; }
+    var whole = Object.prototype.hasOwnProperty.call(WHOLE_PICKS, f.game) && !game(data, f.game) ? WHOLE_PICKS[f.game] : null;
+    if (whole) {
+      var list = games(data).filter(function (e) { return whole.kinds.indexOf(e.kind) > -1; });
+      return list.length ? { game: { id: f.game, name: whole.name, kind: f.game, whole: true }, games: list, until: f.until } : null;
+    }
+    var g = game(data, f.game);
+    return g && g.kind !== 'chance' ? { game: g, games: [g], until: f.until } : null;
+  }
+  /* A pot now: { game: the entry, tokens }, or null. Only with the game's odds (a paytable row with them), so the
+     pot is never shown on its own. */
+  function jackpot(data, id) {
+    var want = id || 'scratch_ticket';
+    var j = (data && Array.isArray(data.jackpots) ? data.jackpots : []).filter(function (p) { return p && p.game === want; })[0];
+    var g = j && isNum(j.tokens) ? game(data, want) : null;
+    return g && g.kind === 'chance' && (g.paytable || []).some(function (r) { return odds(r) !== ''; }) ? { game: g, tokens: j.tokens } : null;
+  }
+
+  /* The Prize Counter's tabs, labelled as on the Arcade page. */
+  var PRIZE_CATEGORIES = [
+    { id: 'boosts', label: 'Boosts' }, { id: 'hunt', label: 'Hunt gear' }, { id: 'cosmetics', label: 'Cosmetics' },
+    { id: 'perks', label: 'Perks' }, { id: 'trophies', label: 'Trophies' }, { id: 'minis', label: 'Mini supplies' }
+  ];
+  /* [{ id, label, prizes: [{ id, name, category, cost, description? }] }], only tabs with a prize in them. */
+  function prizeGroups(data) {
+    var list = data && Array.isArray(data.prizes) ? data.prizes : [];
+    return PRIZE_CATEGORIES.map(function (c) {
+      return { id: c.id, label: c.label, prizes: list.filter(function (p) { return p && p.category === c.id && isNum(p.cost); }) };
+    }).filter(function (c) { return c.prizes.length > 0; });
+  }
+  /* A Card Pack's odds in rarity order, for the Minis colours (LCData.minis.RARITIES[key]):
+     [{ key: 'common', name: 'Common', pct: 62, text: '62%' }]. */
+  function packOdds(pack) {
+    var o = pack && pack.odds && typeof pack.odds === 'object' ? pack.odds : {};
+    return RARITY_ORDER.map(function (key) {
+      var pct = hasOwn(o, key.toUpperCase()) ? o[key.toUpperCase()] : null;
+      return isNum(pct) && pct > 0 ? { key: key, name: RARITIES[key].name, pct: pct, text: round(pct, 2) + '%' } : null;
+    }).filter(Boolean);
+  }
+
+  /* Sample Arcade, in the real feed's shape, with the guide's default numbers (HomeCraftMgmt 0.35's games guide):
+     every game that ships on (Coin Flip ships off), their stakes, give-backs, daily limits and what they pay. The
+     courses are the guide's examples; records, prizes, the pack and the achievements are HomeCraftMgmt's test fixtures.
+     No names: a sample record has no holder. */
+  var arcadeCache = null;
+  function arcadeSample() {
+    if (arcadeCache) { return arcadeCache; }
+    var now = Date.now(), midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    // The pot starts at 50 and grows by 1 a ticket; won 1 time in 100, it sits around 150 (the 77.6 assumes that).
+    var pot = 150;
+    var ticket = [[3, 0.4, 3], [8, 0.22, 5], [20, 0.09, 11], [50, 0.03, 33]].map(function (r) {
+      return { stake: 10, combo: r[0] + ' tokens', pays: r[0], chance: r[1], oneIn: r[2] };
+    }).concat([{ stake: 10, combo: 'the jackpot', pays: pot, chance: 0.01, oneIn: 100 }]);
+    // Ore Slots pays multiples of the tokens in; "two the same" is what's left of 89.97 % after the rest.
+    var slots = [['three wilds', 50, 0.00007809, 12805], ['three diamonds', 40, 0.0005467, 1829], ['three gold', 20, 0.002033, 492],
+      ['three iron', 10, 0.004926, 203], ['three copper', 6, 0.009709, 103], ['three coal', 4, 0.01667, 60], ['two the same', 2, 0.3295, 3]];
+    var wheel = [];
+    [[5, 22, 17, 8], [10, 44, 35, 17], [20, 87, 70, 35]].forEach(function (w) {
+      var s = w[0];
+      wheel.push({ stake: s, combo: w[1] + ' tokens', pays: w[1], spaces: 1, of: 24 }, { stake: s, combo: w[2] + ' tokens', pays: w[2], spaces: 2, of: 24 },
+        { stake: s, combo: w[3] + ' tokens', pays: w[3], spaces: 3, of: 24 }, { stake: s, combo: 'your ' + s + ' back', pays: s, spaces: 5, of: 24 },
+        { stake: s, combo: 'nothing', pays: 0, spaces: 13, of: 24 });
+    });
+    function cabinet(id, name, board, unit, best) {
+      var g = { id: id, name: name, kind: 'cabinet', board: board, unit: unit, lowerIsBetter: unit === 'ms' || unit === 'flips' };
+      if (best) { g.best = best; }
+      return g;
+    }
+    arcadeCache = {
+      generatedAt: now,
+      games: [
+        { id: 'scratch_ticket', name: 'Scratch Ticket', kind: 'chance', stakes: [10], rtp: 77.6, rtpByStake: { 10: 77.6 }, paytable: ticket },
+        { id: 'ore_slots', name: 'Ore Slots', kind: 'chance', stakes: [1, 2, 5], rtp: 89.9, rtpByStake: { 1: 89.9, 2: 89.9, 5: 89.9 }, dailyLimit: 50,
+          paytable: slots.map(function (r) { return { combo: r[0], pays: r[1], chance: r[2], oneIn: r[3] }; }) },
+        { id: 'twenty_one', name: 'Twenty-One', kind: 'chance', stakes: [5, 10, 20], rtp: 89.7, rtpByStake: { 5: 89.7, 10: 89.7, 20: 89.7 }, dailyLimit: 30,
+          rules: 'Beat the Arcade\'s hand without going over 21.',
+          payouts: { 5: { win: 9, twentyOne: 11, doubleWin: 18 }, 10: { win: 18, twentyOne: 22, doubleWin: 36 }, 20: { win: 36, twentyOne: 44, doubleWin: 72 } } },
+        { id: 'wheel', name: 'The Wheel', kind: 'chance', stakes: [5, 10, 20], rtp: 87.5, rtpByStake: { 5: 87.5, 10: 89.5, 20: 90 }, dailyLimit: 30, paytable: wheel },
+        { id: 'higher_lower', name: 'Higher or Lower', kind: 'chance', stakes: [10, 20, 50], rtp: 89.6, rtpByStake: { 10: 89.6, 20: 90, 50: 89.7 }, dailyLimit: 30,
+          rules: 'Guess higher or lower. Cash out any time.', maxMultiplier: 20, maxGuesses: 10 },
+        cabinet('creeper_sweeper', 'Creeper Sweeper', 'normal', 'ms', 18400),
+        cabinet('ore_merge', 'Ore Merge', 'classic', 'points'),
+        cabinet('snake', 'Snake', 'classic', 'apples', 12),
+        cabinet('mini_match', 'Mini Match', 'classic', 'flips'),
+        cabinet('simon_says', 'Simon Says', 'classic', 'points', 14),
+        cabinet('whack_a_zombie', 'Whack-a-Zombie', 'classic', 'points'),
+        cabinet('connect_four', 'Connect Four', 'hard', 'wins'),
+        cabinet('tic_tac_toe', 'Tic-Tac-Toe', 'wins', 'wins'),
+        { id: 'cliffs', name: 'Cliffs', kind: 'parkour', tier: 'easy' },
+        { id: 'river_run', name: 'River Run', kind: 'boat', tier: 'medium', record: { ms: 61234, at: now - 2 * DAY_MS } },
+        { id: 'golf_meadow', name: 'Meadow Links', kind: 'golf', holes: 9, par: 27, record: { strokes: 24, at: now - 3 * DAY_MS } }
+      ],
+      featured: { game: 'river_run', until: midnight.getTime() },
+      jackpots: [{ game: 'scratch_ticket', tokens: pot }],
+      prizes: [
+        { id: 'night_vision', name: 'Night Vision', category: 'boosts', cost: 6, description: 'See in the dark for 20 minutes.' },
+        { id: 'home_slot', name: '+1 Home', category: 'perks', cost: 400, description: 'One more /home, on top of the homes you already have.' },
+        { id: 'hat_command', name: '/hat', category: 'perks', cost: 300, description: 'Wear the block in your hand on your head with /hat.' }
+      ],
+      packs: [{ id: 'starter', name: 'Starter Pack', cost: 50, odds: { COMMON: 62, UNCOMMON: 28, RARE: 9, EPIC: 1 } }],
+      achievements: [
+        { id: 'first_sale', name: 'Sell something to Crate', description: 'Sell something to Crate', tokens: 10 },
+        { id: 'first_crate', name: 'Open an Arcade Crate', description: 'Open an Arcade Crate', tokens: 5 }
+      ]
+    };
+    return arcadeCache;
+  }
+
   window.LCData = {
     SAMPLE_LABEL: 'Sample data',
-    esc: esc, isNum: isNum, money: money, count: count, timeText: timeText, timeLeft: timeLeft, ago: ago,
+    esc: esc, isNum: isNum, money: money, count: count, timeText: timeText, timeLeft: timeLeft, ago: ago, agoWords: agoWords,
     load: load, watch: watch, sparkPoints: sparkPoints,
     market: {
       CATEGORIES: CATEGORIES, categoryOf: categoryOf, categoryLabel: categoryLabel, swatchOf: swatchOf,
@@ -624,6 +865,12 @@
       RARITY_ORDER: RARITY_ORDER, RARITIES: RARITIES, CATEGORY_ORDER: CATEGORY_ORDER, rarityKey: rarityKey,
       categoryLabel: miniCategoryLabel, soldOut: miniSoldOut, printedText: printedText, printedFraction: printedFraction,
       head: head, sample: minisSample
+    },
+    arcade: {
+      GROUPS: GROUPS, TIERS: TIERS, PRIZE_CATEGORIES: PRIZE_CATEGORIES, kindLabel: kindLabel, tierLabel: tierLabel, groupOf: groupOf,
+      games: games, game: game, byGroup: byGroup, playCommand: playCommand, giveBack: giveBack, odds: odds, paytable: paytable,
+      time: time, score: score, record: record, featured: featured, jackpot: jackpot, prizeGroups: prizeGroups, packOdds: packOdds,
+      sample: arcadeSample
     }
   };
 })();

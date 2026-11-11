@@ -4,7 +4,7 @@
  *
  * Every page gets assets/css/site.css and assets/js/site.js. A page also gets
  * assets/css/page-{key}.css and assets/js/page-{key}.js when those files exist, where
- * {key} comes from lilahcraft_page_key(). Home, Market and Minis also get assets/js/lc-data.js.
+ * {key} comes from lilahcraft_page_key(). Home, Market, Minis and Arcade also get assets/js/lc-data.js.
  * URLs carry ?ver= with the theme Version, so bump it on every release.
  * The dark look: a script in <head> picks light or dark before the page paints, and each stylesheet's dark rules
  * are printed again after it for visitors without JavaScript (lilahcraft_dark_twin_css()).
@@ -81,7 +81,7 @@ add_action(
 		);
 
 		$deps = array( 'lilahcraft' );
-		if ( in_array( $key, array( 'home', 'market', 'minis' ), true ) ) {
+		if ( in_array( $key, array( 'home', 'market', 'minis', 'arcade' ), true ) ) {
 			wp_enqueue_script( 'lilahcraft-data', get_theme_file_uri( 'assets/js/lc-data.js' ), array( 'lilahcraft' ), $v, true );
 			$deps[] = 'lilahcraft-data';
 		}

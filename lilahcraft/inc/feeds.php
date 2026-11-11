@@ -6,6 +6,8 @@
  *                                       history; ?long=1 adds history7d and history30d when the feed has them,
  *                                       and the live market's chart markers (events)
  *   GET /wp-json/lilahcraft/v1/minis    the Minis feed  (HomeCraftMgmt /api/minis)
+ *   GET /wp-json/lilahcraft/v1/arcade   the Arcade feed (HomeCraftMgmt 0.35 /api/arcade: games, odds, records,
+ *                                       today's pick, the Prize Counter, Card Packs, achievements)
  *   GET /wp-json/lilahcraft/v1/status   { online, players, max, version }
  *
  * WordPress fetches each feed, keeps it in a transient for the configured seconds and keeps the
@@ -13,7 +15,8 @@
  * with "stale": true. With no URL set, or nothing good yet, the answer is { "sample": true } and the
  * page shows labelled sample data. Only whitelisted fields are passed on. The live market's fields
  * (HomeCraftMgmt 0.33) only come through while the feed says "live": true; without them the answer
- * is exactly what 2.1 served.
+ * is exactly what 2.1 served. The Arcade feed's URL may be left blank: it then follows the Market feed URL
+ * (lilahcraft_feed_url()).
  *
  * @package LilahCraft
  */
@@ -25,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'rest_api_init',
 	function () {
-		foreach ( array( 'market', 'minis', 'status' ) as $route ) {
+		foreach ( array( 'market', 'minis', 'arcade', 'status' ) as $route ) {
 			register_rest_route(
 				'lilahcraft/v1',
 				'/' . $route,
@@ -85,11 +88,11 @@ function lilahcraft_rest_response( $data, $request ) {
 /**
  * A feed, from cache, the network or the last good copy.
  *
- * @param string $feed market or minis.
+ * @param string $feed market, minis or arcade.
  * @return array
  */
 function lilahcraft_get_feed( $feed ) {
-	$url = (string) lilahcraft_setting( $feed . '_url' );
+	$url = lilahcraft_feed_url( $feed );
 	if ( '' === $url ) {
 		return array( 'sample' => true );
 	}
@@ -147,7 +150,7 @@ function lilahcraft_get_feed( $feed ) {
 /**
  * Remember how the last fetch went, for the settings page.
  *
- * @param string $feed  market or minis.
+ * @param string $feed  market, minis or arcade.
  * @param bool   $ok    Whether it worked.
  * @param string $error Error text.
  * @param string $url   The URL fetched: the settings page only shows the note for that URL.
@@ -168,7 +171,7 @@ function lilahcraft_note_feed( $feed, $ok, $error, $url = '' ) {
 /**
  * Fetch and clean a feed.
  *
- * @param string $feed market or minis.
+ * @param string $feed market, minis or arcade.
  * @param string $url  Feed URL.
  * @return array|WP_Error
  */
@@ -200,6 +203,9 @@ function lilahcraft_fetch_feed( $feed, $url ) {
 	$json = json_decode( wp_remote_retrieve_body( $res ), true );
 	if ( ! is_array( $json ) ) {
 		return new WP_Error( 'lilahcraft_feed', __( 'The feed did not send JSON.', 'lilahcraft' ) );
+	}
+	if ( 'arcade' === $feed ) {
+		return lilahcraft_clean_arcade( $json );
 	}
 	return 'market' === $feed ? lilahcraft_clean_market( $json ) : lilahcraft_clean_minis( $json );
 }
@@ -654,4 +660,440 @@ function lilahcraft_clean_minis( $j ) {
 		'generatedAt' => isset( $j['generatedAt'] ) ? lilahcraft_int( $j['generatedAt'] ) : 0,
 		'minis'       => $minis,
 	);
+}
+
+/**
+ * A whole number from $min to $max, or null (not a number, not whole, or out of range).
+ *
+ * @param mixed $n   Value.
+ * @param int   $min Smallest allowed.
+ * @param int   $max Largest allowed.
+ * @return int|null
+ */
+function lilahcraft_whole( $n, $min, $max ) {
+	$n = lilahcraft_num( $n );
+	return ( null !== $n && floor( $n ) === $n && $n >= $min && $n <= $max ) ? (int) $n : null;
+}
+
+/**
+ * $a when it is a JSON list ([…]), else an empty array.
+ *
+ * @param mixed $a Value.
+ * @return array
+ */
+function lilahcraft_list( $a ) {
+	return ( is_array( $a ) && array_keys( $a ) === range( 0, count( $a ) - 1 ) ) ? $a : array();
+}
+
+/**
+ * $a when it is a JSON object ({…}), else an empty array. (A list would turn its positions into stakes.)
+ *
+ * @param mixed $a Value.
+ * @return array
+ */
+function lilahcraft_object( $a ) {
+	return ( is_array( $a ) && ! lilahcraft_list( $a ) ) ? $a : array();
+}
+
+/**
+ * One line of Arcade text: plain text as lilahcraft_plain(), with line breaks and control characters
+ * turned into single spaces.
+ *
+ * @param mixed $s   Value.
+ * @param int   $max Longest allowed.
+ * @return string
+ */
+function lilahcraft_arcade_text( $s, $max ) {
+	return trim( (string) preg_replace( '/[\s\x00-\x1F\x7F]+/u', ' ', lilahcraft_plain( $s, $max ) ) );
+}
+
+/**
+ * A name for something the feed left unnamed: its id in words (river_run: River Run).
+ *
+ * @param string $id A cleaned id.
+ * @return string
+ */
+function lilahcraft_id_words( $id ) {
+	return substr( ucwords( str_replace( array( '_', '-', ':' ), ' ', $id ) ), 0, 60 );
+}
+
+/**
+ * A record holder's name, or '' to leave it out: a Java or Bedrock player name (letters, digits, _ . * - and
+ * spaces, at most 32), never a UUID. HomeCraftMgmt only sends one while its owner has names switched on.
+ *
+ * @param mixed $s Value.
+ * @return string
+ */
+function lilahcraft_arcade_holder( $s ) {
+	$name = lilahcraft_arcade_text( $s, 200 );
+	return ( preg_match( '/^[\p{L}\p{N}_.*\- ]{1,32}$/u', $name ) && ! preg_match( '/[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}/i', $name ) ) ? $name : '';
+}
+
+/**
+ * Keep only the Arcade fields the site shows, in the feed's order. HomeCraftMgmt's writer owns the format
+ * (ArcadeFeed.java); this rebuilds every object from its documented keys, typed and bounded, so nothing else
+ * reaches a visitor, at any depth:
+ *
+ *   generatedAt   ms, always
+ *   games         open games in the feed's order, each id once (the first one wins): see lilahcraft_clean_arcade_game()
+ *   featured      { game, until ms }: today's pick: a skill game or course that is in games (never a game of chance),
+ *                 or "trials" / "golf" for every open course of that kind
+ *   jackpots      [ { game, tokens } ]: a pot, only for a game of chance in games with its paytable (never without odds)
+ *   prizes        [ { id, name, category: boosts|hunt|cosmetics|perks|trophies|minis, cost, description? } ]
+ *   packs         [ { id, name, cost, odds: { COMMON|UNCOMMON|RARE|EPIC|LEGENDARY: percent } } ], odds adding up to 100
+ *   achievements  [ { id, name, description, tokens } ]; none about a jackpot (a game of chance is never advertised)
+ *
+ * A section with nothing left in it is left out, as the feed does. Text is one plain line with the colour codes
+ * gone. A JSON answer without generatedAt isn't the arcade feed.
+ *
+ * @param array $j Decoded feed.
+ * @return array|WP_Error
+ */
+function lilahcraft_clean_arcade( $j ) {
+	$generated = lilahcraft_int( lilahcraft_field( $j, 'generatedAt' ), 0 );
+	// The easy mistake: the Market or Minis address in the Arcade field. Those have a generatedAt too, and would
+	// read as an Arcade with nothing on.
+	$other = null !== lilahcraft_field( $j, 'items' ) || null !== lilahcraft_field( $j, 'minis' );
+	if ( $other && null === lilahcraft_field( $j, 'games' ) ) {
+		return new WP_Error( 'lilahcraft_feed', __( 'That address sends the Market or Minis feed, not the arcade feed: use the /api/arcade address.', 'lilahcraft' ) );
+	}
+	if ( $generated <= 0 ) {
+		return new WP_Error( 'lilahcraft_feed', __( 'The arcade feed has no generatedAt.', 'lilahcraft' ) );
+	}
+	$now   = (int) round( microtime( true ) * 1000 );
+	$out   = array( 'generatedAt' => $generated );
+	$games = array();
+	foreach ( lilahcraft_list( lilahcraft_field( $j, 'games' ) ) as $g ) {
+		$g = lilahcraft_clean_arcade_game( $g, $now );
+		if ( $g && ! isset( $games[ $g['id'] ] ) && count( $games ) < 200 ) {
+			$games[ $g['id'] ] = $g;
+		}
+	}
+	if ( $games ) {
+		$out['games'] = array_values( $games );
+	}
+
+	// The pick changes at the server's next midnight: an end more than two days away is a clock or unit slip.
+	// The pick can also be a whole world game an admin pinned: "trials" (every parkour, elytra and boat
+	// course) or "golf" (every golf course), shown only while at least one course of that kind is open.
+	$f     = lilahcraft_field( $j, 'featured' );
+	$pick  = lilahcraft_id( lilahcraft_field( $f, 'game' ) );
+	$until = lilahcraft_time( lilahcraft_field( $f, 'until' ), $now + 2 * DAY_IN_SECONDS * 1000 );
+	$kinds = array(
+		'trials' => array( 'parkour', 'elytra', 'boat' ),
+		'golf'   => array( 'golf' ),
+	);
+	$whole = false;
+	if ( isset( $kinds[ $pick ] ) && ! isset( $games[ $pick ] ) ) {
+		foreach ( $games as $g ) {
+			$whole = $whole || in_array( $g['kind'], $kinds[ $pick ], true );
+		}
+	}
+	if ( ( $whole || ( isset( $games[ $pick ] ) && 'chance' !== $games[ $pick ]['kind'] ) ) && $until > 0 ) {
+		$out['featured'] = array(
+			'game'  => $pick,
+			'until' => $until,
+		);
+	}
+
+	$pots = array();
+	foreach ( lilahcraft_list( lilahcraft_field( $j, 'jackpots' ) ) as $p ) {
+		$gid    = lilahcraft_id( lilahcraft_field( $p, 'game' ) );
+		$tokens = lilahcraft_whole( lilahcraft_field( $p, 'tokens' ), 0, 1000000000 );
+		if ( null !== $tokens && isset( $games[ $gid ]['paytable'] ) && ! isset( $pots[ $gid ] ) && count( $pots ) < 10 ) {
+			$pots[ $gid ] = array(
+				'game'   => $gid,
+				'tokens' => $tokens,
+			);
+		}
+	}
+	if ( $pots ) {
+		$out['jackpots'] = array_values( $pots );
+	}
+
+	$prizes = array();
+	foreach ( lilahcraft_list( lilahcraft_field( $j, 'prizes' ) ) as $p ) {
+		$id       = lilahcraft_id( lilahcraft_field( $p, 'id' ) );
+		$category = lilahcraft_enum( lilahcraft_field( $p, 'category' ), array( 'boosts', 'hunt', 'cosmetics', 'perks', 'trophies', 'minis' ) );
+		$cost     = lilahcraft_whole( lilahcraft_field( $p, 'cost' ), 0, 1000000000 );
+		if ( '' === $id || '' === $category || null === $cost || isset( $prizes[ $id ] ) || count( $prizes ) >= 200 ) {
+			continue;
+		}
+		$name          = lilahcraft_arcade_text( lilahcraft_field( $p, 'name' ), 60 );
+		$about         = lilahcraft_arcade_text( lilahcraft_field( $p, 'description' ), 200 );
+		$prizes[ $id ] = array(
+			'id'       => $id,
+			'name'     => '' !== $name ? $name : lilahcraft_id_words( $id ),
+			'category' => $category,
+			'cost'     => $cost,
+		);
+		if ( '' !== $about ) {
+			$prizes[ $id ]['description'] = $about;
+		}
+	}
+	if ( $prizes ) {
+		$out['prizes'] = array_values( $prizes );
+	}
+
+	$packs = array();
+	foreach ( lilahcraft_list( lilahcraft_field( $j, 'packs' ) ) as $p ) {
+		$id   = lilahcraft_id( lilahcraft_field( $p, 'id' ) );
+		$cost = lilahcraft_whole( lilahcraft_field( $p, 'cost' ), 0, 1000000000 );
+		$odds = lilahcraft_clean_pack_odds( lilahcraft_field( $p, 'odds' ) );
+		if ( '' === $id || null === $cost || ! $odds || isset( $packs[ $id ] ) || count( $packs ) >= 50 ) {
+			continue;
+		}
+		$name         = lilahcraft_arcade_text( lilahcraft_field( $p, 'name' ), 60 );
+		$packs[ $id ] = array(
+			'id'   => $id,
+			'name' => '' !== $name ? $name : lilahcraft_id_words( $id ),
+			'cost' => $cost,
+			'odds' => $odds,
+		);
+	}
+	if ( $packs ) {
+		$out['packs'] = array_values( $packs );
+	}
+
+	$done = array();
+	foreach ( lilahcraft_list( lilahcraft_field( $j, 'achievements' ) ) as $a ) {
+		$id     = lilahcraft_id( lilahcraft_field( $a, 'id' ) );
+		$about  = lilahcraft_arcade_text( lilahcraft_field( $a, 'description' ), 200 );
+		$name   = lilahcraft_arcade_text( lilahcraft_field( $a, 'name' ), 120 );
+		$name   = '' !== $name ? $name : lilahcraft_arcade_text( $about, 120 );
+		$tokens = lilahcraft_whole( lilahcraft_field( $a, 'tokens' ), 0, 1000000 );
+		// HomeCraftMgmt already leaves out the ones won by a game of chance (the jackpot); so does the site.
+		if ( '' === $id || '' === $name || null === $tokens || isset( $done[ $id ] ) || count( $done ) >= 200
+			|| false !== stripos( $id . ' ' . $name . ' ' . $about, 'jackpot' ) ) {
+			continue;
+		}
+		$done[ $id ] = array(
+			'id'          => $id,
+			'name'        => $name,
+			'description' => '' !== $about ? $about : $name,
+			'tokens'      => $tokens,
+		);
+	}
+	if ( $done ) {
+		$out['achievements'] = array_values( $done );
+	}
+	return $out;
+}
+
+/**
+ * One games[] entry, or null when it isn't one the site can show. Every entry has { id, name, kind }; then by kind:
+ *
+ *   chance    stakes [tokens in], rtp (the lowest of rtpByStake), rtpByStake { stake: percent, one decimal rounded
+ *             down, above 0 and at most 100 }, dailyLimit?, paytable? (lilahcraft_clean_pay_row()), rules?, and only
+ *             these extras: payouts? { stake: { win, twentyOne, doubleWin } } (Twenty-One), maxMultiplier? and
+ *             maxGuesses? (Higher or Lower). A stake without its give-back is left out, and so is a game with no stake left.
+ *   cabinet   board, unit: ms|points|flips|apples|wins, lowerIsBetter, best?, holder? (an unknown unit leaves out
+ *             unit, lowerIsBetter, best and holder: a score can't be shown without its unit)
+ *   parkour, elytra, boat   tier?: easy|medium|hard|extreme, record? { ms, at?, holder? }
+ *   golf      holes?, par?, record? { strokes, at?, holder? }
+ *
+ * holder only comes through when the feed sends one (HomeCraftMgmt does only while its owner has names on).
+ *
+ * @param mixed $g   Feed entry.
+ * @param int   $now The time now (ms).
+ * @return array|null
+ */
+function lilahcraft_clean_arcade_game( $g, $now ) {
+	$id   = lilahcraft_id( lilahcraft_field( $g, 'id' ) );
+	$kind = lilahcraft_enum( lilahcraft_field( $g, 'kind' ), array( 'chance', 'cabinet', 'parkour', 'elytra', 'boat', 'golf' ) );
+	if ( '' === $id || '' === $kind ) {
+		return null;
+	}
+	$name = lilahcraft_arcade_text( lilahcraft_field( $g, 'name' ), 60 );
+	$row  = array(
+		'id'   => $id,
+		'name' => '' !== $name ? $name : lilahcraft_id_words( $id ),
+		'kind' => $kind,
+	);
+
+	if ( 'chance' === $kind ) {
+		$given = lilahcraft_object( lilahcraft_field( $g, 'rtpByStake' ) );
+		$rtps  = array();
+		foreach ( lilahcraft_list( lilahcraft_field( $g, 'stakes' ) ) as $stake ) {
+			$stake = lilahcraft_whole( $stake, 1, 100000 );
+			$rtp   = null === $stake ? null : lilahcraft_num( isset( $given[ $stake ] ) ? $given[ $stake ] : null );
+			if ( null !== $rtp && $rtp > 0 && $rtp <= 100 && ! isset( $rtps[ $stake ] ) && count( $rtps ) < 20 ) {
+				// One decimal, rounded down like the feed's, so "about N" can never read high.
+				$rtps[ $stake ] = floor( round( $rtp * 10, 6 ) ) / 10;
+			}
+		}
+		if ( ! $rtps ) {
+			return null;
+		}
+		$row['stakes']     = array_keys( $rtps );
+		$row['rtp']        = min( $rtps );
+		$row['rtpByStake'] = $rtps;
+		$limit             = lilahcraft_whole( lilahcraft_field( $g, 'dailyLimit' ), 1, 100000 );
+		if ( null !== $limit ) {
+			$row['dailyLimit'] = $limit;
+		}
+		$rows = array();
+		foreach ( lilahcraft_list( lilahcraft_field( $g, 'paytable' ) ) as $p ) {
+			$p = lilahcraft_clean_pay_row( $p, $rtps );
+			if ( $p && count( $rows ) < 100 ) {
+				$rows[] = $p;
+			}
+		}
+		if ( $rows ) {
+			$row['paytable'] = $rows;
+		}
+		$rules = lilahcraft_arcade_text( lilahcraft_field( $g, 'rules' ), 200 );
+		if ( '' !== $rules ) {
+			$row['rules'] = $rules;
+		}
+		$given   = lilahcraft_object( lilahcraft_field( $g, 'payouts' ) );
+		$payouts = array();
+		foreach ( array_keys( $rtps ) as $stake ) {
+			$p     = isset( $given[ $stake ] ) ? $given[ $stake ] : null;
+			$three = array(
+				'win'       => lilahcraft_whole( lilahcraft_field( $p, 'win' ), 0, 10000000 ),
+				'twentyOne' => lilahcraft_whole( lilahcraft_field( $p, 'twentyOne' ), 0, 10000000 ),
+				'doubleWin' => lilahcraft_whole( lilahcraft_field( $p, 'doubleWin' ), 0, 10000000 ),
+			);
+			if ( ! in_array( null, $three, true ) ) {
+				$payouts[ $stake ] = $three;
+			}
+		}
+		if ( $payouts ) {
+			$row['payouts'] = $payouts;
+		}
+		$top = lilahcraft_num( lilahcraft_field( $g, 'maxMultiplier' ) );
+		if ( null !== $top && $top > 0 && $top <= 1000000 ) {
+			$row['maxMultiplier'] = floor( $top ) === $top ? (int) $top : $top;
+		}
+		$guesses = lilahcraft_whole( lilahcraft_field( $g, 'maxGuesses' ), 1, 1000 );
+		if ( null !== $guesses ) {
+			$row['maxGuesses'] = $guesses;
+		}
+		return $row;
+	}
+
+	if ( 'cabinet' === $kind ) {
+		$row['board'] = lilahcraft_arcade_text( lilahcraft_field( $g, 'board' ), 40 );
+		$unit         = lilahcraft_enum( lilahcraft_field( $g, 'unit' ), array( 'ms', 'points', 'flips', 'apples', 'wins' ) );
+		if ( '' !== $unit ) {
+			$lower                = lilahcraft_field( $g, 'lowerIsBetter' );
+			$row['unit']          = $unit;
+			$row['lowerIsBetter'] = is_bool( $lower ) ? $lower : in_array( $unit, array( 'ms', 'flips' ), true );
+			$best                 = lilahcraft_whole( lilahcraft_field( $g, 'best' ), 0, 1000000000000 );
+			if ( null !== $best ) {
+				$row['best'] = $best;
+				$holder      = lilahcraft_arcade_holder( lilahcraft_field( $g, 'holder' ) );
+				if ( '' !== $holder ) {
+					$row['holder'] = $holder;
+				}
+			}
+		}
+		return $row;
+	}
+
+	$given = lilahcraft_object( lilahcraft_field( $g, 'record' ) );
+	if ( 'golf' === $kind ) {
+		foreach ( array( 'holes' => 100, 'par' => 1000 ) as $key => $max ) {
+			$n = lilahcraft_whole( lilahcraft_field( $g, $key ), 1, $max );
+			if ( null !== $n ) {
+				$row[ $key ] = $n;
+			}
+		}
+		$key   = 'strokes';
+		$score = lilahcraft_whole( lilahcraft_field( $given, $key ), 1, 100000 );
+	} else {
+		$tier = lilahcraft_enum( lilahcraft_field( $g, 'tier' ), array( 'easy', 'medium', 'hard', 'extreme' ) );
+		if ( '' !== $tier ) {
+			$row['tier'] = $tier;
+		}
+		$key   = 'ms';
+		$score = lilahcraft_whole( lilahcraft_field( $given, $key ), 1, 1000000000 );
+	}
+	if ( null !== $score ) {
+		$record = array( $key => $score );
+		// A record set "tomorrow" is a clock slip: it keeps its score and loses the date.
+		$at = lilahcraft_time( lilahcraft_field( $given, 'at' ), $now + DAY_IN_SECONDS * 1000 );
+		if ( $at > 0 ) {
+			$record['at'] = $at;
+		}
+		$holder = lilahcraft_arcade_holder( lilahcraft_field( $given, 'holder' ) );
+		if ( '' !== $holder ) {
+			$record['holder'] = $holder;
+		}
+		$row['record'] = $record;
+	}
+	return $row;
+}
+
+/**
+ * One paytable row, or null when it can't be shown. Every row keeps its odds, so a payout is never shown without
+ * them: { stake?, combo, pays, chance, oneIn } or { stake?, combo, pays, spaces, of } (the Wheel's 24 spaces).
+ *
+ *   stake   a row with one pays that many tokens at that stake (one of the game's stakes); a row without one
+ *           pays that multiple of the tokens put in
+ *   chance  above 0 and at most 1, with oneIn: the "1 in N" the game screen shows, which must agree with chance
+ *   spaces  of `of` spaces (0 < spaces ≤ of ≤ 1000)
+ *
+ * @param mixed $p      Feed row.
+ * @param array $stakes The game's cleaned stakes, as keys.
+ * @return array|null
+ */
+function lilahcraft_clean_pay_row( $p, $stakes ) {
+	$out = array();
+	if ( null !== lilahcraft_field( $p, 'stake' ) ) {
+		$stake = lilahcraft_whole( $p['stake'], 1, 100000 );
+		if ( null === $stake || ! isset( $stakes[ $stake ] ) ) {
+			return null;
+		}
+		$out['stake'] = $stake;
+	}
+	$combo  = lilahcraft_arcade_text( lilahcraft_field( $p, 'combo' ), 60 );
+	$pays   = lilahcraft_whole( lilahcraft_field( $p, 'pays' ), 0, 10000000 );
+	$chance = lilahcraft_num( lilahcraft_field( $p, 'chance' ) );
+	$one_in = lilahcraft_whole( lilahcraft_field( $p, 'oneIn' ), 1, 1000000000 );
+	$spaces = lilahcraft_whole( lilahcraft_field( $p, 'spaces' ), 1, 1000 );
+	$of     = lilahcraft_whole( lilahcraft_field( $p, 'of' ), 1, 1000 );
+	// oneIn is rounded from the exact chance and chance to 4 significant digits, so they agree to within 1 %.
+	$odds = null !== $chance && $chance > 0 && $chance <= 1 && null !== $one_in && abs( $one_in - 1 / $chance ) <= max( 1, 0.01 / $chance );
+	$ring = null !== $spaces && null !== $of && $spaces <= $of;
+	if ( '' === $combo || null === $pays || ( ! $odds && ! $ring ) ) {
+		return null;
+	}
+	$out['combo'] = $combo;
+	$out['pays']  = $pays;
+	if ( $odds ) {
+		$out['chance'] = $chance;
+		$out['oneIn']  = $one_in;
+	}
+	if ( $ring ) {
+		$out['spaces'] = $spaces;
+		$out['of']     = $of;
+	}
+	return $out;
+}
+
+/**
+ * A Card Pack's odds in rarity order, { COMMON: 62, UNCOMMON: 28, … }: percents above 0, each rarity once (any case
+ * in the feed, upper case out). [] when there are none, or when they don't add up to 100 (±1).
+ *
+ * @param mixed $odds Feed value.
+ * @return array
+ */
+function lilahcraft_clean_pack_odds( $odds ) {
+	$given = array();
+	foreach ( lilahcraft_object( $odds ) as $key => $pct ) {
+		$key = strtoupper( (string) $key );
+		if ( ! isset( $given[ $key ] ) ) {
+			$given[ $key ] = $pct;
+		}
+	}
+	$out = array();
+	foreach ( array( 'COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY' ) as $rarity ) {
+		$pct = lilahcraft_num( isset( $given[ $rarity ] ) ? $given[ $rarity ] : null );
+		if ( null !== $pct && $pct > 0 && $pct <= 100 ) {
+			$out[ $rarity ] = floor( $pct ) === $pct ? (int) $pct : $pct;
+		}
+	}
+	return ( $out && abs( array_sum( $out ) - 100 ) <= 1 ) ? $out : array();
 }

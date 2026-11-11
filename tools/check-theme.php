@@ -11,6 +11,8 @@
  * - none of the old 2.0 look in any css, html, js, php, json or svg file: its colours (#1d2150, #ff7ac0,
  *   #63e3ea, and the navy #2b3172, #3d4494), its token and class names, rounded corners, outlined
  *   (text-stroke) text and the radial-gradient star field
+ * - the Arcade page's files never use the words HomeCraftMgmt keeps out of anything about games of chance:
+ *   bet, wager, gamble, casino, lucky, almost, so close (its tokens are "tokens in" and "tokens back")
  *
  * Exits 1 on any failure.
  */
@@ -33,6 +35,10 @@ $old_look = array(
 	'/radial-gradient/i' => 'a radial gradient (the old star field)',
 );
 
+// HomeCraftMgmt's word rule for games of chance (its games guide), checked in the Arcade page's files. "Lucky
+// fishing" is a Prize Counter boost, not a game of chance.
+$chance_words = '/\b(bets?|betting|wager\w*|gambl\w*|casinos?|lucky|almost|so\s+close)\b/i';
+
 $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $files as $file ) {
 	$path = str_replace( '\\', '/', $file->getPathname() );
@@ -49,6 +55,11 @@ foreach ( $files as $file ) {
 				$failures[] = "$rel still has $what ($old[0]).";
 			}
 		}
+	}
+
+	if ( preg_match( '#/(templates/page-arcade\.html|assets/(css|js)/page-arcade\.(css|js))$#', $path )
+		&& preg_match_all( $chance_words, preg_replace( '/lucky fishing/i', '', $body ), $words ) ) {
+		$failures[] = "$rel uses a word the Arcade never uses about games of chance: " . implode( ', ', array_unique( $words[0] ) ) . '.';
 	}
 
 	if ( $can_lint && substr( $path, -4 ) === '.php' ) {
