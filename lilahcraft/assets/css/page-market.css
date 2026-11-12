@@ -141,12 +141,12 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-star{color:var(--orange)}
 .lc-main--market .mk-app .lc-chip[aria-pressed="true"] .mk-star{color:#fff}
 .lc-main--market .mk-pickf{display:none}
-.lc-main--market .mk-list-head{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;padding:8px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+.lc-main--market .mk-list-head{display:grid;grid-template-columns:minmax(0,1fr) 76px 70px;gap:8px;padding:8px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
 .lc-main--market .mk-list-head>span+span{text-align:right}
 /* position: the list, not the page, holds its rows' absolute .lc-sr words, so it clips them; otherwise the hidden
    words of a few hundred rows hang below the page and leave thousands of pixels of empty page under the footer */
 .lc-main--market .mk-list{position:relative;flex:1 1 auto;min-height:0;margin:0;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-color:var(--mk-edge) transparent}
-.lc-main--market .mk-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;align-items:center;width:100%;min-height:48px;padding:5px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--on-dark);font-family:var(--body);text-align:left;cursor:pointer}
+.lc-main--market .mk-row{display:grid;grid-template-columns:minmax(0,1fr) 76px 70px;gap:8px;align-items:center;width:100%;min-height:48px;padding:5px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--on-dark);font-family:var(--body);text-align:left;cursor:pointer}
 .lc-main--market .mk-row:hover{background:var(--mk-hover)}
 .lc-main--market .mk-row[aria-pressed="true"]{background:var(--mk-line);box-shadow:inset 4px 0 0 var(--purple-light)}
 .lc-main--market .mk-row:focus-visible{outline-offset:-3px}

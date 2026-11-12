@@ -285,7 +285,8 @@
   }
 
   function ensureSelection() {
-    if (!state.picked && state.wanted && state.byId[state.wanted]) { state.sel = state.wanted; return; }
+    /* A shared ?item= may differ in case: the address bar settles to the item's own id */
+    if (!state.picked && state.wanted && state.byId[state.wanted]) { state.sel = state.wanted; putURL(state.sel); return; }
     if (state.sel && state.byId[state.sel]) { return; }
     /* The chosen item left the feed: say so, as the chart moves on to another */
     var gone = state.sel ? state.selName : '';

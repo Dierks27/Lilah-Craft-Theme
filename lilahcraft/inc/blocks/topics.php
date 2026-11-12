@@ -98,12 +98,12 @@ function lilahcraft_render_topics() {
 		}
 		$count = (int) $term->count;
 		$num   = number_format_i18n( $count );
-		/* translators: 1: topic (category) name, 2: number of posts. Read by screen readers, e.g. "Updates, 2 posts". */
-		$label = sprintf( _n( '%1$s, %2$s post', '%1$s, %2$s posts', $count, 'lilahcraft' ), $term->name, $num );
+		// The link's name is what it shows plus a hidden word ("Updates 2 posts"), so voice control can say what it sees.
+		$word = _n( 'post', 'posts', $count, 'lilahcraft' );
 		$rows .= sprintf(
-			'<li><a class="lc-topic" href="%1$s" aria-label="%2$s"%3$s><span class="lc-topic-name">%4$s</span><span class="lc-topic-n">%5$s</span></a></li>',
+			'<li><a class="lc-topic" href="%1$s"%3$s><span class="lc-topic-name">%4$s<span class="lc-sr"> </span></span><span class="lc-topic-n">%5$s<span class="lc-sr"> %2$s</span></span></a></li>',
 			esc_url( $link ),
-			esc_attr( $label ),
+			esc_html( $word ),
 			$current === (int) $term->term_id ? ' aria-current="page"' : '',
 			esc_html( $term->name ),
 			esc_html( $num )

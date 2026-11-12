@@ -308,6 +308,10 @@ html:not(.lc-js) .lc-main--arcade .lc-ac-if-boat{display:none}
 @media (min-width:921px){
   .lc-main--arcade .lc-arcade-hero-in{min-height:calc(36px + var(--cell) * 9)}
 }
+/* Beside the side menu (921-1179 px) three earn cards are too narrow for a title like "Achievements": two across */
+@media (min-width:921px) and (max-width:1179px){
+  .lc-main--arcade .lc-ac-earn{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 /* Narrower desktops: the pick's facts go under its name */
 @media (max-width:1100px){
   .lc-main--arcade .lc-ac-pick{grid-template-columns:auto minmax(0,1fr)}
