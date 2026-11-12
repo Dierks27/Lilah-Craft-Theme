@@ -3,9 +3,11 @@
  * lilahcraft/craftbridge: the CraftBridge Client download card on the Downloads page.
  *
  * The loud two-column board: what the mod does on the left, the picker on the right
- * (Minecraft 26.2 or 26.3, Fabric or NeoForge), the Download link for the pick, the file name
- * and what else the pick needs. The default pick is rendered here, so the link works without
- * JavaScript; assets/js/page-downloads.js switches picks from the data in data-lc-cb.
+ * (Minecraft 26.2 or 26.3, Fabric or NeoForge), the Download link for the pick, the file name,
+ * what else the pick needs and, on NeoForge, that JEI gets no server recipes there. The default
+ * pick is rendered here, so the link works without JavaScript; assets/js/page-downloads.js
+ * switches picks from the data in data-lc-cb. (The Collins card beside it on the Downloads page
+ * is plain blocks in templates/page-downloads.html: one file, nothing to pick.)
  *
  * Links come from Settings > LilahCraft: the download URL pattern with {version}, {mc} and
  * {loader} filled in. Each link is checked with a HEAD request (cached 12 hours in the
@@ -50,6 +52,20 @@ function lilahcraft_cb_loaders() {
 		'fabric'   => 'Fabric',
 		'neoforge' => 'NeoForge',
 	);
+}
+
+/**
+ * A line a loader's picks carry under "You also need", or ''. The server sends its recipes to JEI
+ * over Fabric's recipe sync, which a NeoForge client doesn't listen on (CraftBridge README).
+ *
+ * @param string $loader Loader value, like neoforge.
+ * @return string
+ */
+function lilahcraft_cb_loader_note( $loader ) {
+	if ( 'neoforge' === $loader ) {
+		return __( 'On NeoForge, JEI shows only the game’s own recipes, not the server’s. Fabric gets both.', 'lilahcraft' );
+	}
+	return '';
 }
 
 /**
@@ -144,7 +160,7 @@ function lilahcraft_cb_check_assets( $urls ) {
  *
  * @return array {
  *     @type string $version CraftBridge Client version.
- *     @type array  $picks   [mc][loader] => { href, file, label, line, needs[], fallback }.
+ *     @type array  $picks   [mc][loader] => { href, file, label, line, needs[], note, fallback }.
  * }
  */
 function lilahcraft_cb_data() {
@@ -192,6 +208,7 @@ function lilahcraft_cb_data() {
 					/* translators: %s: JEI version, like JEI 30.32.0.209. */
 					sprintf( __( '%s for the same loader', 'lilahcraft' ), $reqs[ $mc ]['jei'] ),
 				),
+				'note'     => lilahcraft_cb_loader_note( $loader ),
 				'fallback' => $fallback,
 			);
 		}
@@ -228,10 +245,10 @@ function lilahcraft_render_craftbridge() {
 	$reqs    = lilahcraft_cb_requirements();
 	$loaders = lilahcraft_cb_loaders();
 
-	// Start on the server's Minecraft version when the picker offers it, with Fabric.
+	// Start on the server's Minecraft version when the picker offers it (else the newest it offers), with Fabric.
 	$server = trim( (string) lilahcraft_setting( 'mc_version' ) );
 	$mcs    = array_keys( $reqs );
-	$mc     = isset( $data['picks'][ $server ] ) ? $server : $mcs[0];
+	$mc     = isset( $data['picks'][ $server ] ) ? $server : $mcs[ count( $mcs ) - 1 ];
 	$loader = 'fabric';
 	$pick   = $data['picks'][ $mc ][ $loader ];
 
@@ -257,7 +274,7 @@ function lilahcraft_render_craftbridge() {
 				<h3 class="lc-cb-title"><?php esc_html_e( 'CraftBridge Client', 'lilahcraft' ); ?></h3>
 				<span class="lc-pill lc-pill--code"><span class="lc-sr"><?php esc_html_e( 'Version', 'lilahcraft' ); ?> </span><?php echo esc_html( $data['version'] ); ?></span>
 			</div>
-			<p class="lc-cb-lede"><?php esc_html_e( 'Our own client mod. It makes the server’s crafting and storage blocks see everything you own.', 'lilahcraft' ); ?></p>
+			<p class="lc-cb-lede"><?php esc_html_e( 'Made for the server’s crafting and storage blocks. It shows you everything they can reach.', 'lilahcraft' ); ?></p>
 			<ul class="lc-cb-feats">
 				<?php foreach ( $features as $feature ) : ?>
 				<li><?php echo $feature; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?></li>
@@ -291,6 +308,7 @@ function lilahcraft_render_craftbridge() {
 					<li><?php echo esc_html( $need ); ?></li>
 					<?php endforeach; ?>
 				</ul>
+				<p class="lc-cb-warn" data-lc-cb-note<?php echo '' === $pick['note'] ? ' hidden' : ''; ?>><?php echo esc_html( $pick['note'] ); ?></p>
 				<p class="lc-cb-need"><?php esc_html_e( 'Client only. Don’t put it on a server.', 'lilahcraft' ); ?></p>
 			</div>
 			<noscript>
@@ -313,7 +331,7 @@ function lilahcraft_render_craftbridge() {
 								?>
 							</a>
 							<span class="lc-cb-all-file"><?php echo esc_html( $one['line'] ); ?></span>
-							<span class="lc-cb-all-needs"><?php echo esc_html( implode( '. ', $one['needs'] ) . '.' ); ?></span>
+							<span class="lc-cb-all-needs"><?php echo esc_html( implode( '. ', $one['needs'] ) . '.' . ( '' !== $one['note'] ? ' ' . $one['note'] : '' ) ); ?></span>
 						</li>
 							<?php endforeach; ?>
 						<?php endforeach; ?>

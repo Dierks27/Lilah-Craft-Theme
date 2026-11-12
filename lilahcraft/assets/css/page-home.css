@@ -7,8 +7,9 @@
 
 /* ---------- hero: charcoal band, amethyst texture (site.css), MINE · SELL, copy and the market board ---------- */
 /* 90 px below (72 drawn): the board is taller than drawn, by its headlines, and MINE · SELL still shows whole beneath it
-   and its shadow. */
-.lc-main--home .lc-home-hero-in{padding-block:64px 90px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center}
+   and its shadow. The copy keeps to the top, level with the board: centred, it would follow the board down whenever the
+   board's height changes (its headlines fill in after load). */
+.lc-main--home .lc-home-hero-in{padding-block:64px 90px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:start}
 .lc-main--home .lc-home-hero-in>*{max-width:none}
 /* MINE · SELL is about 8.1 × its size wide: below about 1130 px it shrinks with the window so the whole word shows,
    and its foot stays cropped by the hero's edge in proportion, as drawn (-22 px at 128). */
@@ -19,7 +20,8 @@
 .lc-main--home .lc-home-hero>.wp-block-html{position:static}
 .lc-main--home .lc-home-hero-copy{display:flex;flex-direction:column;gap:20px;min-width:0}
 .lc-main--home .lc-home-title{font-size:50px}
-.lc-main--home .lc-home-lede{max-width:520px;font-size:20px}
+/* Short sentences in a narrow column: "pretty" keeps a last word from standing alone on its line (where supported) */
+.lc-main--home .lc-home-lede{max-width:520px;font-size:20px;text-wrap:pretty}
 
 /* The address in a box, the copy button joined to it */
 .lc-main--home .lc-home-addr{display:flex;flex-wrap:wrap;align-items:stretch}
@@ -58,7 +60,8 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--home [data-lc-copy]{
 .lc-main--home .lc-home-bd-out--chg{display:none}
 .lc-main--home .lc-home-bd-table .lc-home-bd-wait td,
 .lc-main--home .lc-home-bd-table .lc-home-bd-msg td{padding:24px 18px;text-align:center;font-size:15px;color:var(--muted)}
-.lc-js .lc-main--home .lc-home-bd-table .lc-home-bd-wait td{height:258px}
+/* Six rows' height (about 43.7 px each; less on phones, below), so the board doesn't grow when they come in */
+.lc-js .lc-main--home .lc-home-bd-table .lc-home-bd-wait td{height:262px}
 .lc-js .lc-main--home .lc-home-nojs,html:not(.lc-js) .lc-main--home .lc-home-js{display:none}
 
 /* Headlines from the feed (feature 4), between the rows and the foot; the market news instead while the live market
@@ -82,6 +85,11 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--home [data-lc-copy]{
 .lc-main--home .lc-home-board .lc-home-bd-season{margin-top:2px;font-size:14px;line-height:1.45}
 .lc-main--home .lc-home-bd-season .lc-home-bd-news-label{margin-right:4px}
 .lc-main--home .lc-home-bd-season strong{font-weight:800;color:var(--ink)}
+.lc-main--home .lc-home-bd-left{white-space:nowrap}
+/* Until the board's first render (page-home.js then sets data-ready) the table keeps the Headlines box's room below
+   it, so the hero and everything under it stay put when the box fills in: three one-line news rows and the season
+   line (taller on phones, below). Without JavaScript the box stays hidden and no room is kept. */
+.lc-js .lc-main--home .lc-home-board:not([data-ready]) .lc-home-bd-table{margin-bottom:150px}
 
 .lc-main--home .lc-home-bd-foot{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 18px;border-top:3px solid var(--edge)}
 .lc-main--home .lc-home-bd-foot p{font-size:14px}
@@ -105,7 +113,7 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--home [data-lc-copy]{
 .lc-main--home .lc-home-strip-title a::after{content:"";position:absolute;inset:-3px}
 .lc-main--home .lc-home-strip-title a:focus-visible{outline:0}
 .lc-main--home .lc-home-strip-title a:focus-visible::after{outline:3px solid var(--focus);outline-offset:3px}
-.lc-main--home .lc-home-strip .lc-home-strip-text{font-size:16px;color:var(--text)}
+.lc-main--home .lc-home-strip .lc-home-strip-text{font-size:16px;color:var(--text);text-wrap:pretty}
 .lc-main--home .lc-home-strip:hover{box-shadow:6px 6px 0 var(--pop)}
 .lc-main--home .lc-home-strip:hover .lc-home-strip-title a{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px}
 
@@ -125,7 +133,7 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--home [data-lc-copy]{
 .lc-main--home .lc-home-door-icon--violet{--t-bg:var(--purple-light);--t-deep:#8a6cf0;--t-ink:var(--charcoal)}
 .lc-main--home .lc-home-door-icon svg{width:28px;height:28px;margin:0 2px 2px 0;fill:none;stroke:var(--t-ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lc-main--home .lc-home-door-title{font-family:var(--display);font-weight:800;font-size:21px;line-height:1.2;letter-spacing:-.01em}
-.lc-main--home .lc-home-door-text{font-size:17px;color:var(--text)}
+.lc-main--home .lc-home-door-text{font-size:17px;color:var(--text);text-wrap:pretty}
 .lc-main--home .lc-home-door-cta{margin-top:auto;padding-top:4px;font-weight:800;font-size:16px;color:var(--purple-text)}
 .lc-main--home .lc-home-door:hover .lc-home-door-cta{color:var(--pink-text);text-decoration:underline;text-underline-offset:3px}
 
@@ -249,7 +257,9 @@ html:not(.lc-js) .lc-main--home .lc-home-minis-show{display:none}
   .lc-main--home .lc-home-bd-table tbody th{font-size:15px}
   .lc-main--home .lc-home-bd-price{font-size:14px}
   .lc-main--home .lc-home-bd-chg{font-size:13px}
+  .lc-js .lc-main--home .lc-home-bd-table .lc-home-bd-wait td{height:257px}
   .lc-main--home .lc-home-bd-news li{font-size:14px}
+  .lc-js .lc-main--home .lc-home-board:not([data-ready]) .lc-home-bd-table{margin-bottom:170px}
   .lc-main--home .lc-home-bd-foot{flex-direction:column;align-items:flex-start;gap:6px}
   .lc-main--home .lc-home-bd-foot a{margin-block:-8px}
   .lc-main--home .lc-home-strip{padding:18px 20px 20px}
@@ -277,8 +287,18 @@ html:not(.lc-js) .lc-main--home .lc-home-minis-show{display:none}
   .lc-main--home .lc-home-bd-out--chg{display:inline-flex}
   .lc-main--home .lc-home-bd-chg .lc-home-bd-dash{display:none}
   .lc-main--home .lc-home-bd-table .lc-home-bd-chg{padding-right:14px}
+  .lc-js .lc-main--home .lc-home-bd-table .lc-home-bd-wait td{height:253px}
+  .lc-js .lc-main--home .lc-home-board:not([data-ready]) .lc-home-bd-table{margin-bottom:189px}
+  /* Here the time ("as of 3:56 AM") always goes under the title: keep its line while loading too */
+  .lc-js .lc-main--home .lc-home-board:not([data-ready]) .lc-home-bd-head{min-height:78px}
+}
+/* Below 375 px the address and its copy button fit side by side only in the fallback fonts: once the web fonts are in,
+   the button drops under the address and the board jumps down 50 px. It goes there from the start. */
+@media (max-width:374px){
+  .lc-main--home .lc-home-addr-box{flex-basis:100%}
 }
 @media (max-width:360px){
   .lc-main--home .lc-home-bd-table tbody th{font-size:14px}
+  .lc-js .lc-main--home .lc-home-bd-table .lc-home-bd-wait td{height:245px}
   .lc-main--home .lc-home-addr-box{font-size:16px}
 }

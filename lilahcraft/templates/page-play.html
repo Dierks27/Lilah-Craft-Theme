@@ -18,8 +18,9 @@
 <!-- /wp:group -->
 
 <!-- wp:group {"tagName":"section","className":"lc-sec lc-play-join"} -->
-<section class="wp-block-group lc-sec lc-play-join"><!-- wp:group {"className":"lc-wrap lc-grid lc-cols-2 lc-play-paths"} -->
-<div class="wp-block-group lc-wrap lc-grid lc-cols-2 lc-play-paths"><!-- wp:group {"anchor":"java","className":"lc-board lc-play-path lc-play-path--java"} -->
+<section class="wp-block-group lc-sec lc-play-join"><!-- wp:group {"className":"lc-wrap lc-stack lc-play-join-in"} -->
+<div class="wp-block-group lc-wrap lc-stack lc-play-join-in"><!-- wp:group {"className":"lc-grid lc-cols-2 lc-play-paths"} -->
+<div class="wp-block-group lc-grid lc-cols-2 lc-play-paths"><!-- wp:group {"anchor":"java","className":"lc-board lc-play-path lc-play-path--java"} -->
 <div id="java" class="wp-block-group lc-board lc-play-path lc-play-path--java"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
 <h2 class="wp-block-heading lc-h2 lc-h2--md">Java Edition</h2>
 <!-- /wp:heading -->
@@ -38,7 +39,7 @@
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->
-<li>Join. You land in the hub, where portals lead to each world.</li>
+<li>Join. You land in the hub; take a portal from there.</li>
 <!-- /wp:list-item --></ol>
 <!-- /wp:list -->
 
@@ -48,6 +49,10 @@
   <button class="lc-btn lc-btn--purple" type="button" data-lc-copy="mc.lilahcraft.com" data-lc-copied="Copied!">Copy address</button>
 </div>
 <!-- /wp:html -->
+
+<!-- wp:paragraph {"className":"lc-play-mods-note"} -->
+<p class="lc-play-mods-note">Mods are optional. To see TVs, add Collins from the <a href="/downloads/">Downloads page</a>.</p>
+<!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"lc-play-pathnote"} -->
 <p class="lc-play-pathnote">Use the newest release of Minecraft. The server keeps up with updates.</p>
@@ -92,8 +97,45 @@
 <!-- /wp:html -->
 
 <!-- wp:paragraph {"className":"lc-play-pathnote"} -->
-<p class="lc-play-pathnote">A few Java-only extras (like JEI) won’t show up for you. Everything else works.</p>
+<p class="lc-play-pathnote">TVs and mods are Java only, and a few things work differently. <a href="#on-bedrock">What’s different on Bedrock</a></p>
 <!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"anchor":"on-bedrock","className":"lc-card lc-play-diff"} -->
+<div id="on-bedrock" class="wp-block-group lc-card lc-play-diff"><!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--sm">What’s different on Bedrock</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">Same server, same worlds, same rules. The differences:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"lc-play-diff-list"} -->
+<ul class="wp-block-list lc-play-diff-list"><!-- wp:list-item -->
+<li><strong>TVs</strong> need a Java mod, so on Bedrock you won’t see or hear them.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>The Linked Workbench</strong> is a plain crafting table for you. The Combo Chest reaches into nearby chests on both.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Sorting a chest:</strong> use <code>/sort</code>, or pick sneak-punch in <code>/sort settings</code>. There’s no outside of the window to double-click.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Menus</strong> put the key fact in each tile’s name. Press and hold a tile for the rest.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Mini golf:</strong> a ball you buy shows for you. A Mini’s head as your ball is Java only.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Mods</strong>, voice chat included, are Java only. You install nothing.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
@@ -122,8 +164,8 @@
 <h2 class="wp-block-heading lc-h2">The worlds</h2>
 <!-- /wp:heading -->
 
-<!-- wp:group {"className":"lc-grid lc-cols-2 lc-play-worlds"} -->
-<div class="wp-block-group lc-grid lc-cols-2 lc-play-worlds"><!-- wp:group {"className":"lc-card lc-play-world"} -->
+<!-- wp:group {"className":"lc-grid lc-cols-3 lc-play-worlds"} -->
+<div class="wp-block-group lc-grid lc-cols-3 lc-play-worlds"><!-- wp:group {"className":"lc-card lc-play-world"} -->
 <div class="wp-block-group lc-card lc-play-world"><!-- wp:html -->
 <div class="lc-strip lc-strip--stone" aria-hidden="true"></div>
 <!-- /wp:html -->
@@ -147,7 +189,21 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>The main survival world. Mobs are on, so bring a sword. It has its own Nether and End, and your inventory travels with you between them.</p>
+<p>The main survival world. It has its own Nether and End, and your inventory travels with you between them.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-play-world"} -->
+<div class="wp-block-group lc-card lc-play-world"><!-- wp:html -->
+<div class="lc-strip lc-strip--wool" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Games world</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The courses, mini golf and the Clubhouse. A game takes you there and brings you back with everything you had. Nothing there can be built or broken.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
@@ -202,22 +258,38 @@
 <section class="wp-block-group lc-sec"><!-- wp:group {"className":"lc-wrap lc-grid lc-cols-2 lc-play-more"} -->
 <div class="wp-block-group lc-wrap lc-grid lc-cols-2 lc-play-more"><!-- wp:group {"className":"lc-play-col"} -->
 <div class="wp-block-group lc-play-col"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
-<h2 class="wp-block-heading lc-h2 lc-h2--md">Say yes to the resource pack</h2>
+<h2 class="wp-block-heading lc-h2 lc-h2--md">Say yes to the resource packs</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">When you join, the server offers a small resource pack. It's what makes clocks tell the right time in every world.</p>
+<p class="lc-text">When you join, the server offers two. Both are optional: saying no changes how things look, not what works.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"className":"lc-card lc-card--dashed lc-play-soon"} -->
-<div class="wp-block-group lc-card lc-card--dashed lc-play-soon"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Coming soon: CraftBridge models</h3>
+<!-- wp:group {"className":"lc-play-mods lc-play-packs"} -->
+<div class="wp-block-group lc-play-mods lc-play-packs"><!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">LilahCraft clocks</h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>A second pack gives the Linked Workbench and Combo Chest their own 3D look. Skip it and they look like a plain crafting table and barrel.</p>
+<p>Clocks tell the right time in every world.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">CraftBridge models</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>3D models for the Linked Workbench and the Combo Chest, whose lid opens while it’s in use. Without the pack they’re a plain crafting table and barrel.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:paragraph {"className":"lc-note"} -->
+<p class="lc-note">Said no by accident? In your server list, pick the server, click Edit, and set Server Resource Packs to Enabled.</p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"lc-play-col"} -->
@@ -226,7 +298,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">None are required, and they're all Java only.</p>
+<p class="lc-text">None are required, and they're all Java only. Use Fabric: Collins needs it, and only there does JEI get the server’s recipes.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"className":"lc-actions"} -->
@@ -242,7 +314,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Look up any recipe, including the server’s own. Click <kbd>+</kbd> and the Linked Workbench fills the grid from your chests.</p>
+<p>Look up any recipe, the server’s own too on Fabric. Click <kbd>+</kbd> and the Linked Workbench fills the grid from your chests.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -273,6 +345,16 @@
 
 <!-- wp:paragraph -->
 <p>Lets the Combo Chest and Linked Workbench show every item in range, not just the first few dozen.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-play-mod"} -->
+<div class="wp-block-group lc-play-mod"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Collins</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>See and hear TVs: YouTube and Twitch on screens players put up. Fabric and Minecraft 26.3 only.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
@@ -313,7 +395,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Land a town has claimed is protected, so nobody can grief it.</p>
+<p>Outsiders can’t build or break on land a town has claimed, or put up a TV there.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -333,7 +415,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Arcade tokens can’t be bought with money and never turn into money. Prizes can’t be sold for money.</p>
+<p>Arcade tokens can’t be bought with money and never turn into money. Prizes can’t be sold for money, only swapped item for item.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -353,7 +435,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Mods are optional. Bedrock players need nothing installed.</p>
+<p>Mods are optional. The one thing that needs a mod is seeing TVs: Collins, on Java. Bedrock players install nothing.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -363,7 +445,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Kids play here too, so chat and builds stay family-friendly.</p>
+<p>Kids play here too, so chat, builds and TVs stay family-friendly.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"lc-play-rules-link"} -->
@@ -374,9 +456,35 @@
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:html -->
-<span id="house-rules"></span>
-<!-- /wp:html -->
+<!-- wp:group {"tagName":"section","anchor":"house-rules","className":"lc-rules-wrap lc-play-rules"} -->
+<section id="house-rules" class="wp-block-group lc-rules-wrap lc-play-rules"><!-- wp:group {"className":"lc-rules"} -->
+<div class="wp-block-group lc-rules"><!-- wp:heading {"className":"lc-h2 lc-h2--md"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--md">House rules</h2>
+<!-- /wp:heading -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Keep chat, builds and TV videos family-friendly.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>No griefing, no stealing.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>No cheats or exploits. Found a bug? Tell staff instead of using it.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Respect other players’ claims and TVs.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Staff have the last word.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
 
 <!-- wp:post-content {"className":"lc-play-extra"} /--></main>
 <!-- /wp:group -->

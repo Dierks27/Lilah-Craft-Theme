@@ -3,7 +3,7 @@
  * Title: House rules
  * Slug: lilahcraft/house-rules
  * Categories: lilahcraft
- * Description: The dark House rules card from the Play page design. Insert it into the Play page once the rules are written, then type one rule per line.
+ * Description: The dark House rules card, with the rules as drafted for 2.2. The Play page already shows this card (it is in the Play template, where the Good to know link lands); insert this pattern to show the rules on another page. One rule per line.
  * Keywords: rules, play, server
  * Post Types: page
  * Viewport Width: 1280
@@ -19,20 +19,24 @@
 <!-- /wp:heading -->
 
 <!-- wp:list {"ordered":true} -->
-<ol class="wp-block-list"><!-- wp:list-item {"placeholder":"Type the first rule"} -->
-<li></li>
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Keep chat, builds and TV videos family-friendly.</li>
 <!-- /wp:list-item -->
 
-<!-- wp:list-item {"placeholder":"Type the second rule"} -->
-<li></li>
+<!-- wp:list-item -->
+<li>No griefing, no stealing.</li>
 <!-- /wp:list-item -->
 
-<!-- wp:list-item {"placeholder":"Type the third rule"} -->
-<li></li>
+<!-- wp:list-item -->
+<li>No cheats or exploits. Found a bug? Tell staff instead of using it.</li>
 <!-- /wp:list-item -->
 
-<!-- wp:list-item {"placeholder":"Type the fourth rule"} -->
-<li></li>
+<!-- wp:list-item -->
+<li>Respect other players’ claims and TVs.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Staff have the last word.</li>
 <!-- /wp:list-item --></ol>
 <!-- /wp:list --></div>
 <!-- /wp:group --></section>

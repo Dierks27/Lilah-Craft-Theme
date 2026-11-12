@@ -1,10 +1,15 @@
 /* LilahCraft 2.1 "Pixel pop": the Downloads page (templates/page-downloads.html) and its CraftBridge Client
    card (lilahcraft/craftbridge, inc/blocks/craftbridge.php; picker in assets/js/page-downloads.js).
+   The Collins card (#collins, plain blocks in the template) wears the same board classes (.lc-cb-board,
+   .lc-cb-about, .lc-cb-get, .lc-cb-needs…), so the two cards match; its own bits are .lc-dl-tv-*.
    Every rule is scoped under .lc-main--downloads (the editor loads all page files).
    Shared pieces come from site.css: .lc-hero (copper), .lc-sec, .lc-wrap, .lc-grid, .lc-card, .lc-board,
    .lc-btn, .lc-chip, .lc-pill. Colours are the look's tokens (--edge, --purple-text…), so the dark look needs no rules here. */
 
 .lc-main--downloads .lc-dl-made{gap:20px}
+/* Room for the boards' offset shadows: the Collins board and the "Running both?" tip sit further down */
+.lc-main--downloads .lc-dl-made>.lc-dl-tv{margin-top:20px}
+.lc-main--downloads .lc-dl-made>.lc-dl-both{margin-top:14px}
 .lc-main--downloads .lc-dl-stack{gap:24px}
 
 /* ---------- CraftBridge Client: the loud board, two columns ---------- */
@@ -46,6 +51,9 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 .lc-main--downloads .lc-cb-all{display:flex;flex-direction:column;gap:6px;padding-top:16px;border-top:2px solid var(--mid)}
 .lc-main--downloads .lc-cb-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--text)}
 .lc-main--downloads .lc-cb-need{font-size:15px;color:var(--text)}
+.lc-main--downloads .lc-cb-need code{background:none;padding:0;color:var(--ink)}
+/* NeoForge's note (no server recipes in JEI): a quiet line with an orange mark, not an alarm */
+.lc-main--downloads .lc-cb-warn{padding-left:12px;border-left:4px solid var(--orange);font-size:15px;color:var(--ink)}
 /* the deep shade: plain purple is under 4.5:1 on the gray panel */
 .lc-main--downloads .lc-cb-all a{display:inline-flex;align-items:center;min-height:44px;font-weight:800;color:var(--purple-deep-text)}
 .lc-main--downloads .lc-cb-all a:hover{color:var(--pink-text)}
@@ -53,10 +61,30 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 .lc-main--downloads .lc-cb-all-needs{display:block;overflow-wrap:anywhere}
 .lc-main--downloads .lc-cb-all-file{font-family:var(--mono);font-size:14px;color:var(--ink)}
 
+/* ---------- Collins: the second board (pink shadow) ---------- */
+.lc-main--downloads .lc-cb-quiet a{color:var(--purple-text)}
+.lc-main--downloads .lc-cb-quiet a:hover{color:var(--pink-text)}
+/* The plain privacy note: what the mod fetches, keeps and downloads */
+.lc-main--downloads .lc-dl-tv-privacy{padding:14px 16px;background:var(--page);border-left:4px solid var(--pink);font-size:16px;color:var(--text)}
+.lc-main--downloads .lc-dl-tv-privacy strong{color:var(--ink)}
+.lc-main--downloads .lc-dl-tv-privacy code{background:none;padding:0;color:var(--ink)}
+/* Nothing to pick: what it runs on, a row each in place of the picker's buttons */
+.lc-main--downloads .lc-dl-tv-fit{margin:0;padding:0;list-style:none;border-top:2px solid var(--mid)}
+.lc-main--downloads .lc-dl-tv-fit>li{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 16px;padding:10px 0;border-bottom:2px solid var(--mid);font-size:16px;color:var(--text)}
+.lc-main--downloads .lc-dl-tv-fit strong{font-family:var(--mono);font-weight:700;color:var(--ink)}
+/* Links on the gray panel: the deep shade (plain purple is under 4.5:1 there), a 44 px row each */
+.lc-main--downloads .lc-dl-tv-links{gap:0}
+.lc-main--downloads .lc-dl-tv-links a{display:inline-flex;align-items:center;min-height:44px;font-weight:800;color:var(--purple-deep-text)}
+.lc-main--downloads .lc-dl-tv-links a:hover{color:var(--pink-text)}
+.lc-main--downloads .lc-dl-both{max-width:880px}
+
 /* ---------- resource packs ---------- */
 .lc-main--downloads .lc-dl-pack{gap:12px}
 .lc-main--downloads .lc-dl-title{gap:6px 12px}
 .lc-main--downloads .lc-dl-tip{padding:14px 16px;background:var(--page);border-left:4px solid var(--orange);font-size:16px;color:var(--text)}
+.lc-main--downloads .lc-dl-tip strong{color:var(--ink)}
+/* On the gray band the tip is a light box like the cards beside it */
+.lc-main--downloads .lc-sec--gray .lc-dl-tip{max-width:880px;background:var(--card)}
 
 /* ---------- recommended mods ---------- */
 .lc-main--downloads .lc-dl-intro{max-width:700px}
@@ -72,6 +100,8 @@ html:not(.lc-js) .lc-main--downloads .lc-cb-get:not(.lc-cb-get--preview) .lc-cb-
 
 /* ---------- narrower screens ---------- */
 @media (max-width:920px){
+  .lc-main--downloads .lc-dl-made>.lc-dl-tv{margin-top:14px}
+  .lc-main--downloads .lc-dl-made>.lc-dl-both{margin-top:8px}
   .lc-main--downloads .lc-cb-board{grid-template-columns:minmax(0,1fr)}
   .lc-main--downloads .lc-cb-about,.lc-main--downloads .lc-cb-get{padding:28px}
   .lc-main--downloads .lc-cb-get{border-left:0;border-top:3px solid var(--edge)}

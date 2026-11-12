@@ -241,9 +241,10 @@ The tab icon is the logo's four squares on a charcoal tile (`assets/img/icon/`).
 Page layouts live in the theme's templates. To change copy, open **Appearance → Editor → Templates** and pick the page (for example "Page: Play"). A template edited there is saved in the database and overrides the theme's copy of it, so later theme updates won't change that page until you reset the template (⋮ → Reset).
 
 - **Add a world (Play):** in the Play template, select a world card in "The worlds", duplicate it (⋮ → Duplicate) and change the name and text.
-- **House rules (Play):** once the rules are written, open **Pages → Play**, insert the **House rules** pattern (Patterns → LilahCraft) and type one rule per line. Until then the section isn't on the page.
+- **House rules (Play):** they're in the Play template (Appearance → Editor → Templates → "Page: Play", the House rules section the "Read the house rules" link lands on). Edit them there, one rule per line. The **House rules** pattern (Patterns → LilahCraft) is the same card for another page: don't insert it into Pages → Play, or the page shows it twice.
 - **News:** write posts as usual. The newest post is the big card on News. Categories are the Topics in the sidebar.
 - **CraftBridge requirements** on Downloads (loader, Fabric API, NeoForge and JEI versions) are for CraftBridge Client 0.4.0 and live in `lilahcraft/inc/blocks/craftbridge.php`. Update them there when a new CraftBridge version changes them.
+- **Collins** on Downloads: the client version, the jar link, the file name and the release link (its address and its text) are in `lilahcraft/templates/page-downloads.html` (the #collins card). Change all four when the client mod updates (and the size and the "You also need" list, if they changed).
 
 ### Updating from 2.0
 

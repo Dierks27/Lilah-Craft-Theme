@@ -12,7 +12,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-lede"} -->
-<p class="lc-lede">Every raw item has real stock. Sell some in and the price drops. Buy it out and the price climbs. Sold out means nobody can buy it until somebody mines more.</p>
+<p class="lc-lede">Crate sells hundreds of items in eight departments, from blocks and food to tools, combat gear and redstone. Each one has real stock. Sell some in and the price drops. Buy it out and the price climbs. Sold out means nobody can buy it until somebody sells some.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:html -->
@@ -27,7 +27,7 @@
     <button class="mk-tape-btn" type="button" aria-pressed="false" data-mk-tape-btn><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path class="mk-i-pause" d="M3 2h4v12H3zM9 2h4v12H9z"/><path class="mk-i-play" d="M4 2l10 6-10 6z"/></svg><span class="lc-sr">Pause the ticker</span></button>
     <div class="mk-tape-view">
       <div class="mk-tape-track" data-mk-track>
-        <ul class="mk-tape-run" aria-label="Price ticker" data-mk-run></ul>
+        <ul class="mk-tape-run" aria-label="Price ticker: tagged items and the biggest moves" data-mk-run></ul>
         <ul class="mk-tape-run" aria-hidden="true" data-mk-run2></ul>
       </div>
     </div>
@@ -63,7 +63,7 @@
         <div class="mk-find">
           <label class="mk-cap" for="mkFind">Find an item</label>
           <input class="mk-input" id="mkFind" type="search" placeholder="Symbol or name" autocomplete="off" spellcheck="false">
-          <div class="lc-chips mk-tabs" role="group" aria-label="Sector" data-mk-tabs></div>
+          <div class="lc-chips mk-tabs" role="group" aria-label="Department" data-mk-tabs></div>
           <div class="mk-pickf">
             <label class="mk-cap" for="mkPick">Item</label>
             <select class="mk-input" id="mkPick" data-mk-pick></select>
@@ -96,13 +96,14 @@
             <button class="mk-tf" type="button" aria-pressed="false" data-tf="12H">12H<span class="lc-sr">, 12 hours</span></button>
             <button class="mk-tf" type="button" aria-pressed="false" data-tf="24H">24H<span class="lc-sr">, 24 hours</span></button>
             <button class="mk-tf" type="button" aria-pressed="true" data-tf="48H">48H<span class="lc-sr">, 48 hours</span></button>
-            <button class="mk-tf" type="button" aria-disabled="true" aria-describedby="mkTfNote" data-tf="7D">7D<span class="lc-sr">, 7 days</span></button>
-            <button class="mk-tf" type="button" aria-disabled="true" aria-describedby="mkTfNote" data-tf="30D">30D<span class="lc-sr">, 30 days</span></button>
-            <span class="mk-tf-note" id="mkTfNote">7D and 30D need longer history from HomeCraftMgmt</span>
+            <button class="mk-tf" type="button" aria-disabled="true" data-tf="7D">7D<span class="lc-sr">, 7 days</span></button>
+            <button class="mk-tf" type="button" aria-disabled="true" data-tf="30D">30D<span class="lc-sr">, 30 days</span></button>
+            <span class="mk-tf-note" id="mkTfNote" hidden>7D and 30D need longer history from the server</span>
           </div>
           <div class="mk-chart" data-mk-chart>
             <svg class="mk-chart-svg" role="img" aria-label="Price chart" focusable="false" data-mk-svg></svg>
             <div class="mk-chart-labels" aria-hidden="true" data-mk-glabels></div>
+            <p class="mk-c-state" aria-hidden="true" data-mk-cstate hidden></p>
           </div>
           <p class="mk-axis" aria-hidden="true" data-mk-axis><span data-mk-ax="start"></span><span data-mk-ax="mid"></span><span>now</span></p>
           <div class="mk-evs" data-mk-evs hidden>
@@ -138,7 +139,7 @@
         </div>
       </section>
 
-      <aside class="mk-side" aria-label="Movers and sectors" data-mk-side>
+      <aside class="mk-side" aria-label="Movers and departments" data-mk-side>
         <section class="mk-panel mk-news" aria-labelledby="mkNewsT" data-mk-news hidden>
           <div class="mk-panel-head">
             <h2 class="mk-panel-title" id="mkNewsT">Market news</h2>
@@ -158,8 +159,8 @@
           <p class="mk-mnone" data-mk-losers-none hidden>Nothing is down today.</p>
         </section>
         <section class="mk-panel mk-sectors" aria-labelledby="mkSecT">
-          <h2 class="mk-panel-title" id="mkSecT">Sectors today</h2>
-          <ul class="mk-seclist" data-mk-sectors></ul>
+          <h2 class="mk-panel-title" id="mkSecT">Departments today</h2>
+          <ul class="mk-seclist" data-mk-depts></ul>
         </section>
       </aside>
 
@@ -198,10 +199,15 @@
 
     <section class="mk-heat" aria-labelledby="mkHeatT" data-mk-heatsec>
       <div class="mk-heat-head">
-        <h2 class="lc-h2 lc-h2--sm" id="mkHeatT">Heatmap</h2>
-        <p class="mk-heat-note">Every item, coloured by today’s move. Click one to chart it. <span class="lc-sample" data-mk-sample hidden>Sample data</span></p>
+        <div class="mk-heat-t">
+          <h2 class="lc-h2 lc-h2--sm" id="mkHeatT">Heatmap</h2>
+          <p class="mk-heat-scope" id="mkHeatS" data-mk-heat-scope></p>
+          <p class="mk-heat-note">Coloured by today’s move, for whatever the list is showing. Pick one to chart it. <span class="lc-sample" data-mk-sample hidden>Sample data</span></p>
+        </div>
+        <button class="mk-act mk-heat-more" type="button" aria-controls="mkHeatGrid" data-mk-heat-more hidden>Show all</button>
       </div>
-      <ul class="mk-heat-grid" data-mk-heat></ul>
+      <ul class="mk-heat-grid" id="mkHeatGrid" aria-labelledby="mkHeatT mkHeatS" data-mk-heat></ul>
+      <p class="mk-heat-empty" data-mk-heat-empty hidden></p>
     </section>
   </div>
 </div>
@@ -272,7 +278,7 @@
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->
-<li><strong>News Flash</strong> (<strong>UP</strong> or <strong>DOWN</strong>): a sudden jump or drop of <span class="lc-nowrap">15–25%</span> that fades over about a day. At most two a day, between 7 am and 9 pm, and only while someone is online.</li>
+<li><strong>News Flash</strong> (<strong>UP</strong> or <strong>DOWN</strong>): a sudden jump or drop of <span class="lc-nowrap">15–25%</span> that fades over about a day. At most two a day, between 7 am and 9 pm Central time, and only while someone is online.</li>
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->
@@ -285,7 +291,7 @@
 <!-- /wp:list -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">In game: the Market News screen, the Hot &amp; Deals sort in the store, badges on signs, holograms and TVs, and a “While you were away” catch-up when you log in.</p>
+<p class="lc-text">In game: the Market News screen, the Hot &amp; Deals sort in the store, badges on signs, holograms and display boards, and a “While you were away” catch-up when you log in.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></section>

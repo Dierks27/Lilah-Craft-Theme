@@ -4,8 +4,9 @@
    The whole page is charcoal (the main also carries .lc-dark: light price colours, orange focus rings);
    panels are --panel-dark with --charcoal-2 lines, text --on-dark. Orange highlights, purple marks pressed tabs.
    The live market's tags (.lc-tag, site.css) carry their own fills, so they read on the dark panels too.
-   Breakpoints: 1200 px (the news, movers and sectors column moves under the chart), 920 px (narrower gutters),
-   760 px (one column; the list becomes a searchable select), 520 px and 420 px (phones). */
+   Breakpoints: 1200 px (the news, movers and departments column moves under the chart), 920 px (narrower gutters),
+   760 px (one column; the list becomes a searchable select), 520 px and 420 px (phones). The heatmap has 6, 5, 4, 3
+   and 2 columns along the way, so its 60 biggest moves always fill whole rows. */
 
 .lc-main--market{
   --mk-panel:var(--panel-dark); --mk-line:var(--charcoal-2); --mk-row-line:#35323b; --mk-hover:#35323c;
@@ -50,7 +51,8 @@
 .lc-main--market .mk-tape.is-paused .mk-tape-track{animation-play-state:paused}
 .lc-main--market .mk-tape.is-still .mk-tape-track{animation:none}
 .lc-main--market .mk-tape.is-still .mk-tape-run[aria-hidden],.lc-main--market .mk-tape.is-still .mk-tape-btn{display:none}
-.lc-main--market .mk-tape-run{flex:none;display:flex;gap:30px;margin:0;padding:11px 30px 11px 0;list-style:none;white-space:nowrap;color:var(--muted-dark)}
+/* min-height: an empty run (prices still loading) is as tall as a full one, also where the button is hidden */
+.lc-main--market .mk-tape-run{flex:none;display:flex;gap:30px;min-height:44px;margin:0;padding:11px 30px 11px 0;list-style:none;white-space:nowrap;color:var(--muted-dark)}
 /* symbol, tag, price, move; the same height with or without a tag, so the tape never jumps */
 .lc-main--market .mk-tape-run>li{display:flex;align-items:center;gap:0 .6em;min-height:22px}
 .lc-main--market .mk-t-sym{font-weight:700;color:var(--muted-dark)}
@@ -65,13 +67,17 @@
 /* ---------- loading, empty and no-JavaScript states ---------- */
 .lc-main--market .mk-loading{padding:40px 0 64px;font-size:17px;color:var(--muted-dark)}
 .lc-main--market .mk-app:not([data-state="loading"]) [data-mk-loading]{display:none}
-.lc-main--market .mk-app[data-state="loading"] :is(.mk-tape,.mk-index,.mk-grid,.mk-heat),
+/* While the first prices load, the board keeps a screen's height and the tape its row, so nothing in view moves when
+   the board fills in */
+html.lc-js .lc-main--market .mk-app[data-state="loading"]{min-height:100vh}
+.lc-main--market .mk-app[data-state="loading"] .mk-tape{visibility:hidden}
+.lc-main--market .mk-app[data-state="loading"] :is(.mk-index,.mk-grid,.mk-heat),
 .lc-main--market .mk-app[data-state="empty"] :is(.mk-tape,.mk-index,.mk-center,.mk-side,.mk-calc,.mk-heat){display:none}
 .lc-main--market .mk-app[data-state="empty"] .mk-grid{display:block;padding-bottom:64px}
 .lc-main--market .mk-app[data-state="empty"] .mk-listp{position:static;max-height:none}
 html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk-heat,[data-mk-loading]){display:none}
 /* In the Site Editor the board has no script: say what goes here, so the block can be found and selected */
-.block-editor-iframe__html .lc-main--market .mk-body::before{content:"The live market board goes here on the site: ticker, market list, chart, market news, movers, “What’s my stuff worth?” and the heatmap.";display:block;margin:32px 0;padding:28px 24px;border:3px dashed var(--mk-edge);font-size:17px;color:var(--muted-dark)}
+.block-editor-iframe__html .lc-main--market .mk-body::before{content:"The live market board goes here on the site: ticker, market list by department, chart, market news, movers, departments, “What’s my stuff worth?” and the heatmap.";display:block;margin:32px 0;padding:28px 24px;border:3px dashed var(--mk-edge);font-size:17px;color:var(--muted-dark)}
 
 /* ---------- the index strip: LCX, breadth, sold out ---------- */
 .lc-main--market .mk-index{display:flex;align-items:center;flex-wrap:wrap;gap:16px 48px;padding:18px 0;border-bottom:1px solid var(--mk-line)}
@@ -126,7 +132,9 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-input{width:100%;min-height:44px;padding:0 12px;border:2px solid var(--mid);border-radius:0;background:var(--mk-field);color:var(--on-dark);font-family:var(--body);font-size:16px}
 .lc-main--market .mk-input::placeholder{color:#a8a4b1;opacity:1}
 .lc-main--market .mk-tabs{gap:6px}
-.lc-main--market .mk-app .lc-chip{min-width:44px;padding:0 10px;border-color:var(--mk-edge);background:transparent;color:var(--on-dark);font-size:14px}
+/* department names come from the feed: a long one wraps inside its chip rather than widening the panel. Eleven tabs
+   fit four rows of the list panel at 1280 */
+.lc-main--market .mk-app .lc-chip{min-width:44px;max-width:100%;padding:0 8px;border-color:var(--mk-edge);background:transparent;color:var(--on-dark);font-size:14px}
 .lc-main--market .mk-app .lc-chip:hover{background:var(--mk-hover)}
 /* pressed: purple, with a light edge so the state reads against the panel (the fill alone is 2.34:1) */
 .lc-main--market .mk-app .lc-chip[aria-pressed="true"]{background:var(--purple);border-color:var(--purple-light);color:#fff}
@@ -135,7 +143,9 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-pickf{display:none}
 .lc-main--market .mk-list-head{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;padding:8px 14px;border-bottom:1px solid var(--mk-line);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
 .lc-main--market .mk-list-head>span+span{text-align:right}
-.lc-main--market .mk-list{flex:1 1 auto;min-height:0;margin:0;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-color:var(--mk-edge) transparent}
+/* position: the list, not the page, holds its rows' absolute .lc-sr words, so it clips them; otherwise the hidden
+   words of a few hundred rows hang below the page and leave thousands of pixels of empty page under the footer */
+.lc-main--market .mk-list{position:relative;flex:1 1 auto;min-height:0;margin:0;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-color:var(--mk-edge) transparent}
 .lc-main--market .mk-row{display:grid;grid-template-columns:minmax(0,1fr) 66px 70px;gap:8px;align-items:center;width:100%;min-height:48px;padding:5px 14px;border:0;border-bottom:1px solid var(--mk-row-line);background:transparent;color:var(--on-dark);font-family:var(--body);text-align:left;cursor:pointer}
 .lc-main--market .mk-row:hover{background:var(--mk-hover)}
 .lc-main--market .mk-row[aria-pressed="true"]{background:var(--mk-line);box-shadow:inset 4px 0 0 var(--purple-light)}
@@ -211,6 +221,10 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-chart-labels>span{position:absolute;right:0;font-family:var(--mono);font-size:12px;line-height:16px;color:var(--muted-dark);white-space:nowrap}
 .lc-main--market .mk-axis{display:flex;justify-content:space-between;gap:8px;margin:-6px 64px 0 0;font-size:12px;color:var(--muted-dark)}
 .lc-main--market .mk-nohist{padding:40px 0;font-size:16px;color:var(--muted-dark);text-align:center}
+/* While the item's own record is on its way (or can't be had): the chart keeps its size, with faint gridlines
+   and a quiet line in the middle; the axis keeps its row */
+.lc-main--market .mk-c-state{position:absolute;top:0;right:64px;bottom:0;left:0;display:flex;align-items:center;justify-content:center;padding:0 16px;font-size:15px;line-height:1.45;color:var(--muted-dark);text-align:center;text-wrap:pretty}
+.lc-main--market .mk-axis.is-wait{visibility:hidden}
 
 /* live market events on the chart: a dashed line and a square at the top, coloured by kind (3:1 on the panel);
    the list under the chart says what each one is */
@@ -223,6 +237,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-c-evm{fill:var(--ev)}
 .lc-main--market .mk-evs{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-right:64px}
 .lc-main--market .mk-evs .mk-cap{white-space:nowrap}
+.lc-main--market .mk-evs.is-wait{visibility:hidden}
 .lc-main--market .mk-evlist{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none}
 .lc-main--market .mk-evlist>li{display:flex;align-items:center;gap:0 8px;min-height:24px;font-size:14px;line-height:1.3;white-space:nowrap}
 .lc-main--market .mk-ev-sw{flex:none;width:10px;height:10px;background:var(--ev)}
@@ -246,6 +261,7 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-stats dt{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark);white-space:nowrap}
 .lc-main--market .mk-stats dd{margin:0;font-family:var(--mono);font-weight:700;font-size:17px;line-height:1.35;color:var(--on-dark);overflow-wrap:normal}
 .lc-main--market .mk-stats dd.mk-warn{color:var(--orange)}
+.lc-main--market .mk-stats dd.mk-wait{font-weight:400;color:var(--muted-dark)}
 /* nine stats (the live market's usual price too) sit three by three */
 .lc-main--market .mk-stats[data-n="9"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 
@@ -287,8 +303,11 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 .lc-main--market .mk-n-head{font-weight:800;font-size:15px;line-height:1.35;color:#fff}
 .lc-main--market .mk-n-line{font-size:14px;line-height:1.45;color:var(--muted-dark)}
 .lc-main--market .mk-seclist{margin:0;padding:6px 0 8px;list-style:none}
-.lc-main--market .mk-seclist li{display:grid;grid-template-columns:112px minmax(0,1fr) 60px;gap:10px;align-items:center;padding:7px 14px}
-.lc-main--market .mk-sec-name{font-size:13px;line-height:1.3;color:var(--muted-dark)}
+/* a department: its name and how many items it has, the bar, the average move */
+.lc-main--market .mk-seclist li{display:grid;grid-template-columns:124px minmax(0,1fr) 60px;gap:10px;align-items:center;padding:7px 14px}
+.lc-main--market .mk-sec-name{display:flex;align-items:baseline;gap:0 6px;min-width:0;font-size:13px;line-height:1.3;color:var(--muted-dark)}
+.lc-main--market .mk-sec-dept{min-width:0;overflow-wrap:anywhere}
+.lc-main--market .mk-sec-n{flex:none;font-family:var(--mono);font-size:11px;color:#a8a4b1}
 .lc-main--market .mk-sec-bar{display:flex;height:8px;background:var(--mk-line)}
 .lc-main--market .mk-sec-bar>span{display:block;height:8px;background:var(--flat)}
 .lc-main--market .mk-sec-bar>.lc-up{background:var(--up)}
@@ -329,10 +348,16 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
 
 /* ---------- heatmap ---------- */
 .lc-main--market .mk-heat{padding:44px 0 64px}
-.lc-main--market .mk-heat-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 24px;margin-bottom:16px}
+/* the title, what it shows ("Biggest moves · 60 of 263") and the note; "Show all" on the right, above the tiles, so it
+   stays put when the grid grows */
+.lc-main--market .mk-heat-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px 24px;margin-bottom:16px}
+.lc-main--market .mk-heat-t{display:flex;flex-direction:column;gap:4px;min-width:0}
 .lc-main--market .mk-heat-head .lc-h2{color:#fff}
+.lc-main--market .mk-heat-scope{font-family:var(--mono);font-weight:700;font-size:15px;line-height:1.4;color:#fff;overflow-wrap:anywhere}
 .lc-main--market .mk-heat-note{font-size:15px;color:var(--muted-dark)}
-.lc-main--market .mk-heat-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none}
+.lc-main--market .mk-heat-more{flex:none}
+.lc-main--market .mk-heat-empty{padding:16px;border:2px dashed var(--mk-edge);font-size:15px;color:var(--muted-dark)}
+.lc-main--market .mk-heat-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none}
 .lc-main--market .mk-heat-grid>li{display:flex;min-width:0}
 .lc-main--market .mk-tile{display:flex;flex-direction:column;justify-content:space-between;gap:8px;width:100%;min-height:84px;padding:10px 12px;border:0;border-radius:0;background:var(--hm,#3f3c46);color:#fff;font-family:var(--mono);text-align:left;cursor:pointer}
 /* hover draws a ring (brightening the tile would lower its text contrast) */
@@ -380,9 +405,11 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market .mk-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
   .lc-main--market :is(.mk-news,.mk-sectors){grid-column:1/-1}
   .lc-main--market .mk-seclist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lc-main--market .mk-heat-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
 @media (max-width:920px){
   .lc-main--market .mk-seclist{grid-template-columns:minmax(0,1fr)}
+  .lc-main--market .mk-heat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   .lc-main--market .mk-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .lc-main--market .mk-shops{flex-direction:column;align-items:flex-start;margin-right:6px;padding:26px 24px}
   .lc-main--market .mk-calc{box-shadow:6px 6px 0 var(--orange);margin-right:6px}
@@ -420,9 +447,11 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market .mk-q-name{font-size:21px}
   .lc-main--market .mk-q-big{font-size:32px}
   .lc-main--market .mk-chart{height:220px;padding-right:56px}
+  .lc-main--market .mk-c-state{right:56px}
   .lc-main--market .mk-axis{margin-right:56px}
   .lc-main--market .mk-sb{padding-right:56px}
-  .lc-main--market .mk-evs{margin-right:0}
+  /* the label over the markers, so the line is as tall while the record loads as once it's here */
+  .lc-main--market .mk-evs{flex-direction:column;align-items:flex-start;gap:4px;margin-right:0}
   .lc-main--market .mk-tf-note{flex-basis:100%;margin-left:0}
   .lc-main--market .mk-calc{padding:18px 16px 20px}
   .lc-main--market .mk-calc-form{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
@@ -458,6 +487,8 @@ html:not(.lc-js) .lc-main--market :is(.mk-status,.mk-tape,.mk-index,.mk-grid,.mk
   .lc-main--market .mk-tile{border:1px solid ButtonText}
   .lc-main--market :is(.mk-row,.mk-tile,.mk-tf,.mk-watch)[aria-pressed="true"]{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}
   .lc-main--market :is(.mk-row,.mk-tile)[aria-pressed="true"] *{color:HighlightText;background:transparent}
+  .lc-main--market .mk-app .lc-chip[aria-pressed="true"]{background:Highlight;color:HighlightText;border-color:Highlight}
+  .lc-main--market .mk-app .lc-chip[aria-pressed="true"] .mk-star{color:HighlightText}
   .lc-main--market .mk-tf[aria-disabled="true"]{color:GrayText;border-color:GrayText}
   .lc-main--market .mk-c-evm{fill:CanvasText}
   .lc-main--market .mk-c-evl{stroke:CanvasText}

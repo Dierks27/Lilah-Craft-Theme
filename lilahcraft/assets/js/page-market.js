@@ -1,13 +1,16 @@
 /* LilahCraft 2.2: the Market page, a trader's view of the feed.
-   Ticker tape, the LCX index and breadth, the market list (search, sector tabs, Hot & Deals, watchlist), the
-   selected item (price, 12H/24H/48H chart, plus 7D/30D when the feed has the longer history, stock on
-   the shelf, stats, where to trade), market news, top movers, sectors today, the heatmap and "What's my stuff worth?".
-   All from LCData.watch('market') with the long history: live, stale (the last good copy) or labelled
-   sample data. The selection sits in the URL (?item=id).
+   Ticker tape (the tagged items and the 40 biggest moves), the LCX index and breadth, the market list (search,
+   department tabs, Hot & Deals, watchlist), the selected item (price, 12H/24H/48H chart, plus 7D/30D when the feed has
+   the longer history, stock on the shelf, stats, where to trade), market news, top movers, departments today, the
+   heatmap (it follows the list's filter: a long list shows its 60 biggest moves until "Show all") and "What's my stuff worth?".
+   LCData.watch('market') gives the summary, every item without its history: live, stale (the last good copy) or
+   labelled sample data. The chart, the stock bars and open/high/low come from the selected item's own record,
+   LCData.market.item(id), asked once per refresh: until it comes the last record stays drawn, or the chart quietly
+   says it is loading. The selection sits in the URL (?item=id). Tabs come from the feed's departments.
    HomeCraftMgmt's live market (data.live: HOT/DEAL/UP/DOWN/WANTED tags, "Usually $X", chart markers, news,
-   the season) shows only when the feed has it; without it the page is exactly 2.1's.
-   Each refresh updates the page in place, so the selection, sector, range, search, calculator and
-   keyboard focus all stay put. Feed text only ever goes in through textContent. */
+   the season) shows only when the feed has it; without it those parts stay hidden.
+   Each refresh updates the page in place, so the selection, tab, range, search, heatmap size, calculator,
+   keyboard focus and scroll position all stay put. Feed text only ever goes in through textContent. */
 (function () {
   'use strict';
   var D = window.LCData;
@@ -17,10 +20,11 @@
   var LC = window.LC || {};
 
   var DEFAULT_ID = 'iron_ingot';
-  var SECTORS = ['ores', 'stone', 'wood', 'farm', 'mob', 'nether', 'other'];
   var RANGE_POINTS = { '12H': 24, '24H': 48, '48H': 96 };
   /* 7D and 30D chart the feed's longer history (hourly and 6-hourly points), when the item has it. */
   var LONG_RANGE = { '7D': 'history7d', '30D': 'history30d' }, RANGE_STEP_H = { '7D': 1, '30D': 6 };
+  /* The ticker carries the tagged items and this many of the biggest moves; the heatmap shows this many of a longer list */
+  var TAPE_MOVES = 40, HEAT_CAP = 60;
   var WATCH_KEY = 'lilahcraft-market-watch';
   var CALC_KEY = 'lilahcraft-market-calc';
   var STACK = 64, MAX_QTY = 999999, MAX_LINES = 40, MAX_COUNT = 1e9;
@@ -30,6 +34,12 @@
   var TAG_HINT = {
     hot: 'A good time to sell', deal: 'A good time to buy',
     up: 'News Flash: a sudden jump', down: 'News Flash: a sudden drop', wanted: 'The market wants some'
+  };
+  /* What the chart says while the item's record isn't here (or can't be had) */
+  var WAIT_TEXT = {
+    loading: 'Loading the chart…',
+    unreachable: 'The chart can’t be loaded right now. It tries again with the next update.',
+    missing: 'This item isn’t on the market any more.'
   };
 
   /* ---------- small helpers ---------- */
@@ -155,7 +165,7 @@
   var center = q('[data-mk-center]'), quote = q('.mk-quote');
   var watchBtn = q('[data-mk-watch]'), linkBtn = q('[data-mk-link]'), liveLine = q('[data-mk-live]');
   var rangeBox = q('.mk-range'), openLabel = q('[data-mk-open-label]'), tfNote = q('#mkTfNote');
-  var chartBox = q('[data-mk-chart]'), svg = q('[data-mk-svg]'), gLabels = q('[data-mk-glabels]');
+  var chartBox = q('[data-mk-chart]'), svg = q('[data-mk-svg]'), gLabels = q('[data-mk-glabels]'), cState = q('[data-mk-cstate]');
   var axis = q('[data-mk-axis]'), noHist = q('[data-mk-nohist]');
   var evBox = q('[data-mk-evs]'), evList = q('[data-mk-evlist]');
   var sb = q('[data-mk-sb]'), sbNow = q('[data-mk-sb-now]'), sbSvg = q('[data-mk-sb-svg]');
@@ -163,7 +173,8 @@
   var side = q('[data-mk-side]'), newsBox = q('[data-mk-news]'), newsUl = q('[data-mk-news-list]'), newsNone = q('[data-mk-news-none]');
   var gainUl = q('[data-mk-gainers]'), loseUl = q('[data-mk-losers]');
   var gainNone = q('[data-mk-gainers-none]'), loseNone = q('[data-mk-losers-none]');
-  var secUl = q('[data-mk-sectors]'), heatUl = q('[data-mk-heat]');
+  var deptUl = q('[data-mk-depts]'), heatUl = q('[data-mk-heat]');
+  var heatScopeP = q('[data-mk-heat-scope]'), heatMore = q('[data-mk-heat-more]'), heatEmpty = q('[data-mk-heat-empty]');
   var calc = q('[data-mk-calc]');
   if (!find || !tabBox || !list || !pick || !center || !svg || !heatUl || !calc) { return; }
 
@@ -180,10 +191,13 @@
 
   /* ---------- state ---------- */
 
+  /* tab: 'all', 'hot', 'watch' or 'd:' + a department's name. tf: the range last chosen (an item without that longer
+     history shows 48H, and the next item that has it shows it again). det: the selected item's record from
+     LCData.market.item(), { id, rec (null until it comes, or when there's none), mode }. heatAll: "Show all" pressed. */
   var state = {
     res: null, items: [], byId: dict(), live: false,
-    q: find.value || '', tab: 'all', sel: null, wanted: urlItem(), picked: false, tf: '48H',
-    watch: dict(), lines: []
+    q: find.value || '', tab: 'all', sel: null, selName: '', wanted: urlItem(), picked: false, tf: '48H',
+    det: null, heatAll: false, watch: dict(), lines: []
   };
   /* Stored values are checked as they're read: ids are short strings, the watchlist stays small,
      and two stored lines for one item become one line. */
@@ -218,8 +232,9 @@
     }).map(function (e) { return { t: e.t, kind: e.kind, pct: isNum(e.pct) ? e.pct : 0 }; })
       .sort(function (a, b) { return a.t - b.t; });
   }
+  /* The summary's items. History, the longer histories and the markers are in each item's own record (detailOf). */
   function ingest(data) {
-    /* HomeCraftMgmt's live market is running (the feed says so; the sample has one too). Without it, 2.1's page. */
+    /* HomeCraftMgmt's live market is running (the feed says so; the sample has one too). */
     state.live = !!data && data.live === true;
     var raw = data && Array.isArray(data.items) ? data.items : [];
     var items = [], byId = dict();
@@ -227,30 +242,24 @@
       if (!r || r.id == null) { return; }
       var id = String(r.id);
       if (byId[id]) { return; }
-      var hist = points(r.history), longHist = {};
-      Object.keys(LONG_RANGE).forEach(function (tf) { longHist[tf] = points(r[LONG_RANGE[tf]]); });
       var it = {
         id: id,
         name: String(r.name || id),
         material: String(r.material || ''),
+        dept: M.departmentOf(r),
         price: isNum(r.price) ? r.price : null,
         buy: isNum(r.buy) ? r.buy : null,
         sell: isNum(r.sell) ? r.sell : null,
         stock: isNum(r.stock) ? r.stock : null,
         maxStock: isNum(r.maxStock) && r.maxStock > 0 ? r.maxStock : null,
         change24h: isNum(r.change24h) ? r.change24h : null,
-        history: hist,
-        long: longHist,
-        series: hist.map(function (h) { return h.p; }),
         out: M.soldOut(r),
-        sector: M.categoryOf(r.material || id),
         frac: M.stockFraction(r),
         ch: M.change(r.change24h),
-        /* live market: the tag while one shows (gone once it ends), "Usually $X" and the mood, chart markers */
+        /* live market: the tag while one shows (gone once it ends), "Usually $X" and the mood */
         badge: state.live ? M.badge(r) : null,
         usual: state.live && isNum(r.usual) && r.usual >= 0 ? r.usual : null,
-        mood: state.live && isNum(r.moodPct) ? r.moodPct : null,
-        events: state.live ? events(r.events) : []
+        mood: state.live && isNum(r.moodPct) ? r.moodPct : null
       };
       items.push(it);
       byId[id] = it;
@@ -263,6 +272,13 @@
     state.items = items;
     state.byId = byId;
   }
+  /* An item's record (from LCData.market.item()) as the chart reads it: the 48 hours, the longer histories by range,
+     and the live market's markers. */
+  function detailOf(rec) {
+    var long = {};
+    Object.keys(LONG_RANGE).forEach(function (tf) { long[tf] = points(rec[LONG_RANGE[tf]]); });
+    return { history: points(rec.history), long: long, events: state.live ? events(rec.events) : [] };
+  }
 
   function refreshSeconds(data) {
     return Math.max(15, Number(data && data.refreshSeconds) || Number(LC.cacheSeconds) || 60);
@@ -271,31 +287,75 @@
   function ensureSelection() {
     if (!state.picked && state.wanted && state.byId[state.wanted]) { state.sel = state.wanted; return; }
     if (state.sel && state.byId[state.sel]) { return; }
+    /* The chosen item left the feed: say so, as the chart moves on to another */
+    var gone = state.sel ? state.selName : '';
     state.sel = state.byId[DEFAULT_ID] ? DEFAULT_ID : state.items.length ? state.items[0].id : null;
     /* The picked item left the feed, or a shared ?item= isn't in it: the address bar follows, so a reload or a shared URL shows this one too */
     if ((state.picked || state.wanted) && state.sel) { putURL(state.sel); }
+    if (gone && state.sel) { announce(gone + ' has left the market. The chart shows ' + state.byId[state.sel].name + '.'); }
   }
 
-  function visibleItems() {
-    var words = norm(state.q);
-    return state.items.filter(function (it) {
-      var inTab = state.tab === 'all' || (state.tab === 'watch' ? !!state.watch[it.id] : state.tab === 'hot' ? !!it.badge : it.sector === state.tab);
-      return inTab && (!words || it.find.indexOf(words) > -1);
+  /* The selected item's record: what this page already has stays drawn (from the last refresh) while the item is
+     asked for again; a newer answer, or an answer for another item, wins. Only the newest question counts. */
+  var askN = 0;
+  function askDetail() {
+    var id = state.sel;
+    if (!id) { state.det = null; return; }
+    if (!state.det || state.det.id !== id) {
+      var had = M.cachedItem(id);
+      state.det = { id: id, rec: had && had.id === id ? had : null, mode: had ? 'had' : 'loading' };
+    }
+    var n = ++askN;
+    M.item(id).then(function (r) {
+      if (n !== askN || id !== state.sel || !state.res) { return; }
+      var rec = r && r.item && r.item.id === id ? r.item : null;
+      /* 'unreachable' means this page has no copy at all; one drawn earlier stays */
+      if (!rec && r.mode === 'unreachable' && state.det && state.det.id === id) { rec = state.det.rec; }
+      state.det = { id: id, rec: rec, mode: rec ? r.mode : (r.mode === 'missing' ? 'missing' : 'unreachable') };
+      if (state.byId[id]) { renderQuote(); }
     });
   }
 
+  function inTab(it) {
+    var t = state.tab;
+    return t === 'all' || (t === 'watch' ? !!state.watch[it.id] : t === 'hot' ? !!it.badge : 'd:' + it.dept === t);
+  }
+  function visibleItems() {
+    var words = norm(state.q);
+    return state.items.filter(function (it) { return inTab(it) && (!words || it.find.indexOf(words) > -1); });
+  }
+  /* The department a tab shows ('' for All, Hot & Deals and the watchlist) */
+  function tabDept() { return state.tab.indexOf('d:') === 0 ? state.tab.slice(2) : ''; }
+
+  /* The biggest moves: items in stock by the size of today's move either way; sold-out ones only to fill up. */
+  function moveSize(it) { return it.out ? -1 : isNum(it.change24h) ? Math.abs(it.change24h) : 0; }
+  function byName(a, b) { return a.name.localeCompare(b.name); }
+  function biggest(items, n) {
+    return items.slice().sort(function (a, b) { return moveSize(b) - moveSize(a) || byName(a, b); }).slice(0, n);
+  }
+  /* The heatmap's order: the biggest rise first, through no change, to the biggest fall; sold out last */
+  function byMove(a, b) {
+    if (a.out !== b.out) { return a.out ? 1 : -1; }
+    var ca = isNum(a.change24h) ? a.change24h : 0, cb = isNum(b.change24h) ? b.change24h : 0;
+    return cb - ca || byName(a, b);
+  }
+
+  /* ---------- the chart's range ---------- */
+
+  /* What the selected item is drawn from: its details (null until its record is here), the range shown and the record's mode */
+  var view = { d: null, tf: '48H', mode: 'loading' };
   /* 12H/24H/48H always work; 7D and 30D only when the item has at least two points of that history. */
-  function hasRange(it, tf) { return !LONG_RANGE[tf] || it.long[tf].length >= 2; }
-  /* The history for the chosen range */
-  function rangeHist(it) { return LONG_RANGE[state.tf] ? it.long[state.tf] : it.history.slice(-RANGE_POINTS[state.tf]); }
+  function hasRange(d, tf) { return !LONG_RANGE[tf] || d.long[tf].length >= 2; }
+  /* The history for the range shown */
+  function rangeHist(d) { return LONG_RANGE[view.tf] ? d.long[view.tf] : d.history.slice(-RANGE_POINTS[view.tf]); }
   function spanHours(hist) {
     var a = hist.length ? hist[0].t : 0, b = hist.length ? hist[hist.length - 1].t : 0;
     if (isNum(a) && isNum(b) && a > 0 && b > a) { return Math.max(1, Math.round((b - a) / 3600000)); }
-    return Math.max(1, Math.round((hist.length - 1) * (RANGE_STEP_H[state.tf] || 0.5)));
+    return Math.max(1, Math.round((hist.length - 1) * (RANGE_STEP_H[view.tf] || 0.5)));
   }
   function hoursText(h) { return h === 1 ? 'hour' : h + ' hours'; }
   /* On 7D and 30D, two days or more reads in days, to the half day: "7 days", "3.5 days". */
-  function inDays(h) { return !!LONG_RANGE[state.tf] && h >= 48; }
+  function inDays(h) { return !!LONG_RANGE[view.tf] && h >= 48; }
   function daysText(h) { var d = Math.round(h / 12) / 2; return d + (d === 1 ? ' day' : ' days'); }
   function spanText(h) { return inDays(h) ? daysText(h) : hoursText(h); }
   function agoText(h) { return (inDays(h) ? daysText(h) : h + 'h') + ' ago'; }
@@ -307,9 +367,9 @@
     var isSample = state.res.mode === 'sample';
     sampleLabels.forEach(function (el) { el.hidden = !isSample; });
     if (!status || !statusText) { return; }
-    var res = state.res, data = res.data || {}, text;
+    var res = state.res, data = res.data || {}, text, n = state.items.length;
     if (res.mode === 'live') {
-      text = 'Live · updates every ' + refreshSeconds(data) + ' s';
+      text = 'Live · ' + (n ? D.count(n) + plural(n, ' item', ' items') + ' · ' : '') + 'updates every ' + refreshSeconds(data) + ' s';
     } else if (res.mode === 'stale') {
       var t = D.timeText(data.generatedAt || data.fetchedAt);
       text = 'Last known prices' + (t ? ' · ' + t : '');
@@ -320,9 +380,13 @@
     status.setAttribute('data-mode', res.mode);
   }
 
-  /* ---------- ticker tape ---------- */
+  /* ---------- ticker tape: the tagged items, then the 40 biggest moves ---------- */
 
   var tapeCount = -1, tapeKey = null;
+  function tapeItems() {
+    var tagged = state.items.filter(function (it) { return !!it.badge; });
+    return tagged.concat(biggest(state.items.filter(function (it) { return !it.badge; }), TAPE_MOVES));
+  }
   function tapeItem(it) {
     var li = el('li');
     li.appendChild(el('span', 'mk-t-sym', it.sym));
@@ -343,31 +407,33 @@
   }
   function renderTape() {
     if (!run1 || !run2 || !track) { return; }
+    var show = tapeItems();
     /* Rebuilt only when something it shows has changed */
-    var key = state.items.map(function (it) {
+    var key = show.map(function (it) {
       return [it.id, it.sym, it.name, D.money(it.price), it.out ? 'out' : it.ch.text, it.badge ? it.badge.kind : ''].join('\u0001');
     }).join('\u0002');
     if (key !== tapeKey) {
       tapeKey = key;
       run1.textContent = '';
       run2.textContent = '';
-      state.items.forEach(function (it) {
+      show.forEach(function (it) {
         var li = tapeItem(it);
         run1.appendChild(li);
         run2.appendChild(li.cloneNode(true));
       });
     }
     /* Speed from the run's width, set once per item count so a refresh never makes the tape jump. */
-    if (tapeCount !== state.items.length) {
-      tapeCount = state.items.length;
+    if (tapeCount !== show.length) {
+      tapeCount = show.length;
       track.style.setProperty('--mk-tape-s', Math.max(20, Math.round(run1.offsetWidth / 45)) + 's');
     }
     fitTape();
   }
-  /* A run that fits in the view stands still; checked on every render and whenever the tape or the run resizes. */
+  /* A run that fits in the view stands still; checked on every render and whenever the tape or the run resizes.
+     An empty run (prices still loading) changes nothing, so the tape keeps its height. */
   function fitTape() {
-    var w = run1.offsetWidth, view = run1.parentNode.parentNode.clientWidth;
-    tape.classList.toggle('is-still', !w || w <= view);
+    var w = run1.offsetWidth, room = run1.parentNode.parentNode.clientWidth;
+    if (run1.firstChild) { tape.classList.toggle('is-still', !w || w <= room); }
   }
   if (tape && run1 && run2 && track) {
     var tapeTimer = null;
@@ -388,24 +454,6 @@
 
   /* ---------- LCX index, breadth, sold out ---------- */
 
-  /* The index's path over the last 24 hours: every in-stock item's price relative to 24 hours ago, averaged. */
-  function indexSeries(list) {
-    var use = list.filter(function (it) { return it.series.length >= 2; });
-    if (!use.length) { return null; }
-    var L = 49;
-    use.forEach(function (it) { L = Math.min(L, it.series.length); });
-    var out = [];
-    for (var j = 0; j < L; j++) {
-      var sum = 0;
-      use.forEach(function (it) {
-        var s = it.series, base = s[s.length - L];
-        sum += base > 0 ? s[s.length - L + j] / base - 1 : 0;
-      });
-      out.push(1000 * (1 + sum / use.length));
-    }
-    return out;
-  }
-
   function renderIndex() {
     var live = state.items.filter(function (it) { return !it.out; });
     var moved = live.filter(function (it) { return isNum(it.change24h); });
@@ -416,7 +464,8 @@
       setText(lcxNum, val.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
       lcxCh.className = 'mk-lcx-ch lc-' + c.dir;
       setHTML(lcxCh, c.html);
-      var s = indexSeries(moved);
+      /* The index's path over the last 24 hours, worked out once per fetch on the server side (data.index) */
+      var s = M.index(state.res.data);
       if (lcxSpark) {
         lcxSpark.style.display = s ? '' : 'none';
         lcxSpark.setAttribute('class', 'mk-lcx-spark is-' + c.dir);
@@ -475,22 +524,31 @@
     });
   }
 
-  /* ---------- sector tabs ---------- */
+  /* ---------- tabs: All, the feed's departments, Hot & Deals, Watchlist ---------- */
 
   var tabs = dict();
-  function tabLabel(id) {
-    if (id === 'watch') { return '<span class="mk-star" aria-hidden="true">★ </span>Watchlist'; }
-    if (id === 'hot') { return 'Hot &amp; Deals'; }
-    return esc(M.SECTOR_SHORT[id] || M.categoryLabel(id));
+  /* A tab's button; a department's name (feed text) is its own label */
+  function makeTab(id) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'lc-chip';
+    b.setAttribute('data-tab', id);
+    if (id === 'watch') {
+      b.appendChild(el('span', 'mk-star', '★ ')).setAttribute('aria-hidden', 'true');
+      b.appendChild(document.createTextNode('Watchlist'));
+    } else {
+      b.textContent = id === 'all' ? 'All' : id === 'hot' ? 'Hot & Deals' : id.slice(2);
+    }
+    return b;
   }
   function syncTabs() {
     Object.keys(tabs).forEach(function (id) { tabs[id].setAttribute('aria-pressed', id === state.tab ? 'true' : 'false'); });
   }
   function renderTabs() {
-    var present = dict();
-    state.items.forEach(function (it) { present[it.sector] = true; });
-    /* Hot & Deals (every item with a tag) sits beside the watchlist while the live market runs */
-    var ids = ['all'].concat(SECTORS.filter(function (s) { return present[s]; })).concat(state.live ? ['hot', 'watch'] : ['watch']);
+    /* The departments that have an item, in the feed's order. Hot & Deals (every item with a tag) sits beside the
+       watchlist while the live market runs. */
+    var ids = ['all'].concat(M.departments(state.res.data).map(function (d) { return 'd:' + d.name; }))
+      .concat(state.live ? ['hot', 'watch'] : ['watch']);
     var active = document.activeElement, lost = false;
     if (ids.indexOf(state.tab) < 0) { state.tab = 'all'; }
     Object.keys(tabs).forEach(function (id) {
@@ -500,19 +558,11 @@
       delete tabs[id];
     });
     ids.forEach(function (id, i) {
-      var b = tabs[id];
-      if (!b) {
-        b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'lc-chip';
-        b.setAttribute('data-tab', id);
-        b.innerHTML = tabLabel(id);
-        tabs[id] = b;
-      }
-      if (tabBox.children[i] !== b) { tabBox.insertBefore(b, tabBox.children[i] || null); }
+      var b = tabs[id] || (tabs[id] = makeTab(id));
+      if (tabBox.children[i] !== b) { put(tabBox, b, tabBox.children[i] || null); }
     });
     syncTabs();
-    if (lost) { tabs.all.focus(); }
+    if (lost) { tabs.all.focus(); } else { refocus(active); }
   }
 
   /* ---------- market list (and the select that replaces it at 760 px and below) ---------- */
@@ -594,10 +644,16 @@
     refocus(active);
     return vis;
   }
+  /* The list and the heatmap follow the same filter */
+  function renderFilter() {
+    var vis = renderList();
+    if (state.items.length) { renderHeat(vis); }
+    return vis;
+  }
 
   function emptyText(total) {
     if (!total) { return 'Nothing is on the board right now.'; }
-    var words = state.q.trim();
+    var words = state.q.trim(), dept = tabDept();
     if (state.tab === 'watch') {
       if (words) { return 'Nothing on your watchlist matches “' + words + '”.'; }
       return 'Your watchlist is empty. Press Watch on an item to keep it here.';
@@ -606,9 +662,9 @@
       if (words) { return 'Nothing in Hot & Deals matches “' + words + '”.'; }
       return 'Nothing is HOT, on a DEAL, in a News Flash or WANTED right now.';
     }
-    if (words && state.tab !== 'all') { return 'No item in ' + M.categoryLabel(state.tab) + ' matches “' + words + '”. Try another name, or pick All.'; }
+    if (words && dept) { return 'No item in ' + dept + ' matches “' + words + '”. Try another name, or pick All.'; }
     if (words) { return 'No item matches “' + words + '”. Try a symbol like IRON, or a name.'; }
-    return 'Nothing in ' + M.categoryLabel(state.tab) + ' is on the board right now.';
+    return 'Nothing in ' + dept + ' is on the board right now.';
   }
   function footText(n, total) {
     if (!total) { return ''; }
@@ -616,8 +672,8 @@
       return D.SAMPLE_LABEL + ': showing ' + (n === total ? total : n + ' of ' + total) + ' sample ' + plural(total, 'item', 'items') +
         '. The live board lists every item the market carries.';
     }
-    if (n === total) { return total === 1 ? 'Showing 1 item.' : 'Showing all ' + total + ' items.'; }
-    return 'Showing ' + n + ' of ' + total + ' ' + plural(total, 'item', 'items') + '.';
+    if (n === total) { return total === 1 ? 'Showing 1 item.' : 'Showing all ' + D.count(total) + ' items.'; }
+    return 'Showing ' + D.count(n) + ' of ' + D.count(total) + ' ' + plural(total, 'item', 'items') + '.';
   }
 
   function optionText(it) {
@@ -675,9 +731,10 @@
     var it = state.byId[state.sel];
     center.hidden = !it;
     if (!it) { return; }
+    state.selName = it.name;
     setText(qv.sym, it.sym);
     setText(qv.name, it.name);
-    setText(qv.sector, M.categoryLabel(it.sector));
+    setText(qv.sector, it.dept);
     setText(qv.price, D.money(it.price));
     var ch = qv.change;
     if (it.out) {
@@ -696,10 +753,14 @@
     renderLive(it);
     watchBtn.setAttribute('aria-pressed', state.watch[it.id] ? 'true' : 'false');
     if (linkBtn) { linkBtn.setAttribute('data-lc-copy', itemURL(it.id)); }
-    /* The chosen range stays across refreshes; an item without that longer history shows 48H. */
-    if (!hasRange(it, state.tf)) { state.tf = '48H'; }
-    syncRange(it);
-    if (openLabel) { setText(openLabel, 'Open (' + state.tf + ')'); }
+    /* The chart, stock bars and open/high/low come from the item's own record. The chosen range stays across
+       refreshes and items; an item without that longer history shows 48H. */
+    var det = state.det && state.det.id === it.id ? state.det : null;
+    view.d = det && det.rec ? detailOf(det.rec) : null;
+    view.mode = det ? det.mode : 'loading';
+    view.tf = view.d && !hasRange(view.d, state.tf) ? '48H' : state.tf;
+    syncRange(view.d);
+    if (openLabel) { setText(openLabel, 'Open (' + view.tf + ')'); }
     renderChart(it);
     renderStock(it);
     renderStats(it);
@@ -737,15 +798,18 @@
   }
 
   /* Range tabs: 7D and 30D are toggles only while the selected item has that history. Otherwise they
-     stay disabled (aria-disabled, described by the note), and the note names only what's missing. */
-  function syncRange(it) {
+     stay disabled (aria-disabled, described by the note), and the note names only what's missing.
+     Until the item's record is here they stay as they were; only the pressed one follows a click. */
+  function syncRange(d) {
     var missing = [];
     tfBtns.forEach(function (b) {
       var tf = b.getAttribute('data-tf');
-      if (hasRange(it, tf)) {
+      if (!d) {
+        if (b.getAttribute('aria-disabled') !== 'true') { b.setAttribute('aria-pressed', tf === view.tf ? 'true' : 'false'); }
+      } else if (hasRange(d, tf)) {
         b.removeAttribute('aria-disabled');
         b.removeAttribute('aria-describedby');
-        b.setAttribute('aria-pressed', tf === state.tf ? 'true' : 'false');
+        b.setAttribute('aria-pressed', tf === view.tf ? 'true' : 'false');
       } else {
         missing.push(tf);
         b.removeAttribute('aria-pressed');
@@ -753,9 +817,9 @@
         if (tfNote) { b.setAttribute('aria-describedby', tfNote.id); }
       }
     });
-    if (!tfNote) { return; }
+    if (!tfNote || !d) { return; }
     tfNote.hidden = !missing.length;
-    if (missing.length) { setText(tfNote, missing.join(' and ') + (missing.length > 1 ? ' need' : ' needs') + ' longer history from HomeCraftMgmt'); }
+    if (missing.length) { setText(tfNote, missing.join(' and ') + (missing.length > 1 ? ' need' : ' needs') + ' longer history from the server'); }
   }
 
   var chartW = 0;
@@ -763,12 +827,18 @@
     var w = el.getBoundingClientRect().width;
     return w > 40 ? Math.round(w) : fallback;
   }
+  function gridAt(f, H) { return H - 6 - (1 - f) * (H - 16); }
 
   function renderChart(it) {
-    var hist = rangeHist(it), vals = hist.map(function (h) { return h.p; });
+    var d = view.d;
+    if (!d) { renderWait(it); return; }
+    var hist = rangeHist(d), vals = hist.map(function (h) { return h.p; });
     var has = vals.length >= 2;
     chartBox.hidden = !has;
+    chartBox.removeAttribute('aria-busy');
     axis.hidden = !has;
+    axis.classList.remove('is-wait');
+    if (cState) { cState.hidden = true; }
     noHist.hidden = has;
     if (!has) { setHTML(gLabels, ''); renderMarks([]); return; }
     var W = boxWidth(svg, 480), H = Math.round(chartBox.clientHeight) || 280;
@@ -784,7 +854,7 @@
     var first = vals[0], last = vals[vals.length - 1];
     var dir = it.out ? 'flat' : last > first ? 'up' : last < first ? 'down' : 'flat';
     /* Live market events in the range: a dashed line and a small square at the top (kinds are from a fixed list) */
-    var marks = chartMarks(it, hist, W);
+    var marks = chartMarks(d, hist, W);
     svg.setAttribute('class', 'mk-chart-svg is-' + dir);
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.setAttribute('preserveAspectRatio', 'none');
@@ -813,18 +883,48 @@
     svg.setAttribute('aria-label', label);
   }
 
+  /* No record yet, or none to be had: the chart keeps its size (faint gridlines, no line) and says why in a quiet
+     line, so nothing under it moves when the record comes. */
+  function renderWait(it) {
+    var msg = WAIT_TEXT[view.mode] || WAIT_TEXT.loading, busy = !WAIT_TEXT[view.mode] || view.mode === 'loading';
+    chartBox.hidden = false;
+    axis.hidden = false;
+    axis.classList.add('is-wait');
+    noHist.hidden = true;
+    if (busy) { chartBox.setAttribute('aria-busy', 'true'); } else { chartBox.removeAttribute('aria-busy'); }
+    var W = boxWidth(svg, 480), H = Math.round(chartBox.clientHeight) || 280;
+    svg.setAttribute('class', 'mk-chart-svg is-wait');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.innerHTML = '<path class="mk-c-grid" d="' + [0.2, 0.45, 0.7, 0.95].map(function (f) { return 'M0 ' + gridAt(f, H).toFixed(1) + 'H' + W; }).join(' ') + '"></path>';
+    setHTML(gLabels, '');
+    renderMarks([]);
+    /* An item with a HOT, DEAL or News Flash tag nearly always has that marker in its range: the marker line keeps
+       its room (empty and unseen) while the record loads, so what's under the chart stays put when it comes */
+    var room = busy && evBox && evList && !!it.badge && EV_KINDS[it.badge.kind] === 1;
+    if (room) {
+      evBox.hidden = false;
+      evBox.classList.add('is-wait');
+      evList._k = null;
+      evList.textContent = '';
+      evList.appendChild(el('li', '', ' '));
+    }
+    if (cState) { setText(cState, msg); cState.hidden = false; }
+    svg.setAttribute('aria-label', 'Price chart of ' + it.name + ': ' + msg);
+  }
+
   /* Where each event in the range sits on the chart's x axis: between the two snapshots around its time.
      An event after the last snapshot (up to when the feed was made) sits at "now". */
-  function chartMarks(it, hist, W) {
+  function chartMarks(d, hist, W) {
     var n = hist.length, out = [];
-    if (!it.events.length || n < 2) { return out; }
+    if (!d.events.length || n < 2) { return out; }
     for (var i = 0; i < n; i++) {
       if (!isNum(hist[i].t) || (i && hist[i].t < hist[i - 1].t)) { return out; }
     }
     var t0 = hist[0].t, tn = hist[n - 1].t, gen = state.res.data && state.res.data.generatedAt;
     if (!(tn > t0)) { return out; }
     var end = isNum(gen) && gen > tn ? gen : tn, j = 0;
-    it.events.forEach(function (e) {
+    d.events.forEach(function (e) {
       if (e.t < t0 || e.t > end) { return; }
       var x = W;
       if (e.t < tn) {
@@ -846,6 +946,7 @@
     });
     var key = JSON.stringify(rowsIn);
     evBox.hidden = !rowsIn.length;
+    evBox.classList.remove('is-wait');
     if (evList._k === key) { return; }
     evList._k = key;
     evList.textContent = '';
@@ -865,9 +966,23 @@
     });
   }
 
-  /* Stock on the shelf per snapshot (history[].s), scaled to a full shelf when the feed says how big it is. */
+  function shelfText(it) { return isNum(it.stock) ? 'Now ' + D.count(Math.max(0, it.stock)) + (it.maxStock ? ' of ' + D.count(it.maxStock) : '') : ''; }
+  /* Stock on the shelf per snapshot (history[].s), scaled to a full shelf when the feed says how big it is.
+     While the record is on its way the box keeps its place with today's stock from the summary. */
   function renderStock(it) {
-    var hist = rangeHist(it);
+    var d = view.d;
+    if (!d) {
+      sb.hidden = view.mode !== 'loading';
+      if (sb.hidden) { return; }
+      var w = chartW || boxWidth(sbSvg, 480);
+      sbSvg.setAttribute('viewBox', '0 0 ' + w + ' 60');
+      sbSvg.setAttribute('preserveAspectRatio', 'none');
+      sbSvg.innerHTML = '<rect class="mk-sb-base" x="0" y="59" width="' + w + '" height="1"></rect>';
+      setText(sbNow, shelfText(it));
+      sbSvg.setAttribute('aria-label', 'Stock on the shelf: loading.');
+      return;
+    }
+    var hist = rangeHist(d);
     var s = hist.map(function (h) { return isNum(h.s) ? Math.max(0, h.s) : 0; });
     var any = s.some(function (v) { return v > 0; });
     var ok = s.length >= 2 && (any || it.out);
@@ -882,8 +997,8 @@
     s.forEach(function (v, i) {
       var h = v > 0 ? Math.max(1.5, Math.min(1, v / smax) * (H - 4)) : 0;
       if (!h) { return; }
-      var d = 'M' + (i * bw + gap / 2).toFixed(1) + ' ' + (H - h).toFixed(1) + 'h' + Math.max(0.5, bw - gap).toFixed(1) + 'V' + H + 'H' + (i * bw + gap / 2).toFixed(1) + 'Z';
-      if (i === s.length - 1) { lastBar = d; } else { bars += d; }
+      var p = 'M' + (i * bw + gap / 2).toFixed(1) + ' ' + (H - h).toFixed(1) + 'h' + Math.max(0.5, bw - gap).toFixed(1) + 'V' + H + 'H' + (i * bw + gap / 2).toFixed(1) + 'Z';
+      if (i === s.length - 1) { lastBar = p; } else { bars += p; }
     });
     sbSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     sbSvg.setAttribute('preserveAspectRatio', 'none');
@@ -896,20 +1011,29 @@
       (it.maxStock ? ' of a full shelf of ' + D.count(it.maxStock) : '') + (lo === top ? '.' : ', between ' + D.count(lo) + ' and ' + D.count(top) + '.'));
   }
 
-  function setStat(key, html, warn) {
+  function setStat(key, html, warn, wait) {
     var st = stats[key];
     if (!st) { return; }
     st.box.hidden = html === null;
     if (html === null) { return; }
     setHTML(st.dd, html);
     if (warn !== undefined) { st.dd.classList.toggle('mk-warn', !!warn); }
+    st.dd.classList.toggle('mk-wait', !!wait);
   }
   function renderStats(it) {
-    var vals = rangeHist(it).map(function (h) { return h.p; });
-    var has = vals.length >= 1;
-    setStat('open', has ? esc(fine(vals[0])) : null);
-    setStat('high', has ? esc(fine(Math.max.apply(null, vals))) : null);
-    setStat('low', has ? esc(fine(Math.min.apply(null, vals))) : null);
+    var d = view.d;
+    if (d) {
+      var vals = rangeHist(d).map(function (h) { return h.p; });
+      var has = vals.length >= 1;
+      setStat('open', has ? esc(fine(vals[0])) : null);
+      setStat('high', has ? esc(fine(Math.max.apply(null, vals))) : null);
+      setStat('low', has ? esc(fine(Math.min.apply(null, vals))) : null);
+    } else {
+      /* Open, high and low keep their boxes until the record is here (or can't be had) */
+      var ph = view.mode === 'loading' ? '<span aria-hidden="true">…</span><span class="lc-sr">loading</span>' :
+        '<span aria-hidden="true">—</span><span class="lc-sr">not available</span>';
+      ['open', 'high', 'low'].forEach(function (k) { setStat(k, ph, undefined, true); });
+    }
     setStat('usual', it.usual !== null ? esc(fine(it.usual)) : null);
     var spreadOk = isNum(it.buy) && isNum(it.sell) && isNum(it.price) && it.price > 0;
     setStat('spread', spreadOk ? ((it.buy - it.sell) / it.price * 100).toFixed(1) + '%' : null);
@@ -938,7 +1062,7 @@
     sellBox.hidden = false;
   }
 
-  /* ---------- movers and sectors ---------- */
+  /* ---------- movers and departments ---------- */
 
   function fillMovers(ul, none, picks) {
     var active = document.activeElement, lost = false;
@@ -979,7 +1103,6 @@
   }
   function renderMovers() {
     var live = state.items.filter(function (it) { return !it.out && isNum(it.change24h); });
-    var byName = function (a, b) { return a.name.localeCompare(b.name); };
     var up = live.filter(function (it) { return it.ch.dir === 'up'; })
       .sort(function (a, b) { return b.change24h - a.change24h || byName(a, b); }).slice(0, 5);
     var down = live.filter(function (it) { return it.ch.dir === 'down'; })
@@ -988,20 +1111,42 @@
     fillMovers(loseUl, loseNone, down);
   }
 
-  function renderSectors() {
-    var rowsOut = [];
-    SECTORS.forEach(function (s) {
-      var its = state.items.filter(function (it) { return it.sector === s && !it.out && isNum(it.change24h); });
-      if (!its.length) { return; }
-      rowsOut.push({ id: s, avg: its.reduce(function (a, it) { return a + it.change24h; }, 0) / its.length });
+  /* Departments today: each department's average 24-hour move over its items in stock, in tab order, with how many
+     items it has. Rebuilt only when a number changes; nothing in it takes focus. */
+  var deptKey = null;
+  function renderDepts() {
+    if (!deptUl) { return; }
+    var rowsOut = M.departments(state.res.data).map(function (d) {
+      var its = state.items.filter(function (it) { return it.dept === d.name && !it.out && isNum(it.change24h); });
+      return { name: d.name, n: d.count, avg: its.length ? its.reduce(function (a, it) { return a + it.change24h; }, 0) / its.length : null };
     });
-    var maxAbs = rowsOut.reduce(function (m, r) { return Math.max(m, Math.abs(r.avg)); }, 0);
-    setHTML(secUl, rowsOut.map(function (r) {
-      var dir = M.change(r.avg).dir;
-      var w = maxAbs > 0 ? 6 + 94 * Math.abs(r.avg) / maxAbs : 6;
-      return '<li><span class="mk-sec-name">' + esc(M.categoryLabel(r.id)) + '</span><span class="mk-sec-bar" aria-hidden="true"><span class="lc-' + dir +
-        '" style="width:' + w.toFixed(1) + '%"></span></span><span class="mk-sec-ch lc-' + dir + '">' + avgHTML(r.avg) + '</span></li>';
-    }).join(''));
+    var key = JSON.stringify(rowsOut);
+    if (key === deptKey) { return; }
+    deptKey = key;
+    var maxAbs = rowsOut.reduce(function (m, r) { return r.avg === null ? m : Math.max(m, Math.abs(r.avg)); }, 0);
+    deptUl.textContent = '';
+    rowsOut.forEach(function (r) {
+      var li = el('li'), name = el('span', 'mk-sec-name'), bar = el('span', 'mk-sec-bar'), ch = el('span', 'mk-sec-ch');
+      name.appendChild(el('span', 'mk-sec-dept', r.name));
+      name.appendChild(el('span', 'lc-sr', ', '));
+      var n = el('span', 'mk-sec-n', D.count(r.n));
+      n.appendChild(el('span', 'lc-sr', plural(r.n, ' item', ' items') + ', '));
+      name.appendChild(n);
+      bar.setAttribute('aria-hidden', 'true');
+      if (r.avg === null) {
+        ch.innerHTML = '<span aria-hidden="true">—</span><span class="lc-sr">all sold out</span>';
+      } else {
+        var dir = M.change(r.avg).dir, fill = el('span', 'lc-' + dir);
+        fill.style.width = (maxAbs > 0 ? 6 + 94 * Math.abs(r.avg) / maxAbs : 6).toFixed(1) + '%';
+        bar.appendChild(fill);
+        ch.className = 'mk-sec-ch lc-' + dir;
+        ch.innerHTML = avgHTML(r.avg); /* a sign and a number, no feed text */
+      }
+      li.appendChild(name);
+      li.appendChild(bar);
+      li.appendChild(ch);
+      deptUl.appendChild(li);
+    });
   }
 
   /* ---------- market news (the live market's 5 newest rows from the last 7 days) ---------- */
@@ -1026,9 +1171,9 @@
   }
   function renderNews() {
     if (!newsBox) { return; }
-    /* The panel is part of the live market: a feed without it (sim off) shows 2.1's page */
+    /* The panel is part of the live market: a feed without it (sim off) leaves it out */
     newsBox.hidden = !state.live;
-    if (side) { side.setAttribute('aria-label', state.live ? 'Market news, movers and sectors' : 'Movers and sectors'); }
+    if (side) { side.setAttribute('aria-label', state.live ? 'Market news, movers and departments' : 'Movers and departments'); }
     var list = state.live ? M.news(state.res.data) : [];
     var active = document.activeElement, lost = false, keep = dict();
     list.forEach(function (r, i) {
@@ -1059,7 +1204,7 @@
     }
   }
 
-  /* ---------- heatmap ---------- */
+  /* ---------- heatmap: the list's filter; a list longer than 60 shows its 60 biggest moves until "Show all" ---------- */
 
   var tiles = dict();
   function heatClass(it) {
@@ -1091,10 +1236,21 @@
     li.appendChild(b);
     return t;
   }
-  function renderHeat() {
-    var keep = dict(), active = document.activeElement, lost = false;
-    state.items.forEach(function (it, i) {
-      keep[it.id] = true;
+  /* What the heatmap shows, in words: "Biggest moves · 60 of 263", "Blocks · biggest moves, 60 of 106", "Food · 29 items" */
+  function heatScope(n, capped) {
+    var words = state.q.trim();
+    var what = state.tab === 'hot' ? 'Hot & Deals' : state.tab === 'watch' ? 'Your watchlist' : tabDept();
+    if (words) { what = (what ? what + ' matching' : 'Matching') + ' “' + words + '”'; }
+    if (capped) { return what ? what + ' · biggest moves, ' + HEAT_CAP + ' of ' + D.count(n) : 'Biggest moves · ' + HEAT_CAP + ' of ' + D.count(n); }
+    if (!what) { return n === 1 ? '1 item' : 'All ' + D.count(n) + ' items'; }
+    return what + ' · ' + D.count(n) + plural(n, ' item', ' items');
+  }
+  function renderHeat(vis) {
+    var n = vis.length, capped = n > HEAT_CAP && !state.heatAll;
+    var show = (capped ? biggest(vis, HEAT_CAP) : vis.slice()).sort(byMove);
+    var shown = dict(), active = document.activeElement, lost = false;
+    show.forEach(function (it, i) {
+      shown[it.id] = true;
       var t = tiles[it.id] || (tiles[it.id] = makeTile(it.id));
       t.btn.className = 'mk-tile mk-h-' + heatClass(it);
       setText(t.sym, it.sym);
@@ -1105,16 +1261,32 @@
       if (heatUl.children[i] !== t.li) { put(heatUl, t.li, heatUl.children[i] || null); }
     });
     Object.keys(tiles).forEach(function (id) {
-      if (keep[id]) { return; }
+      if (shown[id]) { return; }
       if (tiles[id].li.contains(active)) { lost = true; }
       if (tiles[id].li.parentNode) { tiles[id].li.parentNode.removeChild(tiles[id].li); }
-      delete tiles[id];
+      /* A tile is kept while its item is on the market, ready for when the filter shows it again */
+      if (!state.byId[id]) { delete tiles[id]; }
     });
+    heatUl.hidden = !n;
+    if (heatEmpty) {
+      heatEmpty.hidden = n > 0;
+      if (!n) { setText(heatEmpty, emptyText(state.items.length)); }
+    }
+    if (heatScopeP) {
+      heatScopeP.hidden = !n;
+      setText(heatScopeP, n ? heatScope(n, capped) : '');
+    }
+    if (heatMore) {
+      if (n <= HEAT_CAP && heatMore === active) { lost = true; }
+      heatMore.hidden = n <= HEAT_CAP;
+      setText(heatMore, capped ? 'Show all ' + D.count(n) : 'Show the biggest ' + HEAT_CAP);
+    }
+    markSelected();
     if (lost) {
       var first = heatUl.querySelector('button');
-      (first || find).focus();
+      (heatMore && !heatMore.hidden ? heatMore : first || find).focus();
     } else {
-      /* A tile that moved (the feed changed its order) keeps focus */
+      /* A tile that moved (its move changed its place) keeps focus */
       refocus(active);
     }
   }
@@ -1311,6 +1483,7 @@
     state.picked = true;
     state.wanted = '';
     putURL(id);
+    askDetail();
     markSelected();
     renderQuote();
     renderPick(visibleItems());
@@ -1330,16 +1503,17 @@
     var has = state.items.length > 0;
     root.setAttribute('data-state', has ? 'ready' : 'empty');
     ensureSelection();
+    if (has) { askDetail(); }
     renderTabs();
-    renderList();
+    var vis = renderList();
     if (has) {
       renderTape();
       renderIndex();
       renderQuote();
       renderNews();
       renderMovers();
-      renderSectors();
-      renderHeat();
+      renderDepts();
+      renderHeat(vis);
       markSelected();
     }
     renderCalc();
@@ -1353,16 +1527,19 @@
     }, 500);
   }
 
+  /* A new filter starts the heatmap at its biggest moves again */
   find.addEventListener('input', function () {
     state.q = find.value;
-    if (state.res) { sayCount(renderList().length); }
+    state.heatAll = false;
+    if (state.res) { sayCount(renderFilter().length); }
   });
   tabBox.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('button[data-tab]') : null;
     if (!b) { return; }
     state.tab = b.getAttribute('data-tab');
+    state.heatAll = false;
     syncTabs();
-    if (state.res) { sayCount(renderList().length); }
+    if (state.res) { sayCount(renderFilter().length); }
   });
   list.addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('button.mk-row') : null;
@@ -1382,6 +1559,15 @@
     var b = e.target.closest ? e.target.closest('button.mk-tile') : null;
     if (b) { select(b.getAttribute('data-id'), 'jump'); }
   });
+  if (heatMore) {
+    heatMore.addEventListener('click', function () {
+      if (!state.res) { return; }
+      state.heatAll = !state.heatAll;
+      var vis = visibleItems();
+      renderHeat(vis);
+      announce(state.heatAll ? 'The heatmap shows all ' + D.count(vis.length) + ' items.' : 'The heatmap shows the ' + HEAT_CAP + ' biggest moves.');
+    });
+  }
   [gainUl, loseUl].forEach(function (ul) {
     ul.addEventListener('click', function (e) {
       var b = e.target.closest ? e.target.closest('button.mk-mrow') : null;
@@ -1408,7 +1594,7 @@
     saveWatch();
     watchBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     announce(on ? it.name + ' is on your watchlist.' : it.name + ' is off your watchlist.');
-    if (state.tab === 'watch') { renderList(); }
+    if (state.tab === 'watch') { renderFilter(); }
   });
 
   /* Redraw the chart when its width changes (window resize, the layout switching columns) */
@@ -1432,7 +1618,7 @@
     }
   }, 60000);
 
-  /* { long: true } asks for the 7D/30D history and the chart markers too (only this page does; Home stays on the lean feed) */
+  /* The summary on every refresh; the selected item's record is asked for on each (askDetail, in renderAll) */
   D.watch('market', function (res) {
     var first = !state.res;
     state.res = res;
@@ -1440,5 +1626,5 @@
     renderAll();
     /* A shared link (?item=) scrolls the list to its item */
     if (first && state.sel && state.sel === urlItem()) { revealRow(state.sel, true); }
-  }, null, { long: true });
+  });
 })();

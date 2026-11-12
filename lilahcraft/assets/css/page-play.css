@@ -9,7 +9,8 @@
 .lc-main--play.is-layout-flow>*,
 .lc-main--play .is-layout-flow>*{margin-block:0}
 
-/* ---------- Getting in: the two path cards (loud boxes: Java orange, Bedrock pink) ---------- */
+/* ---------- Getting in: the two path cards (loud boxes: Java orange, Bedrock pink), then what's different on Bedrock ---------- */
+.lc-main--play .lc-play-join-in{gap:44px}
 .lc-main--play .lc-play-paths{gap:34px;align-items:stretch}
 .lc-main--play .lc-play-path{--step:var(--orange);display:flex;flex-direction:column;gap:16px;padding:30px;min-width:0}
 .lc-main--play .lc-play-path--bedrock{--step:var(--pink)}
@@ -32,6 +33,15 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 .lc-main--play .lc-play-tap .lc-btn{flex:none}
 .lc-main--play .lc-play-tap-note{flex:1 1 220px;font-size:15px;color:var(--muted)}
 .lc-main--play .lc-play-path .lc-play-pathnote{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+.lc-main--play .lc-play-mods-note{font-size:15px;color:var(--muted)}
+.lc-main--play :is(.lc-play-pathnote,.lc-play-mods-note) a{font-weight:800}
+.lc-main--play .lc-play-pathnote a{white-space:nowrap}
+/* What's different on Bedrock: a plain card, the list in two columns (one at 920 px and below) */
+.lc-main--play .lc-play-diff{gap:12px;padding:28px 30px}
+.lc-main--play .lc-play-diff-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 48px;margin:6px 0 0;padding-left:22px;list-style:square;font-size:17px;color:var(--text)}
+.lc-main--play .lc-play-diff-list li::marker{color:var(--pink)}
+.lc-main--play .lc-play-diff-list strong{color:var(--ink)}
+.lc-main--play .lc-play-diff-list code{font-size:.9em;font-weight:600;color:var(--purple-deep-text);white-space:nowrap}
 
 /* ---------- When are people on? (hidden until the site has enough samples) ---------- */
 .lc-main--play .lc-play-act{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:24px 48px;align-items:end;padding:28px 30px}
@@ -98,23 +108,21 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
   .lc-main--play .lc-play-check-bar i.is-on{forced-color-adjust:none;background:Highlight}
 }
 
-/* ---------- Resource pack and mods ---------- */
+/* ---------- Resource packs and mods ---------- */
 .lc-main--play .lc-play-more{gap:48px}
 .lc-main--play .lc-play-col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .lc-main--play .lc-play-col .lc-actions{align-self:flex-start}
-.lc-main--play .lc-play-soon{gap:8px;padding:22px}
-/* The mods: one bordered list, a row per mod (a group each, so Jeff can add one) */
+/* The packs and the mods: one bordered list each, a row per pack or mod (a group each, so Jeff can add one) */
 .lc-main--play .lc-play-mods{display:flex;flex-direction:column;background:var(--card);border:3px solid var(--edge)}
 .lc-main--play .lc-play-mods>.wp-block-group{display:flex;flex-direction:column;gap:2px;padding:16px 20px;color:var(--ink)}
 .lc-main--play .lc-play-mods>.wp-block-group+.wp-block-group{border-top:1px solid var(--line)}
-.lc-main--play .lc-play-soon h3,
 .lc-main--play .lc-play-mods h3{font-family:var(--body);font-size:17px;font-weight:800;line-height:1.45;letter-spacing:0}
-.lc-main--play .lc-play-soon p,
 .lc-main--play .lc-play-mods p{font-size:16px;color:var(--text)}
 
 /* ---------- Good to know: plain facts, a card each ---------- */
 .lc-main--play .lc-play-know-head .lc-lede{max-width:800px}
-/* In the dark look this gray band and the charcoal footer are one shade: a hairline between them */
+/* In the dark look this gray band and the charcoal footer are one shade: a hairline between them (for when Jeff
+   takes the House rules out of the template and the band meets the footer) */
 :root[data-theme="dark"] .lc-main--play .lc-play-know{border-bottom:1px solid var(--line)}
 .lc-main--play .lc-play-facts{gap:20px}
 /* A last card alone in its row fills the row (three across here, two at 1100 px and below) */
@@ -125,19 +133,27 @@ html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--play .lc-play-addr .
 .lc-main--play .lc-play-facts>:nth-child(3n+2) h3::before{background:var(--pink)}
 .lc-main--play .lc-play-facts>:nth-child(3n) h3::before{background:var(--purple)}
 .lc-main--play .lc-play-facts p{font-size:16px;color:var(--text)}
-/* "Read the house rules" jumps to the House rules card below (#house-rules, just before the page content). Until a
-   rule is typed that card hides itself, so the link does too (it stays in the Site Editor, to be editable). */
+/* "Read the house rules" jumps to the House rules card below (#house-rules). If every rule is deleted, that card
+   hides itself (site.css), so the link does too (it stays in the Site Editor, to be editable). */
 .lc-main--play .lc-play-rules-link a{display:inline-flex;align-items:center;min-height:44px;font-weight:800}
 body:not(.editor-styles-wrapper) .lc-main--play:not(:has(.lc-rules li:not(:empty))) .lc-play-rules-link{display:none}
 
-/* ---------- Page content (Pages > Play), e.g. the House rules pattern ----------
-   Empty page: the Post Content block renders nothing. It follows the gray Good to know band, so it
-   brings its own space above. The House rules pattern has its own wrapper (and hides itself until a
-   rule is typed); anything else Jeff adds gets the page width and gutter. */
+/* ---------- House rules: the template's own card (site.css draws .lc-rules-wrap and .lc-rules) ----------
+   It follows the gray Good to know band, so it brings its own space above. */
+.lc-main--play .lc-play-rules{padding-top:64px}
+/* The dark look: the charcoal card on the near-black page needs its outline, like the other cards */
+:root[data-theme="dark"] .lc-main--play .lc-rules{border:3px solid var(--edge)}
+
+/* ---------- Page content (Pages > Play), under the House rules ----------
+   Empty page: the Post Content block renders nothing. A House rules pattern Jeff inserts brings its own wrapper
+   (and hides itself until a rule is typed); anything else gets the page width and gutter. The House rules card
+   above already leaves 64 px under itself. */
 .lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:64px}
 .lc-main--play .lc-play-extra>:not(.lc-rules-wrap){width:100%;max-width:1280px;margin-inline:auto;padding-inline:var(--gutter)}
 .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:64px}
 .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:64px}
+.lc-main--play .lc-play-rules:has(li:not(:empty))+.lc-play-extra>.lc-rules-wrap:first-child{padding-top:0}
+.lc-main--play .lc-play-rules:has(li:not(:empty))+.lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:0}
 
 @media (max-width:1100px){
   .lc-main--play .lc-play-act{grid-template-columns:minmax(0,1fr)}
@@ -150,6 +166,10 @@ body:not(.editor-styles-wrapper) .lc-main--play:not(:has(.lc-rules li:not(:empty
 }
 @media (max-width:920px){
   .lc-main--play .lc-play-paths{gap:28px}
+  .lc-main--play .lc-play-join-in{gap:34px}
+  .lc-main--play .lc-play-diff{padding:24px}
+  .lc-main--play .lc-play-diff-list{grid-template-columns:minmax(0,1fr)}
+  .lc-main--play .lc-play-rules{padding-top:52px}
   .lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:52px}
   .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:52px}
   .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:52px}
@@ -175,6 +195,9 @@ body:not(.editor-styles-wrapper) .lc-main--play:not(:has(.lc-rules li:not(:empty
   .lc-main--play .lc-play-check-item{padding-inline:18px;font-size:16px}
   .lc-main--play .lc-play-mods>.wp-block-group{padding:14px 16px}
   .lc-main--play .lc-play-facts>.wp-block-group{padding:20px}
+  .lc-main--play .lc-play-diff{padding:20px}
+  .lc-main--play .lc-play-diff-list{font-size:16px}
+  .lc-main--play .lc-play-rules{padding-top:44px}
   .lc-main--play .lc-play-extra>.lc-rules-wrap{padding-top:44px}
   .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):first-child{margin-top:44px}
   .lc-main--play .lc-play-extra>:not(.lc-rules-wrap):last-child{margin-bottom:44px}

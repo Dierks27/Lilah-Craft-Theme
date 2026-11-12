@@ -5,7 +5,8 @@
  * inc/settings.php  Settings > LilahCraft
  * inc/ping.php      Java server list ping for the header status
  * inc/activity.php  player counts over the day ("When are people on?" on Play)
- * inc/feeds.php     /wp-json/lilahcraft/v1/{market,minis,status}
+ * inc/feeds.php     /wp-json/lilahcraft/v1/{market,minis,arcade,status}
+ *                   (with inc/departments.php: the Market's departments when the feed doesn't send them)
  * inc/setup.php     creates the pages and sets Reading on activation or update, names the page templates
  * inc/assets.php    styles and scripts, per page
  * inc/meta.php      descriptions and share cards (og:image) per page

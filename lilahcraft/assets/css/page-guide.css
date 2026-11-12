@@ -3,10 +3,13 @@
    "Guide sections" side menu (250 px: a card surface, 3 px outline, a stone strip on top; the section
    being read gets a purple bar, set by page-guide.js) beside the sections. At 920 px and below the
    menu sits above the sections as a two-column link grid. Subsections sit inside sections under an h3:
-   Hot, deals and news (in Selling: a key of the market tags), then Golem chests and the Sound Muffler (in
-   Crafting, each with its own menu entry). The Towns, Golem chests and Sound Muffler facts go under their
-   paragraphs at 1100 px and below. The command table is the page's loud board (its /hcm arcade row links to
-   the Arcade page); it stacks below 640 px.
+   Hot, deals and news (in Selling: a key of the market tags), What can't be traded (in Trading), Golem chests
+   and the Sound Muffler (in Crafting, each with its own menu entry; the Copper Golem Brush is an h4 inside
+   Golem chests, also in the menu), the Firework Remote and Holiday colours (a key of dates and colours), the
+   TV Remote and Playlists. Beside the paragraphs: a facts list, and for a recipe worth drawing a 3×3 crafting
+   grid (.lc-recipe); at 1100 px and below they go under the paragraphs, side by side while there's room.
+   The command table is the page's loud board (its /hcm arcade row links to the Arcade page); it stacks
+   below 640 px.
    The dark look (2.2) is all tokens: outlines --edge, accent text --purple-deep-text, the bar --purple-text. */
 
 /* ---------- two columns: side menu + sections ---------- */
@@ -36,40 +39,92 @@
 .lc-main--guide .lc-guide-sec--wide{gap:18px}
 .lc-main--guide .lc-guide-sec p:not(.lc-pill):not(.lc-empty){max-width:760px;font-size:18px;color:var(--text)}
 
-/* Towns, Golem chests and the Sound Muffler: paragraphs beside the facts list */
+/* Towns, Trading, Golem chests, the brush, the Sound Muffler, Firework shows, TVs: paragraphs beside the facts */
 .lc-main--guide :is(.lc-guide-towns,.lc-guide-split){display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:start}
 .lc-main--guide :is(.lc-guide-towns,.lc-guide-split) p:not(.lc-pill){max-width:none}
 /* keep the label on one line; the value wraps first */
 .lc-main--guide :is(.lc-guide-towns,.lc-guide-split) .lc-facts dt{flex-shrink:0;max-width:55%}
 .lc-main--guide :is(.lc-guide-towns,.lc-guide-split) .lc-facts>div:last-child{border-bottom:0}
+/* the side column when it holds a recipe (with or without facts under it) */
+.lc-main--guide .lc-guide-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+/* a command in a facts value reads at the value's size */
+.lc-main--guide .lc-facts dd code{font-weight:600}
 
-/* A subsection inside a section (an h3 and its blocks), set apart from what comes before it */
+/* A subsection inside a section (an h3 and its blocks), set apart from what comes before it; the Copper Golem
+   Brush is one level down (an h4 inside Golem chests) and reads a step smaller */
 .lc-main--guide .lc-guide-sub{display:flex;flex-direction:column;gap:14px;margin-top:22px}
 .lc-main--guide .lc-guide-sub>.lc-h3{font-size:23px}
+.lc-main--guide .lc-guide-sub .lc-guide-sub{margin-top:30px}
+.lc-main--guide .lc-guide-sub .lc-guide-sub>.lc-h3{font-size:21px}
 
-/* Hot, deals and news: each market tag beside what it means (the tags themselves are site.css .lc-tag) */
-.lc-main--guide .lc-guide-tags{max-width:760px;padding:4px 22px;background:var(--card);border:3px solid var(--edge)}
-.lc-main--guide .lc-guide-tags>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 20px;padding:14px 0;border-bottom:1px solid var(--line)}
-.lc-main--guide .lc-guide-tags>div:last-child{border-bottom:0}
+/* What can't be traded: a plain list with square purple markers */
+.lc-main--guide .lc-guide-list{display:flex;flex-direction:column;gap:6px;max-width:760px;padding-left:22px;list-style:square;font-size:18px;color:var(--text)}
+.lc-main--guide .lc-guide-list li::marker{color:var(--purple-text)}
+
+/* Hot, deals and news: each market tag beside what it means (the tags themselves are site.css .lc-tag).
+   The firework shows and the holiday colours (.lc-guide-key) use the same card with a wider first column: a
+   show beside how long it runs, a holiday and its dates beside its colours. */
+.lc-main--guide :is(.lc-guide-tags,.lc-guide-key){max-width:760px;padding:4px 22px;background:var(--card);border:3px solid var(--edge)}
+.lc-main--guide :is(.lc-guide-tags,.lc-guide-key)>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 20px;padding:14px 0;border-bottom:1px solid var(--line)}
+.lc-main--guide :is(.lc-guide-tags,.lc-guide-key)>div:last-child{border-bottom:0}
 .lc-main--guide .lc-guide-tags dt{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;padding-top:2px}
 .lc-main--guide .lc-guide-tags .lc-tag{font-size:13px}
-.lc-main--guide .lc-guide-tags dd{margin:0;font-size:17px;color:var(--text)}
+.lc-main--guide :is(.lc-guide-tags,.lc-guide-key) dd{margin:0;font-size:17px;color:var(--text)}
 .lc-main--guide .lc-guide-tags dd strong{color:var(--ink)}
+.lc-main--guide .lc-guide-key>div{grid-template-columns:210px minmax(0,1fr);align-items:center;padding:12px 0}
+.lc-main--guide .lc-guide-key dt{font-weight:700;font-size:17px;line-height:1.3;color:var(--ink)}
+.lc-main--guide .lc-guide-when{display:block;font-family:var(--mono);font-weight:600;font-size:14px;color:var(--muted)}
+.lc-main--guide .lc-guide-key dd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.lc-main--guide .lc-guide-sec p.lc-small:not(.lc-pill){font-size:15px;color:var(--muted)}
+/* the colours as small squares, in the game's firework shades: decoration only (aria-hidden), the names say it.
+   They keep their colours in forced-colours mode. Room for four in every row (4 × 16 px + 3 gaps), so the
+   names line up under each other. */
+.lc-main--guide .lc-fw{display:inline-flex;gap:3px;min-width:73px}
+.lc-main--guide .lc-fw i{width:16px;height:16px;border:2px solid var(--edge-strong);background:var(--fw);forced-color-adjust:none}
+.lc-main--guide .lc-fw--pink{--fw:#d88198}
+.lc-main--guide .lc-fw--red{--fw:#b3312c}
+.lc-main--guide .lc-fw--white{--fw:#f0f0f0}
+.lc-main--guide .lc-fw--lime{--fw:#41cd34}
+.lc-main--guide .lc-fw--green{--fw:#1faf3f}
+.lc-main--guide .lc-fw--gold{--fw:#ffd700}
+.lc-main--guide .lc-fw--blue{--fw:#253192}
+.lc-main--guide .lc-fw--orange{--fw:#eb8844}
+.lc-main--guide .lc-fw--purple{--fw:#7b2fbe}
+.lc-main--guide .lc-fw--brown{--fw:#51301a}
+.lc-main--guide .lc-fw--silver{--fw:#c0c0c0}
+.lc-main--guide .lc-fw--aqua{--fw:#00ffff}
 
-/* Golem chests and Sound Muffler: the catch, a quiet note with a bar down the left (a border, so forced colours
+/* A crafting recipe as the game shows it: a 3×3 grid on a card. Filled slots are card squares with the strong
+   edge and the item's name; empty slots are sunk into the gray. The grid is one image to screen readers (its
+   aria-label reads the recipe), so the slot texts aren't read twice. */
+.lc-main--guide .lc-recipe{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--card);border:3px solid var(--edge)}
+.lc-main--guide .lc-recipe-grid{display:grid;grid-template-columns:repeat(3,80px);gap:4px;width:max-content;padding:4px;background:var(--light)}
+.lc-main--guide .lc-recipe-grid>span{display:flex;align-items:center;justify-content:center;min-height:60px;padding:4px;background:var(--page);border:2px solid transparent;font-family:var(--mono);font-weight:700;font-size:12px;line-height:1.25;text-align:center;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--guide .lc-recipe-grid>span:not(:empty){background:var(--card);border-color:var(--edge-strong)}
+.lc-main--guide .lc-recipe figcaption{max-width:256px;font-size:15px;line-height:1.4;color:var(--muted)}
+
+/* Trading, Golem chests, Sound Muffler, Playlists: the catch, a quiet note with a bar down the left (a border, so forced colours
    keep it; charcoal, and a mid gray in the dark look, where the card outline shade would vanish on the gray band) */
 .lc-main--guide .lc-guide-sec .lc-guide-sub p.lc-guide-note{max-width:none;padding:16px 20px 16px 19px;background:var(--light);border-left:5px solid var(--edge-strong);font-size:17px}
 .lc-main--guide .lc-guide-note strong{color:var(--ink)}
+/* a link on the note's gray: the deep purple (the plain link purple is under 4.5:1 there; the light one in the dark look) */
+.lc-main--guide .lc-guide-note a:not(:hover){color:var(--purple-deep-text)}
 
 /* Crafting and storage, Staying safe: two-column cards */
 .lc-main--guide .lc-guide-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .lc-main--guide .lc-guide-cards .lc-card{gap:8px}
 .lc-main--guide .lc-guide-cards .lc-card p:not(.lc-pill){max-width:none;font-size:17px}
-/* a command never breaks across lines */
+/* a card's recipe line sits at the foot of the card, under a hairline, so the recipes line up across a row */
+.lc-main--guide .lc-guide-cards .lc-card p.lc-guide-recipe{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+.lc-main--guide .lc-guide-recipe strong{color:var(--ink)}
+/* a command never breaks across lines (below 380 px one longer than the line does, at its spaces: see the end) */
 .lc-main--guide :is(.lc-hero,.lc-guide-sec) code{white-space:nowrap}
 
 /* ---------- commands ---------- */
 .lc-main--guide .lc-cmd-find{width:380px;max-width:100%}
+/* the search box filters with site.js: without JavaScript it would do nothing, so it goes (the table stays; the
+   block editor keeps showing it) */
+html:not(.lc-js) body:not(.editor-styles-wrapper) .lc-main--guide .lc-cmd-find{display:none}
 /* Site Editor only: the Custom HTML block wraps the field, table and empty note, so give them the section's gap */
 .lc-main--guide .lc-guide-sec>.wp-block-html{display:flex;flex-direction:column;gap:inherit}
 .lc-main--guide .lc-cmds-box{margin-top:4px}
@@ -88,10 +143,13 @@
 /* no hairline right under a group heading */
 .lc-main--guide .lc-cmds tr:first-child+tr>*{border-top:0}
 
-/* ---------- 1100 px and below: Towns, Golem chests and Sound Muffler facts under the paragraphs (beside them the facts
-   card gets too narrow for "$10 minimum", which then runs out of the card) ---------- */
+/* ---------- 1100 px and below: the facts under the paragraphs (beside them the facts card gets too narrow for
+   "$10 minimum", which then runs out of the card); a recipe and its facts side by side while both fit ---------- */
 @media (max-width:1100px){
   .lc-main--guide :is(.lc-guide-towns,.lc-guide-split){grid-template-columns:minmax(0,1fr);gap:20px}
+  .lc-main--guide .lc-guide-side{flex-flow:row wrap;align-items:flex-start;gap:20px}
+  .lc-main--guide .lc-guide-side>.lc-recipe{flex:none}
+  .lc-main--guide .lc-guide-side>.lc-facts{flex:1 1 340px}
 }
 
 /* ---------- 920 px and below: one column, the menu on top ---------- */
@@ -105,6 +163,8 @@
   .lc-main--guide .lc-guide-cards{grid-template-columns:minmax(0,1fr);gap:16px}
   .lc-main--guide .lc-guide-sub{margin-top:14px}
   .lc-main--guide .lc-guide-sub>.lc-h3{font-size:21px}
+  .lc-main--guide .lc-guide-sub .lc-guide-sub{margin-top:24px}
+  .lc-main--guide .lc-guide-sub .lc-guide-sub>.lc-h3{font-size:19px}
 }
 
 /* ---------- phones: the command table stacks ---------- */
@@ -129,9 +189,20 @@
   .lc-main--guide .lc-toc .lc-strip{margin:0 -8px}
   .lc-main--guide .lc-toc a{padding:4px 8px 4px 12px;font-size:15px}
   .lc-main--guide .lc-toc-title{padding-left:12px}
-  /* the tag key stacks: tags above their meaning */
-  .lc-main--guide .lc-guide-tags{padding:2px 16px}
-  .lc-main--guide .lc-guide-tags>div{grid-template-columns:minmax(0,1fr);gap:8px}
+  /* the tag key and the holiday dates stack: tags above their meaning, a holiday above its colours */
+  .lc-main--guide :is(.lc-guide-tags,.lc-guide-key){padding:2px 16px}
+  .lc-main--guide :is(.lc-guide-tags,.lc-guide-key)>div{grid-template-columns:minmax(0,1fr);gap:8px}
   .lc-main--guide .lc-guide-sub>.lc-h3{font-size:19px}
+  .lc-main--guide .lc-guide-sub .lc-guide-sub>.lc-h3{font-size:18px}
+  .lc-main--guide .lc-guide-list{font-size:17px}
+  .lc-main--guide .lc-recipe{padding:14px}
+  .lc-main--guide .lc-recipe-grid{grid-template-columns:repeat(3,76px)}
   .lc-main--guide .lc-guide-sec .lc-guide-sub p.lc-guide-note{padding:14px 16px 14px 15px}
+}
+
+/* ---------- below 380 px: a command longer than its line (/collins playlist <name> add <link> is about 337 px)
+   wraps at its spaces instead of pushing the page sideways. As a box no wider than the line, a command that fits
+   still moves whole to the next line, so the short ones (and /collins-cache at its hyphen) never split. ---------- */
+@media (max-width:379px){
+  .lc-main--guide :is(.lc-hero,.lc-guide-sec) code{display:inline-block;max-width:100%;white-space:normal}
 }

@@ -12,7 +12,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-lede"} -->
-<p class="lc-lede">Tiny collectible blocks. Every one is numbered, and a capped Mini stops at its cap: once they're all printed, that's it. This is every Mini there is, straight from the Museum.</p>
+<p class="lc-lede">Tiny collectible blocks. Every one is numbered, and a capped Mini stops at its cap: once they’re all out, that’s it. This is every Mini there is, straight from the Museum.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:html -->
@@ -102,14 +102,6 @@
       <label class="lc-label" for="miniCat">Category</label>
       <select class="lc-select" id="miniCat" data-mn-cat>
         <option value="all">All categories</option>
-        <option value="ANIMAL">Animal</option>
-        <option value="FOOD">Food</option>
-        <option value="LETTER">Letter</option>
-        <option value="SYMBOL">Symbol</option>
-        <option value="CHARACTER">Character</option>
-        <option value="VEHICLE">Vehicle</option>
-        <option value="HOLIDAY">Holiday</option>
-        <option value="MISC">Misc</option>
       </select>
     </div>
     <label class="lc-check lc-mn-hide"><input type="checkbox" data-mn-hide> Hide sold out</label>
@@ -196,12 +188,50 @@
 <p>Numbered, graded, and sometimes Shiny. Show it off in a Display Case.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:paragraph {"className":"lc-mn-how-note"} -->
+<p class="lc-mn-how-note">Holiday Minis skip all four steps: <a href="#holiday-minis">they’re earned at their holiday</a>.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:group {"tagName":"section","anchor":"holiday-minis","className":"lc-wrap lc-sec lc-mn-holiday"} -->
+<section id="holiday-minis" class="wp-block-group lc-wrap lc-sec lc-mn-holiday"><!-- wp:group {"className":"lc-card lc-mn-hol"} -->
+<div class="wp-block-group lc-card lc-mn-hol"><!-- wp:html -->
+<div class="lc-strip lc-strip--copper" aria-hidden="true"></div>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"lc-mn-hol-in"} -->
+<div class="wp-block-group lc-mn-hol-in"><!-- wp:group {"className":"lc-stack lc-mn-hol-text"} -->
+<div class="wp-block-group lc-stack lc-mn-hol-text"><!-- wp:heading {"className":"lc-h2 lc-h2--sm"} -->
+<h2 class="wp-block-heading lc-h2 lc-h2--sm">Holiday Minis</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">The Holiday Collection is earned at its holiday and nowhere else: never from a Card Pack, a crate or the wild. There’s no Card, so no printing, and every copy is Standard grade. When the holiday is over, that Mini is closed for good. One you own can still be traded.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">This year’s is the <strong>Turkey Mini 2026</strong>, and only 20 will ever exist. Every turkey you catch has a 5 in 100 chance at one, up to one per player.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-text lc-mn-hol-note"} -->
+<p class="lc-text lc-mn-hol-note">It can be earned from 22 to 29 November 2026, Central time.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:html -->
+<div class="lc-mn-hol-feed" data-mn-hol hidden>
+  <ul class="lc-mn-hol-list" role="list" aria-label="Holiday Minis in the Museum" data-mn-hol-list></ul>
+</div>
+<!-- /wp:html --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
-<!-- wp:group {"tagName":"section","className":"lc-wrap lc-sec lc-grid lc-cols-2 lc-mn-lore"} -->
-<section class="wp-block-group lc-wrap lc-sec lc-grid lc-cols-2 lc-mn-lore"><!-- wp:group {"className":"lc-card lc-mn-info"} -->
+<!-- wp:group {"tagName":"section","className":"lc-wrap lc-sec lc-sec--flush lc-grid lc-cols-2 lc-mn-lore"} -->
+<section class="wp-block-group lc-wrap lc-sec lc-sec--flush lc-grid lc-cols-2 lc-mn-lore"><!-- wp:group {"className":"lc-card lc-mn-info"} -->
 <div class="wp-block-group lc-card lc-mn-info"><!-- wp:html -->
 <div class="lc-strip lc-strip--amethyst" aria-hidden="true"></div>
 <!-- /wp:html -->
@@ -229,7 +259,11 @@
 <!-- /wp:list -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">A <strong>Mini Radar</strong> tells you Cold, Warm, Hot… Burning. A <strong>Mini Lure</strong> makes the next wild Mini show up near you. A Mini that gets away never uses up a number.</p>
+<p class="lc-text">A <strong>Mini Radar</strong> reads Cold, Warm or Hot every few seconds for a minute. It never says which way, and one radar works once per wild Mini. A <strong>Mini Lure</strong> makes the next wild Mini show up near you. A Mini that gets away never uses up a number.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">Wild Minis skip anyone in the Nether, where one would land on the bedrock roof.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -315,7 +349,11 @@
 <p class="lc-small">Keep your Cards together.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
-<!-- /wp:group --></section>
+<!-- /wp:group -->
+
+<!-- wp:paragraph {"className":"lc-text lc-mn-trade"} -->
+<p class="lc-text lc-mn-trade"><strong>Trading:</strong> swap Minis with another player in the trade window. Type <code>/trade</code> and their name, or use the Trade site on a PC. The Mini changes owner in the Museum on the spot. A Mini in a Vending Machine, a Display Case or the Auction House has to come out first. The Guide has <a href="/guide/#trading">the rest of the trade rules</a>.</p>
+<!-- /wp:paragraph --></section>
 <!-- /wp:group --></main>
 <!-- /wp:group -->
 

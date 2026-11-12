@@ -26,8 +26,16 @@
     return (n < 0 ? '−$' : '$') + a.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   }
   function count(n) { return isNum(n) ? Math.round(n).toLocaleString('en-US') : ''; }
+  /* When a feed was made, in the visitor's own time: "6:00 PM" today, "Nov 3, 6:00 PM" on another day (so a
+     stale copy days old doesn't read as today), "Dec 30, 2025, 6:00 PM" in another year; '' when it isn't a time. */
   function timeText(ms) {
-    return isNum(ms) && ms > 0 ? new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+    var d = new Date(isNum(ms) && ms > 0 ? ms : NaN), now = new Date();
+    if (isNaN(d.getTime())) { return ''; }
+    var t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (d.toDateString() === now.toDateString()) { return t; }
+    var day = { month: 'short', day: 'numeric' };
+    if (d.getFullYear() !== now.getFullYear()) { day.year = 'numeric'; }
+    return d.toLocaleDateString('en-US', day) + ', ' + t;
   }
   /* Time until `endsAt` (ms since 1970, like statusEndsAt): "2d 4h", "1d", "5h", "40 min"; '' when it has
      passed or isn't a time. Minutes round up (30 s left is "1 min"), hours and days down. `now` defaults to Date.now(). */

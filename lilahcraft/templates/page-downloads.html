@@ -12,7 +12,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-lede"} -->
-<p class="lc-lede">Optional extras for Java players. Nothing here is required, and Bedrock players don't need to install anything.</p>
+<p class="lc-lede">Optional extras for Java players. You can play without any of them; only TVs need a mod to be seen. Bedrock players install nothing.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
@@ -23,7 +23,128 @@
 <h2 class="wp-block-heading lc-h2 lc-h2--md">Made for LilahCraft</h2>
 <!-- /wp:heading -->
 
-<!-- wp:lilahcraft/craftbridge /--></div>
+<!-- wp:paragraph {"className":"lc-text lc-dl-intro"} -->
+<p class="lc-text lc-dl-intro">Two client mods for this server. Both are optional and Java only, and Fabric runs both.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:lilahcraft/craftbridge /-->
+
+<!-- wp:group {"anchor":"collins","className":"lc-board lc-board--pink lc-cb-board lc-dl-tv"} -->
+<div id="collins" class="wp-block-group lc-board lc-board--pink lc-cb-board lc-dl-tv"><!-- wp:group {"className":"lc-cb-about"} -->
+<div class="wp-block-group lc-cb-about"><!-- wp:group {"className":"lc-cb-head"} -->
+<div class="wp-block-group lc-cb-head"><!-- wp:heading {"level":3,"className":"lc-cb-title"} -->
+<h3 class="wp-block-heading lc-cb-title">Collins</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-pill lc-pill--code"} -->
+<p class="lc-pill lc-pill--code"><span class="lc-sr">Version </span>1.5.1</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:paragraph {"className":"lc-cb-lede"} -->
+<p class="lc-cb-lede">Shows the TVs players put up around the server. Without it a TV is just the blocks it hangs on, and silent.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"lc-cb-feats"} -->
+<ul class="wp-block-list lc-cb-feats"><!-- wp:list-item -->
+<li>YouTube videos and Twitch streams, in sync for everyone in range. Those are the links players can put on a TV; staff can approve others.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Set your own top quality with <code>/collinsc quality</code>. It starts at 720.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Your own volume, or TVs off, from its settings screen (needs ModMenu).</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><code>/collins-cache clear</code> deletes the videos it has saved.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph {"className":"lc-dl-tv-privacy"} -->
+<p class="lc-dl-tv-privacy"><strong>What it does on your computer.</strong> Your game fetches each video itself, straight from YouTube or Twitch (or an address staff have approved), the way a browser would. It saves the videos in a <code>collins-cache</code> folder on your disk. The first time it starts, it downloads two helper programs, <span class="lc-nowrap">yt-dlp</span> and ffmpeg. Other players with the mod see a camera symbol after your name in the tab list.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-cb-quiet"} -->
+<p class="lc-cb-quiet">Collins is by Sawiq, Zorsh and EssciZ; this is their mod, ported to Minecraft 26.3 for LilahCraft. Free software under the GPL-3.0. Making a TV and the TV Remote are in <a href="/guide/#tvs">the Guide</a>.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-cb-get lc-dl-tv-get"} -->
+<div class="wp-block-group lc-cb-get lc-dl-tv-get"><!-- wp:list {"className":"lc-dl-tv-fit"} -->
+<ul class="wp-block-list lc-dl-tv-fit"><!-- wp:list-item -->
+<li><span>Minecraft</span> <strong>26.3 only</strong></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><span>Mod loader</span> <strong>Fabric only</strong></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><span>Size</span> <strong>about 108 MB</strong></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:html -->
+<a class="lc-btn lc-btn--orange lc-cb-dl" href="https://github.com/Dierks27/collins-fabric/releases/download/v1.5.1-mc26.3/collins-fabric-1.5.1-mc26.3.jar" aria-describedby="lc-tv-file"><svg class="lc-cb-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Download</span><span class="lc-sr"> Collins</span></a>
+<p class="lc-cb-file" id="lc-tv-file">collins-fabric-1.5.1-mc26.3.jar</p>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"lc-cb-needs"} -->
+<div class="wp-block-group lc-cb-needs"><!-- wp:paragraph {"className":"lc-cb-label"} -->
+<p class="lc-cb-label">You also need</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"lc-cb-list"} -->
+<ul class="wp-block-list lc-cb-list"><!-- wp:list-item -->
+<li>Fabric Loader 0.18.4 or newer</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Fabric API 0.165.0+26.3 or newer</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph {"className":"lc-cb-need"} -->
+<p class="lc-cb-need">Optional: ModMenu, for the settings screen.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-cb-need"} -->
+<p class="lc-cb-need">Windows, Linux and Mac; not Windows or Linux on ARM. On an Apple Silicon Mac, install ffmpeg yourself first (<code>brew install ffmpeg</code>) or YouTube videos won’t play.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-cb-needs"} -->
+<div class="wp-block-group lc-cb-needs"><!-- wp:paragraph {"className":"lc-cb-label"} -->
+<p class="lc-cb-label">Release and source</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"lc-cb-list lc-dl-tv-links"} -->
+<ul class="wp-block-list lc-cb-list lc-dl-tv-links"><!-- wp:list-item -->
+<li><a href="https://github.com/Dierks27/collins-fabric/releases/tag/v1.5.1-mc26.3">The 1.5.1 release page</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://github.com/Dierks27/collins-fabric">Source of this mod</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://github.com/Dierks27/collins-paper">Source of the server plugin</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://github.com/imsawiq/collins">The original Collins</a></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:paragraph {"className":"lc-dl-tip lc-dl-both"} -->
+<p class="lc-dl-tip lc-dl-both"><strong>Running both?</strong> One Minecraft 26.3 instance with Fabric does it: Fabric Loader 0.19.5 or newer, Fabric API 0.165.0+26.3 or newer, and JEI 31.7.0.34 for CraftBridge Client.</p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
@@ -33,6 +154,10 @@
 <h2 class="wp-block-heading lc-h2 lc-h2--md">Resource packs</h2>
 <!-- /wp:heading -->
 
+<!-- wp:paragraph {"className":"lc-text lc-dl-intro"} -->
+<p class="lc-text lc-dl-intro">The server offers two when you join, so there’s nothing to download. Both are optional: saying no changes how things look, not what works.</p>
+<!-- /wp:paragraph -->
+
 <!-- wp:group {"className":"lc-grid lc-cols-2"} -->
 <div class="wp-block-group lc-grid lc-cols-2"><!-- wp:group {"className":"lc-card lc-dl-pack"} -->
 <div class="wp-block-group lc-card lc-dl-pack"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
@@ -40,30 +165,24 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">Makes clocks tell the right time in every world. The server offers it when you join, so there's nothing to download.</p>
-<!-- /wp:paragraph -->
+<p class="lc-text">Makes clocks tell the right time in every world.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"lc-card lc-dl-pack"} -->
+<div class="wp-block-group lc-card lc-dl-pack"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
+<h3 class="wp-block-heading lc-h3">CraftBridge models</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"lc-text"} -->
+<p class="lc-text">3D models for the Linked Workbench, a table on legs with its tools on a rack, and the Combo Chest, a small chest whose lid opens while it’s in use. The server’s own items get their art, where they have some. Without the pack: a plain crafting table and a plain barrel.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
 
 <!-- wp:paragraph {"className":"lc-dl-tip"} -->
 <p class="lc-dl-tip">Said no by accident? In your server list, pick the server, click Edit, and set Server Resource Packs to Enabled.</p>
 <!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"lc-card lc-card--dashed lc-dl-pack"} -->
-<div class="wp-block-group lc-card lc-card--dashed lc-dl-pack"><!-- wp:group {"className":"lc-row lc-dl-title"} -->
-<div class="wp-block-group lc-row lc-dl-title"><!-- wp:heading {"level":3,"className":"lc-h3"} -->
-<h3 class="wp-block-heading lc-h3">CraftBridge models</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"className":"lc-pill lc-pill--soon"} -->
-<p class="lc-pill lc-pill--soon">Coming soon</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">3D models for the Linked Workbench and Combo Chest, and art for the server's own items as it arrives. Also offered when you join.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
 
@@ -84,7 +203,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">Look up any recipe, including the server’s own. CraftBridge Client needs it.</p>
+<p class="lc-text">Look up any recipe. On Fabric that includes the server’s own; on NeoForge, only the game’s. CraftBridge Client needs it.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"className":"lc-actions"} -->
@@ -142,7 +261,7 @@
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->
-<li>Make an instance on the server's Minecraft version with Fabric or NeoForge.</li>
+<li>Make an instance on the server's Minecraft version with Fabric. NeoForge runs CraftBridge Client and JEI, but not Collins.</li>
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->

@@ -78,6 +78,28 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
 .lc-main--minis .lc-mn-step-n{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--orange);color:var(--charcoal);font-family:var(--display);font-weight:800;font-size:20px;line-height:1}
 .lc-main--minis .lc-mn-step-title{margin-top:4px;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.25;letter-spacing:-.01em;color:#fff}
 .lc-main--minis .lc-mn-step p:not(.lc-mn-step-n){font-size:16px;color:var(--muted-dark)}
+/* "Holiday Minis skip all four steps": the link takes the dark band's light purple from site.css */
+.lc-main--minis .lc-mn-how-note{font-size:17px;color:var(--muted-dark)}
+
+/* ---------- Holiday Minis: the text, and beside it a row per holiday Mini in the feed (page-minis.js) ---------- */
+.lc-main--minis .lc-mn-hol{gap:14px;padding:32px}
+.lc-main--minis .lc-mn-hol>.lc-strip{margin:-32px -32px 8px}
+.lc-main--minis .lc-mn-hol-in{display:flex;flex-wrap:wrap;align-items:flex-start;gap:28px 40px}
+.lc-main--minis .lc-mn-hol-text{flex:1 1 460px;min-width:0;max-width:760px}
+.lc-main--minis .lc-mn-hol-feed{flex:1 1 320px;min-width:0}
+.lc-main--minis .lc-mn-hol-list{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.lc-main--minis .lc-mn-hol-row{--head:72px;display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;column-gap:20px;padding:18px 20px 22px;background:var(--page);border:2px solid var(--light)}
+.lc-main--minis .lc-mn-hol-row .lc-head{align-self:start}
+.lc-main--minis .lc-mn-hol-info{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+.lc-main--minis .lc-mn-hol-name{font-family:var(--display);font-weight:800;font-size:17px;line-height:1.25;letter-spacing:-.01em;color:var(--ink);overflow-wrap:anywhere}
+.lc-main--minis .lc-mn-hol-when{font-size:15px;font-weight:700;line-height:1.45;color:var(--text)}
+.lc-main--minis .lc-mn-hol-row .lc-mn-pills{justify-content:flex-start}
+.lc-main--minis .lc-mn-hol-row .lc-mn-printed{text-align:left}
+/* "Starts 22 Nov" takes site.css's "Coming soon" colours (both looks) */
+.lc-main--minis .lc-pill.lc-mn-hol-soon{background:#ffe3cc;color:#8a3c06}
+:root[data-theme="dark"] .lc-main--minis .lc-pill.lc-mn-hol-soon{background:#4a2f17;color:#ffc48f}
+/* on a holiday Mini's card in the grid: "Holiday Mini · earned 22–29 Nov 2026" */
+.lc-main--minis .lc-mn-event{max-width:100%;font-size:14px;font-weight:800;line-height:1.4;text-align:center;color:var(--pink-text)}
 
 /* ---------- Wild Minis, Grades and Shiny (cards with the amethyst strip) ---------- */
 .lc-main--minis .lc-mn-info{gap:14px;padding:32px}
@@ -95,6 +117,8 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
 .lc-main--minis .lc-mn-home{gap:6px}
 .lc-main--minis .lc-mn-home-name{font-family:var(--display);font-weight:800;font-size:17px;line-height:1.25;letter-spacing:-.01em}
 .lc-main--minis .lc-mn-home .lc-small{color:var(--muted)}
+.lc-main--minis .lc-mn-trade{max-width:860px;margin-top:6px}
+.lc-main--minis .lc-mn-trade code{white-space:nowrap}
 
 /* ---------- smaller screens ---------- */
 /* up to 1200 px the ladder is still five across: smaller names and gems keep "Uncommon" and
@@ -128,14 +152,17 @@ html:not(.lc-js) .lc-main--minis :is(.lc-mn-statbox,.lc-mn-filters,.lc-chips,.lc
   .lc-main--minis .lc-mn-stat dd{font-size:22px;text-align:right}
   .lc-main--minis .lc-mn-ladder{padding-top:40px;padding-bottom:36px}
   .lc-main--minis .lc-mn-cat{flex-basis:100%}
-  .lc-main--minis .lc-mn-info{padding:24px 20px}
-  .lc-main--minis .lc-mn-info>.lc-strip{margin:-24px -20px 6px}
+  .lc-main--minis :is(.lc-mn-info,.lc-mn-hol){padding:24px 20px}
+  .lc-main--minis :is(.lc-mn-info,.lc-mn-hol)>.lc-strip{margin:-24px -20px 6px}
+  .lc-main--minis .lc-mn-hol-row{--head:64px;grid-template-columns:64px minmax(0,1fr);column-gap:16px;padding:16px 16px 20px}
   .lc-main--minis .lc-mn-step{padding:22px}
   /* one column: the card turns sideways (head left, details right) so a long list stays scannable */
   .lc-main--minis .lc-mn-grid{gap:14px}
   .lc-main--minis .lc-mn-card{--head:80px;display:grid;grid-template-columns:80px minmax(0,1fr);grid-auto-rows:auto;align-content:center;align-items:center;column-gap:18px;row-gap:8px;padding:18px 18px 22px}
   .lc-main--minis .lc-mn-card .lc-head{grid-row:1 / span 3;align-self:start}
+  .lc-main--minis .lc-mn-card--hol .lc-head{grid-row:1 / span 4}
   .lc-main--minis .lc-mn-name{margin-top:0;font-size:16px;text-align:left}
+  .lc-main--minis .lc-mn-event{text-align:left}
   .lc-main--minis .lc-mn-pills{justify-content:flex-start}
   .lc-main--minis .lc-mn-prog{margin-top:0}
   .lc-main--minis .lc-mn-printed{text-align:left}

@@ -1,9 +1,10 @@
 /* LilahCraft: Downloads page.
    The CraftBridge Client picker (inc/blocks/craftbridge.php). The server renders the default pick,
    so the Download link works without this file; data-lc-cb holds every pick:
-   { "26.2": { "fabric": { href, file, label, line, needs: [], fallback }, ... }, ... }.
+   { "26.2": { "fabric": { href, file, label, line, needs: [], note, fallback }, ... }, ... }.
    The Minecraft and loader buttons are toggle buttons (aria-pressed); a pick updates the link,
-   the file line and the "You also need" list, and says what changed through LC.announce. */
+   the file line, the "You also need" list and the loader's note (NeoForge: no server recipes in
+   JEI), and says what changed through LC.announce. */
 (function () {
   'use strict';
 
@@ -16,6 +17,7 @@
     var label = box.querySelector('[data-lc-cb-label]');
     var file = box.querySelector('[data-lc-cb-file]');
     var needs = box.querySelector('[data-lc-cb-needs]');
+    var note = box.querySelector('[data-lc-cb-note]');
     var iconFile = box.querySelector('[data-lc-cb-icon="file"]');
     var iconPage = box.querySelector('[data-lc-cb-icon="page"]');
     var mcBtns = [].slice.call(box.querySelectorAll('[data-lc-cb-mc]'));
@@ -65,9 +67,13 @@
         li.textContent = text;
         needs.appendChild(li);
       });
+      if (note) {
+        note.textContent = pick.note || '';
+        note.hidden = !pick.note;
+      }
 
       if (say && window.LC && LC.announce) {
-        LC.announce(pick.fallback ? pick.line : 'Download set to ' + pick.file + '.');
+        LC.announce((pick.fallback ? pick.line : 'Download set to ' + pick.file + '.') + (pick.note ? ' ' + pick.note : ''));
       }
     }
 

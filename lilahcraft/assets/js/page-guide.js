@@ -2,8 +2,9 @@
    Marks the "Guide sections" link for the section being read with aria-current="true"
    (styled in page-guide.css). The section at the top of the viewport, just under the sticky
    header, is the current one; at the very bottom of the page the last section wins. A link may also
-   point at a subsection heading (the Golem chests and Sound Muffler h3s inside Crafting): the menu lists
-   its targets in page order. When a short window makes the menu scroll, the marked link is kept in its view.
+   point at a subsection heading (the Golem chests and Sound Muffler h3s inside Crafting, and the Copper
+   Golem Brush h4 inside Golem chests): the menu lists its targets in page order, so the last target above
+   the line is the one being read. When a short window makes the menu scroll, the marked link is kept in its view.
    The command search is the shared [data-lc-filter] in site.js. */
 (function () {
   'use strict';

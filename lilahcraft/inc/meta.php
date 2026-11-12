@@ -30,13 +30,13 @@ function lilahcraft_seo_plugin_active() {
  */
 function lilahcraft_page_descriptions() {
 	return array(
-		'home'      => __( 'A survival Minecraft server for Java and Bedrock where every block is worth something. Mine it, sell it, watch the price move.', 'lilahcraft' ),
+		'home'      => __( 'A survival Minecraft server for Java and Bedrock where every block is worth something: a live market, towns, trading, Minis and an Arcade with weekly courses.', 'lilahcraft' ),
 		'play'      => __( 'Pick your kind of Minecraft and you’re in within a minute. Java and Bedrock land in the same hub: mc.lilahcraft.com.', 'lilahcraft' ),
-		'downloads' => __( 'Optional extras for Java players: the CraftBridge Client mod, resource packs and recommended mods.', 'lilahcraft' ),
-		'market'    => __( 'Live prices from the LilahCraft market. Every raw item has real stock: sell some in and the price drops.', 'lilahcraft' ),
+		'downloads' => __( 'Optional extras for Java players: the CraftBridge Client mod, the Collins mod for TVs, resource packs and recommended mods.', 'lilahcraft' ),
+		'market'    => __( 'Live prices from Crate, the server’s market: hundreds of items in eight departments, each with real stock. Sell some in and the price drops.', 'lilahcraft' ),
 		'minis'     => __( 'Every numbered Mini on LilahCraft: how rare it is, how many are printed and how many are left.', 'lilahcraft' ),
-		'arcade'    => __( 'Tokens are the Arcade’s coins. You earn them by playing, and they never cost or turn into money.', 'lilahcraft' ),
-		'guide'     => __( 'Everything on the LilahCraft server in plain words: the PC, the market, towns, crafting and commands.', 'lilahcraft' ),
+		'arcade'    => __( 'Arcade games, new courses every week, leaderboards and the Prize Counter. You earn tokens by playing; they never cost or turn into money.', 'lilahcraft' ),
+		'guide'     => __( 'Everything on the LilahCraft server in plain words: the PC, the market, trading, towns, crafting, firework shows, TVs and commands.', 'lilahcraft' ),
 		'news'      => __( 'Updates, new Minis and events on the LilahCraft server.', 'lilahcraft' ),
 	);
 }

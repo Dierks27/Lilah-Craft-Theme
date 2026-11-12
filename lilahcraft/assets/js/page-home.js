@@ -1,6 +1,7 @@
 /* LilahCraft home: the hero's market board (with its headlines) and the four Minis, both from window.LCData.
    Board: Cobblestone, Oak Log, Iron Ingot, Gold Ingot, Emerald and Diamond when the feed has them,
-   any empty slots filled with the biggest movers; refreshed on the feed's refreshSeconds.
+   any empty slots filled with the biggest movers; refreshed on the feed's refreshSeconds. It reads the market
+   summary only (no price histories): each row's sparkline is the item's spark.
    While HomeCraftMgmt's live market runs, a row's name carries the item's tag (HOT, DEAL, UP, DOWN, WANTED).
    Headlines: the newest market news (tag, headline, "20 min ago") when the feed has some; otherwise up to three
    short sentences worked out from the whole feed, always true of the prices shown (sold out, biggest gain,
@@ -122,29 +123,11 @@
     return rel > 0 ? 'rising' : 'falling';
   }
 
-  /* The design draws 24 points in 80 px. A longer history is split into 24 buckets and each bucket
-     averaged (picking every 4th point zigzags on the half-hourly ripple), keeping the real first and last price. */
-  var SPARK_POINTS = 24;
-  function thin(series) {
-    var n = series.length;
-    if (n <= SPARK_POINTS) { return series; }
-    var out = [];
-    for (var i = 0; i < SPARK_POINTS; i++) {
-      var a = Math.floor(i * n / SPARK_POINTS), b = Math.floor((i + 1) * n / SPARK_POINTS), sum = 0;
-      for (var j = a; j < b; j++) { sum += series[j]; }
-      out.push(sum / (b - a));
-    }
-    out[0] = series[0];
-    out[SPARK_POINTS - 1] = series[n - 1];
-    return out;
-  }
-
-  /* The sparkline covers the same 24 hours as the change beside it (the last 49 half-hourly prices),
-     so a green "▲" never sits next to a falling line. */
-  var DAY_POINTS = 49;
-  /* Adds the sparkline and its word ("rising") to the cell, when there are two prices to draw. */
+  /* The summary's spark: the same 24 hours as the change beside it, as up to 24 prices (the 24 points the design
+     draws in 80 px), so a green "▲" never sits next to a falling line.
+     Adds the sparkline and its word ("rising") to the cell, when there are two prices to draw. */
   function addSpark(td, item) {
-    var series = thin(D.market.priceSeries(item).slice(-DAY_POINTS));
+    var series = D.market.spark(item);
     if (series.length < 2) { return; }
     var svg = svgEl('svg', { 'class': 'lc-home-bd-spark', width: '80', height: '24', viewBox: '0 0 80 24', preserveAspectRatio: 'none', 'aria-hidden': 'true', focusable: 'false' });
     svg.appendChild(svgEl('polyline', { points: D.sparkPoints(series, 80, 24, 3), fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
@@ -299,7 +282,10 @@
       seasonLine.appendChild(make('span', 'lc-sr', ':'));
       seasonLine.appendChild(document.createTextNode(' '));
       seasonLine.appendChild(make('strong', null, s.name));
-      if (left) { seasonLine.appendChild(document.createTextNode(', ends in ' + left)); }
+      if (left) {
+        seasonLine.appendChild(document.createTextNode(', ends in '));
+        seasonLine.appendChild(make('span', 'lc-home-bd-left', left)); // "79d 23h" stays on one line
+      }
     }
     seasonLine.hidden = !s;
   }
@@ -318,6 +304,8 @@
     }
     renderSeason(data);
     renderHeadlines(list, data);
+    // The headlines are in: page-home.css stops keeping their room.
+    board.setAttribute('data-ready', '');
   }
 
   if (boardRows) { D.watch('market', renderBoard); }
