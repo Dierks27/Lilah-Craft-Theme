@@ -37,7 +37,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-pill lc-pill--code"} -->
-<p class="lc-pill lc-pill--code"><span class="lc-sr">Version </span>1.5.1</p>
+<p class="lc-pill lc-pill--code"><span class="lc-sr">Version </span>1.6.0</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -59,12 +59,16 @@
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->
-<li><code>/collins-cache clear</code> deletes the videos it has saved.</li>
+<li>Want only YouTube and Twitch on your screen, on any server? <code>/collinsc sites on</code> turns that on. It starts off.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><code>/collins-cache limit</code> sets how much disk its saved videos may use (16 GB unless you change it); <code>/collins-cache clear</code> deletes them.</li>
 <!-- /wp:list-item --></ul>
 <!-- /wp:list -->
 
 <!-- wp:paragraph {"className":"lc-dl-tv-privacy"} -->
-<p class="lc-dl-tv-privacy"><strong>What it does on your computer.</strong> Your game fetches each video itself, straight from YouTube or Twitch (or an address staff have approved), the way a browser would. It saves the videos in a <code>collins-cache</code> folder on your disk. The first time it starts, it downloads two helper programs, <span class="lc-nowrap">yt-dlp</span> and ffmpeg. Other players with the mod see a camera symbol after your name in the tab list.</p>
+<p class="lc-dl-tv-privacy"><strong>What it does on your computer.</strong> Your game fetches each video itself, straight from YouTube or Twitch (or an address staff have approved), the way a browser would. It saves the videos in a <code>collins-cache</code> folder on your disk, up to 16 GB unless you set a different limit. The first time it starts, it downloads two helper programs, <span class="lc-nowrap">yt-dlp</span> and ffmpeg. Other players with the mod see a camera symbol after your name in the tab list.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"lc-cb-quiet"} -->
@@ -88,8 +92,8 @@
 <!-- /wp:list -->
 
 <!-- wp:html -->
-<a class="lc-btn lc-btn--orange lc-cb-dl" href="https://github.com/Dierks27/collins-fabric/releases/download/v1.5.1-mc26.3/collins-fabric-1.5.1-mc26.3.jar" aria-describedby="lc-tv-file"><svg class="lc-cb-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Download</span><span class="lc-sr"> Collins</span></a>
-<p class="lc-cb-file" id="lc-tv-file">collins-fabric-1.5.1-mc26.3.jar</p>
+<a class="lc-btn lc-btn--orange lc-cb-dl" href="https://github.com/Dierks27/collins-fabric/releases/download/v1.6.0-mc26.3/collins-fabric-1.6.0-mc26.3.jar" aria-describedby="lc-tv-file"><svg class="lc-cb-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Download</span><span class="lc-sr"> Collins</span></a>
+<p class="lc-cb-file" id="lc-tv-file">collins-fabric-1.6.0-mc26.3.jar</p>
 <!-- /wp:html -->
 
 <!-- wp:group {"className":"lc-cb-needs"} -->
@@ -112,6 +116,10 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"lc-cb-need"} -->
+<p class="lc-cb-need">Already on 1.5.1? It still works here. 1.6.0 adds the YouTube-and-Twitch switch and a disk limit that now counts every saved video.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"className":"lc-cb-need"} -->
 <p class="lc-cb-need">Windows, Linux and Mac; not Windows or Linux on ARM. On an Apple Silicon Mac, install ffmpeg yourself first (<code>brew install ffmpeg</code>) or YouTube videos won’t play.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
@@ -123,7 +131,7 @@
 
 <!-- wp:list {"className":"lc-cb-list lc-dl-tv-links"} -->
 <ul class="wp-block-list lc-cb-list lc-dl-tv-links"><!-- wp:list-item -->
-<li><a href="https://github.com/Dierks27/collins-fabric/releases/tag/v1.5.1-mc26.3">The 1.5.1 release page</a></li>
+<li><a href="https://github.com/Dierks27/collins-fabric/releases/tag/v1.6.0-mc26.3">The 1.6.0 release page</a></li>
 <!-- /wp:list-item -->
 
 <!-- wp:list-item -->
@@ -143,7 +151,7 @@
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"className":"lc-dl-tip lc-dl-both"} -->
-<p class="lc-dl-tip lc-dl-both"><strong>Running both?</strong> One Minecraft 26.3 instance with Fabric does it: Fabric Loader 0.19.5 or newer, Fabric API 0.165.0+26.3 or newer, and JEI 31.7.0.34 for CraftBridge Client.</p>
+<p class="lc-dl-tip lc-dl-both"><strong>Running both?</strong> One Minecraft 26.3 instance with Fabric does it: Fabric Loader 0.19.5 or newer, Fabric API 0.165.0+26.3 or newer, and JEI for CraftBridge Client (it’s tested with JEI 31.7.0.34).</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></section>
 <!-- /wp:group -->
@@ -155,7 +163,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text lc-dl-intro"} -->
-<p class="lc-text lc-dl-intro">The server offers two when you join, so there’s nothing to download. Both are optional: saying no changes how things look, not what works.</p>
+<p class="lc-text lc-dl-intro">The server sends its resource pack when you join, so there’s nothing to download. Say yes: it brings both of these.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:group {"className":"lc-grid lc-cols-2"} -->
@@ -165,7 +173,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"lc-text"} -->
-<p class="lc-text">Makes clocks tell the right time in every world.</p>
+<p class="lc-text">Makes clocks tell the right time in every overworld, Lilah’s World and the hub included. Without it they spin there.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
