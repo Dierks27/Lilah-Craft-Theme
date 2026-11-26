@@ -6,7 +6,9 @@
    achievements; and the "Arcade sections" side menu, which marks the section being read (as on the Guide).
    The template's parts about games that aren't open (.lc-ac-if-games, -chance, -skill, -fresh, -cup, -clubhouse,
    -courses, -race, -golf, -boat, -friend) hide once the feed says so, a section the feed has nothing for hides
-   whole, and the side menu drops what is hidden: the page shows exactly what the feed has.
+   whole, and the side menu drops what is hidden: the page shows exactly what the feed has, with one exception: a
+   machine played for in-game dollars only (the feed's "money": true, The Motherlode and Farm Slots) is left off the
+   page and out of every count until the site has a place for dollar play.
    Feed text goes in with textContent only. No player data: the only names shown are a record's or a board row's
    holder and the Star Chart's, and only when the feed sends one (HomeCraftMgmt sends them only while its owner has
    names switched on). Server days and times are printed in the server's time zone, not the visitor's. */
@@ -110,8 +112,9 @@
 
   /* ---------- words: facts from HomeCraftMgmt's games guide ---------- */
 
-  /* One plain line per game. A game this list doesn't know gets its kind's line or, for a game of chance, the
-     feed's own `rules` line. */
+  /* One plain line per game (a function of the feed's entry and the card's context where the line uses one of its
+     numbers or depends on whether the Clubhouse, with its Game Parlor, takes visitors: ctx.parlor). A game this list
+     doesn't know gets its kind's line or, for a game of chance, the feed's own `rules` line. */
   var LINES = {
     scratch_ticket: 'Scratch three squares. Three stars or three suns wins, and the jackpot grows by 1 token with every ticket anyone buys.',
     ore_slots: 'Three reels of ores and one line. Match ores on the line; a wild counts as any ore.',
@@ -119,12 +122,43 @@
     wheel: 'A ring of 24 spaces, each as likely as the next. Every space shows what it gives.',
     higher_lower: 'Guess whether the next card is higher or lower. Each right guess grows your pot, and you cash out when you like.',
     coin_flip: 'Two players nearby put in the same tokens, and one flip picks who gets most of both.',
+    nether_slots: 'Three reels of Nether treasures and one line; a Wild counts as any treasure. Two the same pays nothing, so it pays less often than Ore Slots, but more when it does.',
+    deep_mine: 'Three rows of three reels, and every row is a line. A spin puts the same on each row, so it costs three times that, and it can pay on more than one row.',
+    mob_slots: function (g) {
+      return 'Three reels and one line; a Creeper stands in for any drop.' + (whole(g.freeSpins) && g.freeSpins > 0 ?
+        ' Three Creepers pay the top line and also give ' + plural(g.freeSpins, 'free spin', 'free spins') +
+        (g.freeSpins === 1 ? ', which pays' : ', which pay') + ' as if the same tokens went in. A free spin never gives more free spins.' :
+        ' Three Creepers pay the top line.');
+    },
+    // Shown only while there is a Parlor (PARLOR_ONLY).
+    mob_races: 'Six tiny mobs race round a track in the Clubhouse’s Game Parlor. Each race has its own card with every racer’s exact chance of winning and what it pays: a long shot pays more because it wins less often.',
+    // The first line's share and four corners' come from the feed (cornersShare); a card is 1 to 4 (BingoTicket).
+    // With no Parlor, a round is still shared by everyone who buys cards for it.
+    bingo: function (g, ctx) {
+      var c = g.cornersShare;
+      var split = whole(c) && c > 0 && c < 100 ?
+        ' The first card to make a line takes ' + (100 - c) + '% of it and the first to make four corners ' + c + '%;' :
+        (c === 0 ? ' The first card to make a line takes it all;' : ' The first card to make a line takes part of it and the first to make four corners the rest;');
+      return '75-ball bingo with ' + (ctx.parlor ? 'everyone in the Game Parlor' : 'everyone who joins the round') +
+        '; you play 1 to 4 cards a round. The round’s prize is set by how many cards are in play.' +
+        split + ' cards that make it on the same call share.';
+    },
+    video_poker: 'Jacks or Better. Five cards from a fresh deck; hold any, then draw once.',
+    creeper_fuse: function (g, ctx) {
+      var top = D.isNum(g.maxMultiplier) && g.maxMultiplier > 1 ? ' toward ' + times(g.maxMultiplier) + '×' : '';
+      return 'One fuse for ' + (ctx.parlor ? 'everyone in the Game Parlor' : 'everyone who puts in') +
+        '. Put in, watch the multiple climb from 1×' + top +
+        ', and cash out when you like. When the creeper goes off, anyone still in gets nothing.';
+    },
     creeper_sweeper: 'Dig every safe square on a 9 by 5 field without digging up a creeper.',
     ore_merge: 'Slide ores around a 4 by 4 grid. Two of the same merge into the next, from coal up to a dragon egg.',
     snake: 'Steer the snake to the apples without hitting the wall or its own body.',
     mini_match: 'Find all 8 pairs of cards in as few flips as you can.',
     simon_says: 'Copy the pattern of lit pads. It gets one longer every round.',
-    whack_a_zombie: 'Bonk the zombies as they pop up, a point each. Bonking a villager costs a point.',
+    whack_a_zombie: function (g, ctx) {
+      return 'Bonk the zombies as they pop up, a point each. Bonking a villager costs a point.' +
+        (ctx.parlor ? ' Its cabinet in the Clubhouse’s Arcade Room plays a gentle version that pays no medals.' : '');
+    },
     connect_four: 'Four in a row on a board 7 columns wide, against the Arcade or a friend.',
     tic_tac_toe: 'Three in a row on a 3 by 3 board, against the Arcade or a friend.',
     // The Fresh Courses the server builds
@@ -152,13 +186,19 @@
     twenty_one: 'Twenty-One! is 21 with your first two cards. The same total as the Arcade gives your tokens back. How you play changes how often each result comes up.',
     wheel: 'Where it stops is picked before the light moves, and the light always moves the same way.',
     higher_lower: 'A wrong guess, or the same card again, ends the run with nothing back. A 2 or an Ace after a right guess cashes you out, since no guess from there can grow your pot. The best play is to cash out after your first right guess.',
-    coin_flip: 'The winner gets most of both players’ tokens, and the rest is gone. The player you ask needs Coin Flip invites on.'
+    coin_flip: 'The winner gets most of both players’ tokens, and the rest is gone. The player you ask needs Coin Flip invites on.',
+    deep_mine: 'Each line of the table below is one row: what that row pays for what’s on it, and how often. A spin plays all three rows, so it can pay on more than one.',
+    mob_races: 'These are one race’s numbers; every race gets a new card. One play pays at most 250 tokens, so a long shot can be missing when more tokens go in. Leave the Game Parlor before the start and your tokens come back.',
+    video_poker: 'A pair of Jacks or better gives your tokens back, and that isn’t a win. The give-back assumes the best hold on every hand.'
   };
   var ANCHOR = { luck: 'luck', cabinets: 'cabinets', courses: 'courses', golf: 'mini-golf', together: 'together-games' };
-  /* Games whose give-back assumes the best choices (/hcm arcade odds says "the best play gives back about…") */
-  var BEST_PLAY = { twenty_one: true, higher_lower: true };
-  /* Both players put in the same */
-  var EACH = { coin_flip: true };
+  /* Games whose give-back assumes the best choices (/hcm arcade odds says "the best play gives back about…"). Only
+     these: Creeper Fuse gives back the same wherever you cash out. */
+  var BEST_PLAY = { twenty_one: true, higher_lower: true, video_poker: true };
+  var BACK_AFTER = { creeper_fuse: ', wherever you cash out' };
+  /* After the tokens in: both players put in the same; a Bingo Night card */
+  var STAKE_AFTER = { coin_flip: ' each', bingo: ' a card' };
+  var DAY_LABEL = { bingo: 'Rounds a day' };
   var FRIEND_GAMES = ['connect_four', 'tic_tac_toe'];
   var RACE_KINDS = ['parkour', 'elytra', 'boat'];
   var UNITS = ['ms', 'points', 'flips', 'apples', 'wins'];
@@ -382,20 +422,32 @@
 
   /* ---------- which games are open ---------- */
 
-  /* The feed's games, each id once (the feed promises that; a page.route test may not keep it). */
-  function openGames(data) {
+  /* The feed's games, each id once (the feed promises that; a page.route test may not keep it), without the machines
+     played for in-game dollars only: this page is about tokens. They stay in the data, marked, for a later page. */
+  function moneyOnly(g) { return g.kind === 'chance' && g.money === true; }
+  /* Games run only in the Clubhouse's Game Parlor, which can't be played while there is none ("Mob Races is run on the
+     track in the Clubhouse's Game Parlor.", MobRaces.java). The other games of chance go back to where they always
+     were when there is no Parlor. */
+  var PARLOR_ONLY = { mob_races: true };
+  /* Whether the Clubhouse, and so its Game Parlor, takes visitors: the feed's word when it has one (0.38.8), else
+     whether the games are on (anything besides the Scratch Ticket, which is in the feed even while the games are off,
+     and the dollar-only machines). The Clubhouse parts of the template (.lc-ac-if-clubhouse) and every card go by it. */
+  function parlorOpen(data) {
+    var open = A.clubhouseOpen(data);
+    return open === true || (open === null && A.games(data).some(function (g) { return g.id !== SCRATCH && !moneyOnly(g); }));
+  }
+  function openGames(data, parlor) {
     var seen = Object.create(null);
     return A.games(data).filter(function (g) {
-      if (seen[g.id]) { return false; }
+      if (seen[g.id] || moneyOnly(g) || (!parlor && hasOwn(PARLOR_ONLY, g.id))) { return false; }
       seen[g.id] = true;
       return true;
     });
   }
 
   /* Show or hide the template's .lc-ac-if-* parts. "games" is anything besides the Scratch Ticket, which is in the
-     feed even while the games are off. The Clubhouse goes by the feed's word when it has one (0.38.8), else by
-     whether the games are on. */
-  function toggleParts(list, set, data) {
+     feed even while the games are off. The Clubhouse goes by parlorOpen(). */
+  function toggleParts(list, set, parlor) {
     var has = { games: false, chance: false, skill: false, fresh: !!set, cup: false, clubhouse: false, courses: false, race: false, golf: false, boat: false, friend: false };
     list.forEach(function (g) {
       if (g.id === SCRATCH) { return; }
@@ -408,8 +460,7 @@
       if (FRIEND_GAMES.indexOf(g.id) > -1) { has.friend = true; }
       if (A.cup(g)) { has.cup = true; }
     });
-    var open = A.clubhouseOpen(data);
-    has.clubhouse = open === true || (open === null && has.games);
+    has.clubhouse = parlor;
     Object.keys(has).forEach(function (k) {
       all('.lc-ac-if-' + k, main).forEach(function (node) { node.hidden = !has[k]; });
     });
@@ -457,9 +508,11 @@
     var s = state.stake[g.id];
     return stakes.indexOf(s) > -1 ? s : stakes[0];
   }
-  function bestPlay(g) { return hasOwn(BEST_PLAY, g.id) || hasOwn(g, 'payouts') || D.isNum(g.maxMultiplier); }
-  function lineOf(g) {
-    if (hasOwn(LINES, g.id)) { return LINES[g.id]; }
+  function bestPlay(g) { return hasOwn(BEST_PLAY, g.id); }
+  /* "about 94 of every 100 tokens" and what it assumes: " with the best play", ", wherever you cash out" */
+  function backAfter(g) { return bestPlay(g) ? ' with the best play' : (hasOwn(BACK_AFTER, g.id) ? BACK_AFTER[g.id] : ''); }
+  function lineOf(g, ctx) {
+    if (hasOwn(LINES, g.id)) { return typeof LINES[g.id] === 'function' ? LINES[g.id](g, ctx || {}) : LINES[g.id]; }
     if (hasOwn(KIND_LINES, g.kind)) { return KIND_LINES[g.kind] + (g.kind === 'parkour' && A.isFresh(g) ? FRESH_PARKOUR : ''); }
     return g.kind === 'chance' && typeof g.rules === 'string' ? g.rules.trim() : '';
   }
@@ -657,13 +710,23 @@
     if (back !== null) {
       body.appendChild(el('p', 'lc-ac-pays-back', bestPlay(g) ?
         'With the best play, ' + tokens(s) + ' in gives back about ' + back + ' of every 100 tokens.' :
-        'At ' + tokens(s) + ' in it gives back about ' + back + ' of every 100 tokens.'));
+        'At ' + tokens(s) + ' in it gives back about ' + back + ' of every 100 tokens' + backAfter(g) + '.'));
     }
     var rows = A.paytable(g, s);
+    // Deep Mine's rows are one row's pay and chance (a spin puts a third of its tokens on each of its rows): its
+    // note comes first, so the table is never read as what a whole spin pays.
+    var row = g.id === 'deep_mine';
+    // The table's caption is for screen readers only, so the note says what a row carries at this stake too.
+    var perRow = row && whole(g.lines) && g.lines > 1 && s % g.lines === 0 ? s / g.lines : null;
+    if (row && hasOwn(NOTES, g.id)) {
+      body.appendChild(el('p', 'lc-ac-pays-line', (perRow ? 'A spin of ' + tokens(s) + ' puts ' + tokens(perRow) + ' on each row. ' : '') + NOTES[g.id]));
+    }
     if (rows.length) {
-      body.appendChild(table('What ' + name + ' pays at ' + tokens(s) + ' in',
+      body.appendChild(table(row ? 'What one row pays at ' + (perRow ? tokens(perRow) + ' a row (' + tokens(s) + ' a spin)' : tokens(s) + ' a spin') :
+        'What ' + name + ' pays at ' + tokens(s) + ' in',
         [['Result'], ['Tokens back', 'lc-ac-num'], ['Odds', 'lc-ac-odds']],
-        rows.map(function (r) { return [cap(r.combo), backText(r), r.odds]; })));
+        // The feed names a result by its items' ids: "3 nether_star" reads "3 nether star".
+        rows.map(function (r) { return [cap(String(r.combo).replace(/_/g, ' ')), backText(r), r.odds]; })));
     }
     // Twenty-One: what a win, a Twenty-One! and a doubled win give back at this stake (a doubled win only when the
     // feed has it).
@@ -676,16 +739,48 @@
           pay.map(function (r) { return [r[0], D.count(r[1]), D.count(r[2])]; })));
       }
     }
-    // Higher or Lower: where a run cashes out by itself. The feed's multiplier, capped by the most one play pays
-    // (250 tokens, which the feed doesn't carry), so the top pot is never worked out as stake × multiplier.
-    var cashAt = D.isNum(g.maxMultiplier) && g.maxMultiplier > 1 ?
+    // Higher or Lower (only): where a run cashes out by itself. The feed's multiplier, capped by the most one play
+    // pays (250 tokens, which the feed doesn't carry), so the top pot is never worked out as stake × multiplier.
+    var hilo = g.id === 'higher_lower';
+    var cashAt = hilo && D.isNum(g.maxMultiplier) && g.maxMultiplier > 1 ?
       'when it reaches ' + times(g.maxMultiplier) + ' times your tokens in or 250 tokens, whichever is lower' : '';
-    var cashAfter = whole(g.maxGuesses) && g.maxGuesses > 0 ? 'after ' + plural(g.maxGuesses, 'right guess', 'right guesses') : '';
+    var cashAfter = hilo && whole(g.maxGuesses) && g.maxGuesses > 0 ? 'after ' + plural(g.maxGuesses, 'right guess', 'right guesses') : '';
     if (cashAt || cashAfter) {
       body.appendChild(el('p', 'lc-ac-pays-line', 'Your pot starts at your tokens in and grows with each right guess. It cashes out by itself ' +
         [cashAt, cashAfter].filter(Boolean).join(', or ') + '.'));
     }
-    if (hasOwn(NOTES, g.id)) { body.appendChild(el('p', 'lc-ac-pays-note', NOTES[g.id])); }
+    if (g.id === 'creeper_fuse') { body.appendChild(el('p', 'lc-ac-pays-note', fuseNote(g, s))); }
+    if (hasOwn(NOTES, g.id) && !row) { body.appendChild(el('p', 'lc-ac-pays-note', NOTES[g.id])); }
+  }
+
+  /* Creeper Fuse at one stake. The chance it's still lit past a multiple m is give-back ÷ m (CreeperFuse, FuseMath),
+     so of every 100 fuses, 100 − give-back go off at once and give-back ÷ m (rounded down) are still lit at m. A
+     stake whose pay would pass the most one play pays (250 tokens) is cashed out there. Every pay it names (the
+     burn-out, the cash-out at 250 tokens) comes with how often a fuse gets that far, so without a give-back for the
+     stake it names none. The give-back has one decimal (the cleaner's): the sums are done in tenths, the chances of
+     getting somewhere are rounded down and the share that goes off at once is rounded up, so the note never reads better
+     than the game is. */
+  function fuseNote(g, s) {
+    var r = g.rtpByStake && hasOwn(g.rtpByStake, String(s)) ? g.rtpByStake[String(s)] : null;
+    var t = D.isNum(r) && r > 0 && r < 100 ? Math.round(r * 10) : 0; // the give-back in tenths: 935 for 93.5
+    var top = D.isNum(g.maxMultiplier) && g.maxMultiplier > 1 ? g.maxMultiplier : null;
+    var out = ['Where it goes off is drawn before it’s lit.'];
+    if (!t) { return out[0]; }
+    function lit(m) { return Math.floor(t / (10 * m) + 1e-9); }
+    function reach(m) { var n = lit(m); return (n >= 1 ? 'about ' + n : 'fewer than 1') + ' in 100 fuses'; }
+    var off = (1000 - t) % 10 === 0 ? String((1000 - t) / 10) : 'about ' + Math.ceil((1000 - t) / 10);
+    var still = [2, 5, 10].filter(function (m) { return !top || m < top; }).map(function (m, i) {
+      return lit(m) + (i ? '' : ' are still lit') + ' at ' + m + '×';
+    });
+    out.push('Of every 100 fuses, ' + off + ' go off straight away' + (still.length ? ', and about ' + andList(still) : '') + '.');
+    if (top) {
+      out.push('At ' + times(top) + '× it burns out, and everyone still in is paid ' + times(top) + '×: ' + reach(top) + ' get there.');
+      if (s * top > 250) {
+        out.push('One play pays at most 250 tokens, so at ' + tokens(s) + ' in you’re cashed out at ' + times(250 / s) + '×, which ' +
+          reach(250 / s) + ' reach.');
+      }
+    }
+    return out.join(' ');
   }
 
   function addPays(li, g) {
@@ -776,7 +871,7 @@
     if (tags.children.length) { top.appendChild(tags); }
     li.appendChild(top);
 
-    var line = lineOf(g);
+    var line = lineOf(g, ctx);
     if (line) { li.appendChild(el('p', 'lc-ac-game-line', line)); }
 
     var facts = el('dl', 'lc-ac-facts');
@@ -785,11 +880,11 @@
       var stakes = stakesOf(g);
       if (stakes.length) {
         fact(facts, 'Tokens in', orList(stakes.map(D.count)) + (stakes.length === 1 && stakes[0] === 1 ? ' token' : ' tokens') +
-          (hasOwn(EACH, g.id) ? ' each' : ''));
+          (hasOwn(STAKE_AFTER, g.id) ? STAKE_AFTER[g.id] : ''));
       }
       var back = A.giveBack(g);
-      if (back !== null) { fact(facts, 'Gives back', 'about ' + back + ' of every 100 tokens' + (bestPlay(g) ? ' with the best play' : '')); }
-      if (whole(g.dailyLimit) && g.dailyLimit > 0) { fact(facts, 'Plays a day', D.count(g.dailyLimit)); }
+      if (back !== null) { fact(facts, 'Gives back', 'about ' + back + ' of every 100 tokens' + backAfter(g)); }
+      if (whole(g.dailyLimit) && g.dailyLimit > 0) { fact(facts, hasOwn(DAY_LABEL, g.id) ? DAY_LABEL[g.id] : 'Plays a day', D.count(g.dailyLimit)); }
       var jOdds = ctx.jp ? jackpotOdds(ctx.jp) : '';
       if (jOdds && whole(ctx.jp.tokens)) { fact(facts, 'Jackpot now', tokens(ctx.jp.tokens) + ' · ' + jOdds, 'lc-ac-jackpot'); }
     } else {
@@ -851,9 +946,16 @@
       var pays = g.kind === 'cabinet' ? cabinetPays(g, ctx.rules) : (g.kind === 'arena' ? '' : firstFinish(g, ctx.rules, ctx.set));
       if (pays) { fact(facts, g.kind === 'cabinet' ? 'Pays' : 'First finish', pays); }
     }
-    // The Scratch Ticket isn't a /hcm play game: its tile is in the Arcade, and a click on it buys a ticket.
+    // Games of chance are played in the Clubhouse's Game Parlor (/hcm play <id> works only there), and the Scratch
+    // Ticket, which has no /hcm play id, is sold at the Parlor's ticket booth. With the Clubhouse closed there is no
+    // Parlor, and both are where they were before it: the ticket's tile in the Arcade, the game anywhere.
     if (g.id === SCRATCH) {
-      fact(facts, 'Open it', codeDd('/hcm arcade', ', then its tile: a click buys a ticket'));
+      fact(facts, 'Open it', ctx.parlor ? 'At the ticket booth in the Clubhouse’s Game Parlor' : codeDd('/hcm arcade', ', then its tile: a click buys a ticket'));
+    } else if (g.kind === 'chance' && ctx.parlor) {
+      var where = el('dd', 'lc-ac-code', 'In the Clubhouse’s Game Parlor');
+      where.appendChild(el('span', 'lc-ac-dd-after', ', with '));
+      where.appendChild(fillCode(el('code'), A.playCommand(g)));
+      fact(facts, 'Open it', where);
     } else {
       fact(facts, 'Open it', codeDd(A.playCommand(g)));
     }
@@ -864,7 +966,7 @@
 
   /* A card from cache, or built again when what it shows has changed, so focus and open tables survive a refresh. */
   function cardFor(g, ctx) {
-    var sig = JSON.stringify([g, ctx.grp, ctx.level, ctx.pick, ctx.jp ? ctx.jp.tokens : null, ctx.zone, !!A.cup(g),
+    var sig = JSON.stringify([g, ctx.grp, ctx.level, ctx.pick, ctx.jp ? ctx.jp.tokens : null, ctx.zone, !!ctx.parlor, !!A.cup(g),
       g.kind === 'cabinet' ? cabinetPays(g, ctx.rules) : firstFinish(g, ctx.rules, ctx.set)]);
     var c = cards[g.id];
     if (!c || c.sig !== sig) {
@@ -939,10 +1041,10 @@
   }
 
   /* A group's intro, with the numbers the server pays by. */
-  function introOf(id, r) {
+  function introOf(id, r, parlor) {
     if (id === 'luck') {
       var lim = num(r, 'chanceDailyLimit');
-      return 'Tokens in, tokens back. Each game shows what it gives back and what it pays, and over many plays every one gives back less than goes in.' +
+      return 'Tokens in, tokens back' + (parlor ? ', in the Clubhouse’s Game Parlor' : '') + '. Each game shows what it gives back, and over many plays every one gives back less than goes in.' +
         (lim ? ' Together they take at most ' + tokens(lim) + ' a day.' : '');
     }
     if (id === 'cabinets') { return 'Free: no tokens go in. Medals and each day’s goal pay tokens, as each card says. Your first try each day is the one that counts for the goal.'; }
@@ -1013,13 +1115,13 @@
       keepGroup[grp.id] = true;
       box.head.hidden = !on;
       box.intro.hidden = !on;
-      setText(box.intro, introOf(grp.id, ctx0.rules));
+      setText(box.intro, introOf(grp.id, ctx0.rules, ctx0.parlor));
       if (box.brk) { box.brk.hidden = !on; }
       var n = grp.games.length;
       setText(box.count, grp.id === 'courses' || grp.id === 'golf' ? plural(n, 'course', 'courses') : plural(n, 'game', 'games'));
       if (ui.groups.children[gi] !== box.wrap) { ui.groups.insertBefore(box.wrap, ui.groups.children[gi] || null); }
       fillList(box.list, grp.games.map(function (g) {
-        return cardFor(g, { grp: grp.id, level: level, pick: pickIds[g.id] === true, jp: j && j.game.id === g.id ? j : null, rules: ctx0.rules, zone: ctx0.zone, set: set });
+        return cardFor(g, { grp: grp.id, level: level, pick: pickIds[g.id] === true, jp: j && j.game.id === g.id ? j : null, rules: ctx0.rules, zone: ctx0.zone, parlor: ctx0.parlor, set: set });
       }));
     });
     Object.keys(groupEls).forEach(function (id) {
@@ -1348,13 +1450,16 @@
     state.res = res;
     var key = focusKey();
     var data = res.data || {};
-    var list = openGames(data);
+    // The Game Parlor is in the Clubhouse: a feed that says the Clubhouse is closed has none, and an older feed that
+    // doesn't say is read as having one while the games are on, as the server now does.
+    var parlor = parlorOpen(data);
+    var list = openGames(data, parlor);
     var set = A.freshSet(data);
     var r = A.rules(data);
-    var ctx0 = { rules: r, zone: zoneOf(r) };
+    var ctx0 = { rules: r, zone: zoneOf(r), parlor: parlor };
     renderStatus(res);
     renderHolidays(data, ctx0.zone);
-    var has = toggleParts(list, set, data);
+    var has = toggleParts(list, set, parlor);
     applyRules(r, set, res.mode);
     app.removeAttribute('aria-busy');
     setNote(ui.note, noteFor(res, true));

@@ -765,7 +765,8 @@
      The feed is inc/feeds.php's lilahcraft_clean_arcade(): every section can be missing (games off, or the Arcade
      switched off), so read data.games || [] and so on. These helpers check what they use, like the market ones.
      0.38.8 added the reward rules, the Clubhouse and the holidays: rules(), clubhouseOpen() and holidays() say what
-     the feed has, and null or [] when it is an older one. */
+     the feed has, and null or [] when it is an older one. From 0.48.0 a game of chance played for in-game dollars
+     only (The Motherlode, Farm Slots) is marked "money": true: its stake is dollars, not tokens. */
 
   /* The in-game Games screen's tabs, in its order. Droppers are courses; Falling Floors (kind arena) is on Together. */
   var COURSE_KINDS = ['parkour', 'elytra', 'boat', 'dropper'];
@@ -811,7 +812,8 @@
       return { id: grp.id, label: grp.label, games: list.filter(function (g) { return grp.kinds.indexOf(g.kind) > -1; }) };
     }).filter(function (grp) { return grp.games.length > 0; });
   }
-  /* The Scratch Ticket has no /hcm play id: it's bought from the Arcade's Luck row or the Games screen's Luck tab. */
+  /* The Scratch Ticket has no /hcm play id: it's sold at the ticket booth in the Clubhouse's Game Parlor. A game of
+     chance's id opens it only there (HomeCraftMgmt 0.46.0). */
   function playCommand(g) { return g && typeof g.id === 'string' && g.id !== 'scratch_ticket' ? '/hcm play ' + g.id : ''; }
 
   /* A game of chance that is closed right now: the Scratch Ticket while its prizes would give back 100 of every 100
@@ -1215,6 +1217,31 @@
     // Ore Slots pays multiples of the tokens in. The lines read as the feed names them, with the shipped reels' odds.
     var slots = [['3 wild', 50, 0.0000781, 12805], ['3 diamond', 40, 0.0005467, 1829], ['3 gold', 20, 0.002031, 492],
       ['3 iron', 10, 0.00492, 203], ['3 copper', 6, 0.009684, 103], ['3 coal', 4, 0.01679, 60], ['two the same', 2, 0.3294, 3]];
+    // The 0.48.0 to 0.57.0 games of chance, with the plugin's shipped numbers and one race's card. A row is
+    // [combo, pays, chance, oneIn]; at(rows, stake) gives each row that stake, or pays in multiples without one.
+    function at(rows, stake) {
+      return rows.map(function (r) {
+        var row = stake ? { stake: stake } : {};
+        row.combo = r[0];
+        row.pays = r[1];
+        row.chance = r[2];
+        row.oneIn = r[3];
+        return row;
+      });
+    }
+    // Deep Mine: a spin puts the same on each of its 3 rows; each row of the table is one row's pay at 1, 2 or 5 a row.
+    var deep = [];
+    [1, 2, 5].forEach(function (n) {
+      deep = deep.concat(at([['3 wild', 16 * n, 0.0009591, 1043], ['3 diamond', 15 * n, 0.002278, 439], ['3 gold', 10 * n, 0.006714, 149],
+        ['3 iron', 6 * n, 0.01403, 71], ['3 copper', 4 * n, 0.02494, 40], ['3 coal', 3 * n, 0.04016, 25], ['two the same', n, 0.4785, 2]], 3 * n));
+    });
+    // Mob Races: a racer whose pay would pass 250 tokens isn't offered at that stake (here Pig, Rabbit and Sheep at 20).
+    var card = [['Chicken', 0.1628, 6, 28, 55, 111], ['Pig', 0.0536, 19, 84, 168, 0], ['Rabbit', 0.0669, 15, 67, 135, 0],
+      ['Cow', 0.2539, 4, 18, 35, 71], ['Fox', 0.3959, 3, 11, 23, 45], ['Sheep', 0.0669, 15, 67, 135, 0]];
+    var races = [];
+    [5, 10, 20].forEach(function (s, i) {
+      races = races.concat(at(card.filter(function (c) { return c[3 + i] > 0; }).map(function (c) { return [c[0] + ' wins', c[3 + i], c[1], c[2]]; }), s));
+    });
     var wheel = [];
     [[5, 22, 17, 8], [10, 44, 35, 17], [20, 87, 70, 35]].forEach(function (w) {
       var s = w[0];
@@ -1281,6 +1308,19 @@
         { id: 'higher_lower', name: 'Higher or Lower', kind: 'chance', stakes: [10, 20, 50], rtp: 89.6, rtpByStake: { 10: 89.6, 20: 90, 50: 89.7 }, dailyLimit: 30,
           rules: 'Guess whether the next card is higher or lower (Aces high; the same card loses). Each right guess grows the pot; cash out any time after one.',
           maxMultiplier: 20, maxGuesses: 10 },
+        { id: 'deep_mine', name: 'Deep Mine', kind: 'chance', stakes: [3, 6, 15], rtp: 89.9, rtpByStake: { 3: 89.9, 6: 89.9, 15: 89.9 }, dailyLimit: 50,
+          paytable: deep, lines: 3 },
+        { id: 'mob_slots', name: 'Mob Slots', kind: 'chance', stakes: [1, 2], rtp: 89.9, rtpByStake: { 1: 89.9, 2: 89.9 }, dailyLimit: 50,
+          paytable: at([['3 creeper', 20, 0.005492, 182], ['3 blaze_rod', 10, 0.003998, 250], ['3 ender_pearl', 6, 0.009578, 104],
+            ['3 string', 4, 0.017, 59], ['3 bone', 3, 0.02654, 38], ['3 rotten_flesh', 2, 0.03844, 26], ['two the same', 1, 0.4439, 2]]), freeSpins: 5 },
+        // Played for in-game dollars only ($1 a spin, with a pot): in the data as the feed has it; the Arcade page leaves it off.
+        { id: 'farm_slots', name: 'Farm Slots', kind: 'chance', stakes: [1], rtp: 90, rtpByStake: { 1: 90 }, dailyLimit: 100,
+          paytable: at([['3 wild', 10, 0.006871, 146], ['3 golden_carrot', 8, 0.004471, 224], ['two the same', 1, 0.4516, 2]]),
+          money: true, pot: 23.6, potSeed: 10, feedPercent: 5 },
+        { id: 'mob_races', name: 'Mob Races', kind: 'chance', stakes: [5, 10, 20], rtp: 87, rtpByStake: { 5: 87, 10: 88.8, 20: 89 }, dailyLimit: 30, paytable: races },
+        { id: 'bingo', name: 'Bingo Night', kind: 'chance', stakes: [10], rtp: 90, rtpByStake: { 10: 90 }, dailyLimit: 30, cornersShare: 60 },
+        { id: 'video_poker', name: 'Video Poker', kind: 'chance', stakes: [1, 2, 5], rtp: 93.3, rtpByStake: { 1: 93.4, 2: 93.4, 5: 93.3 }, dailyLimit: 50 },
+        { id: 'creeper_fuse', name: 'Creeper Fuse', kind: 'chance', stakes: [10, 20, 50], rtp: 94, rtpByStake: { 10: 94, 20: 94, 50: 94 }, dailyLimit: 30, maxMultiplier: 20 },
         cabinet('creeper_sweeper', 'Creeper Sweeper', 'normal', 'ms', [[18400, 30], [21750, 52], [21750, 9], [26300, 70]]),
         cabinet('ore_merge', 'Ore Merge', 'classic', 'points'),
         cabinet('snake', 'Snake', 'classic', 'apples', [[34, 20], [29, 44], [12, 3]]),

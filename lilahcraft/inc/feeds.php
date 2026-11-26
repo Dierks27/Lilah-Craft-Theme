@@ -68,12 +68,16 @@ add_action(
 /**
  * How each feed's stored copy is laid out. Raised when a release changes what the cleaner keeps, so a copy an older
  * version of the theme stored (the whole market with its history, a summary without its departments, an Arcade
- * without its Fresh Courses or its rules) is fetched again instead of being served.
+ * without its Fresh Courses or its rules, or, 2.2.2, without the money flag that keeps the dollar machines off the
+ * page) is fetched again instead of being served.
  *
  * @param string $feed market, minis or arcade.
  * @return int
  */
 function lilahcraft_feed_format( $feed ) {
+	if ( 'arcade' === $feed ) {
+		return 4;
+	}
 	return 'minis' === $feed ? 2 : 3;
 }
 
@@ -1061,6 +1065,31 @@ function lilahcraft_arcade_text( $s, $max ) {
 }
 
 /**
+ * A game's rules line: one line of Arcade text, at most $max characters. A longer one ends at the last full sentence
+ * that fits or, when not even one does, at the last whole word, with "…". HomeCraftMgmt's lines run to about 300
+ * characters (0.57.0), so this is only a backstop: a line is never shown cut off mid-word.
+ *
+ * @param mixed $s   Value.
+ * @param int   $max Longest allowed.
+ * @return string
+ */
+function lilahcraft_arcade_rules( $s, $max = 400 ) {
+	$text = lilahcraft_arcade_text( $s, 1000 );
+	$mb   = function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' );
+	if ( ( $mb ? mb_strlen( $text ) : strlen( $text ) ) <= $max ) {
+		return $text;
+	}
+	// One character more than fits, so a sentence that ends exactly at $max still counts as ending.
+	$cut = $mb ? mb_substr( $text, 0, $max + 1 ) : substr( $text, 0, $max + 1 );
+	if ( preg_match( '/^(.*[.!?])\s/su', $cut, $m ) ) {
+		return $m[1];
+	}
+	$cut   = $mb ? mb_substr( $text, 0, $max ) : substr( $text, 0, $max );
+	$words = preg_replace( '/\s+\S*$/u', '', $cut );
+	return rtrim( '' !== $words ? $words : $cut, ' ,;:-' ) . '…';
+}
+
+/**
  * A name for something the feed left unnamed: its id in words (river_run: River Run).
  *
  * @param string $id A cleaned id.
@@ -1438,10 +1467,14 @@ function lilahcraft_clean_arcade_holidays( $list, $now ) {
 /**
  * One games[] entry, or null when it isn't one the site can show. Every entry has { id, name, kind }; then by kind:
  *
- *   chance    stakes [tokens in], rtp (the lowest of rtpByStake), rtpByStake { stake: percent, one decimal rounded
- *             down, above 0 and below 100 }, dailyLimit?, paytable? (lilahcraft_clean_pay_row()), rules?, and only
- *             these extras: payouts? { stake: { win, twentyOne, doubleWin? } } (Twenty-One; a stake that offers no
- *             Double has no doubleWin), maxMultiplier? and maxGuesses? (Higher or Lower). A stake without its
+ *   chance    stakes [tokens in; for a money machine, dollars], rtp (the lowest of rtpByStake), rtpByStake { stake:
+ *             percent, one decimal rounded down, above 0 and below 100 }, dailyLimit?, paytable?
+ *             (lilahcraft_clean_pay_row()), rules? (lilahcraft_arcade_rules()), and only these extras: payouts?
+ *             { stake: { win, twentyOne, doubleWin? } } (Twenty-One; a stake that offers no Double has no doubleWin),
+ *             maxMultiplier? (Higher or Lower's top multiple; Creeper Fuse's, where its fuse burns out), maxGuesses?
+ *             (Higher or Lower), money?: true with pot?, potSeed?, feedPercent? (a machine played for in-game
+ *             dollars only, HomeCraftMgmt 0.48.0: The Motherlode, Farm Slots), lines? (Deep Mine's rows),
+ *             freeSpins? (Mob Slots) and cornersShare? (Bingo Night). A stake without its
  *             give-back is left out, and so is a game with no stake left. A give-back of 100 or more is never a
  *             number on the site: HomeCraftMgmt closes the Scratch Ticket when its prizes add up to that much and
  *             says "closed": true, and then the entry is { id, name, kind, closed: true } and nothing else.
@@ -1510,7 +1543,7 @@ function lilahcraft_clean_arcade_game( $g, $now ) {
 		if ( $rows ) {
 			$row['paytable'] = $rows;
 		}
-		$rules = lilahcraft_arcade_text( lilahcraft_field( $g, 'rules' ), 200 );
+		$rules = lilahcraft_arcade_rules( lilahcraft_field( $g, 'rules' ) );
 		if ( '' !== $rules ) {
 			$row['rules'] = $rules;
 		}
@@ -1541,6 +1574,36 @@ function lilahcraft_clean_arcade_game( $g, $now ) {
 		$guesses = lilahcraft_whole( lilahcraft_field( $g, 'maxGuesses' ), 1, 1000 );
 		if ( null !== $guesses ) {
 			$row['maxGuesses'] = $guesses;
+		}
+		// A machine played for the server's in-game dollars only (PotSlots.java): "money": true (nothing else marks
+		// one), its stake is the price of a spin in dollars, and its pot is in dollars: pot now, potSeed (what the pot
+		// starts at) and feedPercent (the share of every spin that goes into it). The Arcade page leaves these off.
+		if ( true === lilahcraft_field( $g, 'money' ) ) {
+			$row['money'] = true;
+			foreach ( array(
+				'pot'         => 10000000,
+				'potSeed'     => 10000000,
+				'feedPercent' => 100,
+			) as $key => $most ) {
+				$n = lilahcraft_num( lilahcraft_field( $g, $key ) );
+				if ( null !== $n && $n >= 0 && $n <= $most ) {
+					$n           = round( $n, 2 );
+					$row[ $key ] = floor( $n ) === $n ? (int) $n : $n;
+				}
+			}
+		}
+		// Deep Mine: a spin puts the same on each of its `lines` rows (a stake is that many times one row's), and its
+		// paytable is what one row pays. Mob Slots: the free spins three Creepers give. Bingo Night: four corners'
+		// share of a round's prize, in percent (the first line gets the rest; 0 = the line takes it all).
+		foreach ( array(
+			'lines'        => array( 2, 10 ),
+			'freeSpins'    => array( 1, 100 ),
+			'cornersShare' => array( 0, 80 ),
+		) as $key => $range ) {
+			$n = lilahcraft_whole( lilahcraft_field( $g, $key ), $range[0], $range[1] );
+			if ( null !== $n ) {
+				$row[ $key ] = $n;
+			}
 		}
 		return $row;
 	}
